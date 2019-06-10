@@ -3,14 +3,14 @@
     中国联通网络技术研究院
     2019年6月
 
----
-
 [![GitHub releases](https://img.shields.io/github/release/cube-ai/cubeai.svg)](https://github.com/cube-ai/cubeai/releases)
 [![GitHub downloads](https://img.shields.io/github/downloads/cube-ai/cubeai/total.svg)](https://github.com/cube-ai/cubeai/releases)
 [![GitHub issues](https://img.shields.io/github/issues/cube-ai/cubeai.svg)](https://github.com/cube-ai/cubeai/issues)
 [![GitHub forks](https://img.shields.io/github/forks/cube-ai/cubeai.svg)](https://github.com/cube-ai/cubeai/network)
 [![GitHub stars](https://img.shields.io/github/stars/cube-ai/cubeai.svg)](https://github.com/cube-ai/cubeai/stargazers)
 [![GitHub license](https://img.shields.io/github/license/cube-ai/cubeai.svg)](https://github.com/cube-ai/cubeai/blob/master/LICENSE)
+
+---
 
 ## 平台简介
 
