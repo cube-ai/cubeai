@@ -22,7 +22,7 @@ CubeAI致力于在AI算法开发者和AI模型的实际使用者之间架设一�
 
 ## 系统架构
 
-[](./cubeai-arch.jpg)
+![](./cubeai-arch.jpg)
 
 ## 软件架构
 
