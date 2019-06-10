@@ -1,7 +1,6 @@
-# ![](./CubeAI.jpg)
+# ![](./cubeai-logo.jpg)
 
-    中国联通网络技术研究院
-    2019年6月
+    版权所有 © 2019 中国联通网络技术研究院
 
 [![GitHub releases](https://img.shields.io/github/release/cube-ai/cubeai.svg)](https://github.com/cube-ai/cubeai/releases)
 [![GitHub downloads](https://img.shields.io/github/downloads/cube-ai/cubeai/total.svg)](https://github.com/cube-ai/cubeai/releases)
@@ -25,6 +24,74 @@ CubeAI致力于在AI算法开发者和AI模型的实际使用者之间架设一�
 ![](./cubeai-arch.jpg)
 
 ## 软件架构
+
+![](./cubeai-soft.jpg)
+
+本系统基于Spring Cloud微服务架构进行开发。前端采用Angular 6.0框架，编程语言主要为TypeScript和HTML，后端采用Spring Boot框架，编程语言主要为Java。微服务初始代码框架采用Jhipster代码脚手架工具生成。
+
+### 微服务基础组件
+
+- Consul
+
+使用Consul作为微服务注册/发现中心和数据配置中心。
+
+- API网关
+
+API网关是一个特殊的微服务，用于为后端的业务应用微服务提供一个统一的访问入口，主要功能包括：HTTP路由，负载均衡，安全，QoS控制，接入控制，熔断机制，等等。
+
+本系统将API网关功能与采用Angular编写的前端Portal页面集成于同一个微服务之中，命名为：gateway。
+
+- uaa
+
+uaa（用户认证授权中心）是一个特殊的微服务，为系统提供统一的安全控制服务，主要用于用户的认证、鉴权、授权，微服务的访问控制，以及基于角色的访问控制。
+
+- 消息中间件
+
+消息中间件由一组特殊的微服务组成，主要用于系统中微服务间异步数据和消息的高效传输和处理。本系统采用开源软件Kafka来作为消息中间件。
+
+- 搜索/日志/可视化套件
+
+搜索/日志/可视化采用ELK套件。ELK Stack构建在开源基础之上，能够安全可靠地获取微服务架构中任何来源、任何格式的数据，并且能够实时地对数据进行搜索、分析和可视化呈现。
+
+### CubeAI应用相关微服务
+
+- Portal
+
+前端采用Angular框架进行开发，将其代码托管于API网关所在的后端微服务gateway之中。
+
+- umm
+
+AI模型管理。下挂一个MySql数据库，集中管理CubeAI应用中用到的所有数据模型。
+
+- umu
+
+AI模型导入。负责将建模阶段打包好的AI模型导入CubeAI平台，并生成docker形式的微服务镜像。
+
+- umo
+
+AI模型编排。以图形化的可视化界面将多个基础模型编排组合成一个更为复杂的模型。
+
+- umd
+
+AI模型部署。将CubeAI平台中模型部署至Kubernetes云平台，以docker容器的方式运行，以RESTful API的形式向用户提供AI能力开放接口。
+
+- ability
+
+AI能力开放网关。对Kubernetes平台中docker容器提供的AI能力接口进行格式封装，增强API访问的安全性。
+
+- udemo
+
+AI能力开放示范平台。为Kubernetes平台中已部署的部分AI开放能力提供图形化演示界面。
+
+### CubeAI应用支撑组件
+
+- Nexus
+
+提供用于存储AI模型相关构件和文档的文件服务器，以及用于存贮AI模型docker镜像的docker仓库。
+
+- Kubernates
+
+用于部署AI模型，以docker容器形式提供AI能力开放的微服务化容器编排和调度平台。
 
 ## 开发环境
 
