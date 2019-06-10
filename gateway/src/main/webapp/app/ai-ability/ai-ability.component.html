@@ -1,0 +1,11 @@
+<mat-sidenav-container>
+    <mat-sidenav #sideNav role="navigation" opened="true" mode="side" fixedInViewport="true" fixedTopGap="40" fixedBottomGap="30" style="width:200px">
+        <jhi-ai-ability-navbar></jhi-ai-ability-navbar>
+    </mat-sidenav>
+    <mat-sidenav-content>
+        <div  class="container-fluid" style="padding-top:40px">
+            <router-outlet></router-outlet>
+        </div>
+    </mat-sidenav-content>
+</mat-sidenav-container>
+

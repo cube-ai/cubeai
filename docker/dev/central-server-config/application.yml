@@ -1,0 +1,28 @@
+configserver:
+    name: Docker Consul Service
+    status: Connected to Consul Server running in Docker
+
+jhipster:
+    security:
+        authentication:
+            jwt:
+                secret: my-secret-token-to-change-in-production
+
+nexus:
+    maven:
+        url: https://localhost:10001/repository/ucumos
+        username: username
+        password: password
+    docker:
+        host: localhost
+        port: 2375
+        registryUsername: username
+        registryPassword: password
+        imagetagPrefix: localhost:10002
+
+kubernetes:
+    ability:
+        internalIP: localhost
+    api:
+        url: https://localhost:60000
+        token: my-kubernetes-token-to-change-in-production

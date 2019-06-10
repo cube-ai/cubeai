@@ -1,0 +1,61 @@
+<mat-card class="page-title">
+    <span>我的能力</span>
+
+    <div class="btn-toolbar float-right" role="toolbar">
+        <button mat-icon-button (click)="refresh()" matTooltip="刷新">
+            <mat-icon color="primary">refresh</mat-icon>
+        </button>
+        <span>&nbsp;&nbsp;</span>
+        <input name="search" type="text" class="form-control" placeholder="全文搜索" [(ngModel)]="filter"
+               (blur)="refresh()" style="width:200px">
+    </div>
+</mat-card>
+
+<mat-card>
+    <div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
+                    <th jhiSortBy="id"><span>编号</span> <span class="fa fa-sort"></span></th>
+                    <th jhiSortBy="solutionName"><span>模型名称</span> <span class="fa fa-sort"></span></th>
+                    <th jhiSortBy="solutionAuthor"><span>模型作者</span> <span class="fa fa-sort"></span></th>
+                    <th jhiSortBy="deployer"><span>部署人</span> <span class="fa fa-sort"></span></th>
+                    <th jhiSortBy="createdDate"><span>部署日期</span> <span class="fa fa-sort"></span></th>
+                    <th>AI模型能力开放API接口</th>
+                    <th width="60px">操作</th>
+                </tr>
+                </thead>
+                <tbody *ngIf="abilities">
+                    <tr *ngFor="let ability of abilities; trackBy: trackIdentity">
+                        <td>{{ability.id}}</td>
+                        <td><a (click)="viewSolution(ability.solutionUuid)" matTooltip="查看模型">{{ability.solutionName}}</a></td>
+                        <td>{{ability.solutionAuthor}}</td>
+                        <td>{{ability.deployer}}</td>
+                        <td>{{ability.createdDate | date:'yyyy-MM-dd'}}</td>
+                        <td>
+                            <a (click)="viewAbility(ability)" matTooltip="查看模型实例">
+                                {{genAbilityUrl(ability)}}
+                            </a>
+                        </td>
+                        <td width="60px">
+                            <a (click)="viewAbility(ability)" matTooltip="查看模型实例">
+                                <span class="fa fa-eye" style="color: #673ab7"></span>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <br>
+    <div>
+        <mat-paginator #paginator
+                       [length]="totalItems"
+                       [pageSize]="itemsPerPage"
+                       [pageSizeOptions]="pageSizeOptions"
+                       (page)="reloadPage($event)"
+                       showFirstLastButtons>
+        </mat-paginator>
+    </div>
+</mat-card>

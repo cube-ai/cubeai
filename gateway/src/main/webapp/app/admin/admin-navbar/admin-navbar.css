@@ -1,0 +1,65 @@
+/* ==========================================================================
+Navbar
+========================================================================== */
+
+.jh-navbar {
+    background-color: #353d47;
+    padding: .2em 1em;
+    float: left;
+    height: 100%;
+    width: 100%;
+}
+
+.jh-navbar ul.navbar-nav {
+    padding: 0.5em;
+}
+
+.jh-navbar .navbar-nav .nav-item {
+    margin-left: 1.5rem;
+}
+
+.jh-navbar a.nav-link {
+    font-weight: 400;
+}
+
+.navbar-title {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.navbar-header {
+    height: 60px;
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+
+
+/* ==========================================================================
+Logo styles
+========================================================================== */
+.navbar-brand.logo {
+    padding: 5px 0;
+}
+
+.logo .logo-img {
+    height: 45px;
+    display: inline-block;
+    vertical-align: middle;
+    width: 70px;
+}
+
+.logo-img {
+    height: 100%;
+    background: url("../../../content/images/logo-unicom.png") no-repeat center center;
+    background-size: contain;
+    width: 100%;
+}
+
+
+.navbar-title {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+

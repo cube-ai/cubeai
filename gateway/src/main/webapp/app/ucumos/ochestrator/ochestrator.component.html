@@ -1,0 +1,144 @@
+<mat-card class="page-title">
+    <span>模型编排</span>
+
+    <div class="btn-toolbar float-right" role="toolbar">
+        <button mat-icon-button (click)="save()" matTooltip="保存">
+            <mat-icon color="primary">save</mat-icon>
+        </button>
+    </div>
+</mat-card>
+
+<mat-card>
+    <!--<span class="headline ">Design Studio <sup class="ds-text2">BETA</sup></span>-->
+    <mat-grid-list cols = "10" rowHeight="40px">
+        <mat-grid-tile colspan = "2" rowspan = "1" style="background: lightcoral">
+            <span class="headline ">Design Studio <sup class="ds-text2">BETA</sup></span>
+        </mat-grid-tile>
+        <mat-grid-tile colspan = "8" rowspan = "1" style="background: lightcoral">
+            <!--<span class="headline ">Design Studio <sup class="ds-text2">BETA</sup></span>-->
+        </mat-grid-tile>
+        <mat-grid-tile colspan = "2" rowspan = "1" style="background: lightblue">
+            <span class="headline ">Solutions</sup></span>
+        </mat-grid-tile>
+        <mat-grid-tile colspan = "8" rowspan = "1" style="background: lightgreen">
+            <div style="height: -webkit-fill-available; width: -webkit-fill-available;">
+                <mat-chip-list>
+                    <!--<mat-chip >解决方案1</mat-chip>-->
+                    <mat-chip (click)="addTab(true)">新建方案</mat-chip>
+                </mat-chip-list>
+            </div>
+
+        </mat-grid-tile>
+        <!--<mat-grid-tile colspan = "6" rowspan = "1" style="background: lightgreen"></mat-grid-tile>-->
+        <!--<mat-grid-tile colspan = "2" rowspan = "12" style="background: lightpink"></mat-grid-tile>-->
+        <mat-grid-tile colspan = "2" rowspan = "1" style="background: lightpink">
+            <!--<input name="search" type="text" class="form-control" placeholder="搜索" [(ngModel)]="filter"-->
+            <!--(blur)="refresh()" style="width:200px">-->
+            <input name="search" type="text" class="form-control" placeholder="搜索"  style="width:200px" [formControl]="serchControl">
+            <i class="fa fa-fw fa-search" aria-hidden="true"></i>
+        </mat-grid-tile>
+        <mat-grid-tile colspan = "6" rowspan = "13" >
+            <div id = "svgcanvas" style="height: -webkit-fill-available; width: -webkit-fill-available;">
+                <mat-tab-group [selectedIndex]="selected.value"
+                               (selectedIndexChange)="selected.setValue($event); changeSolution($event)" (animationDone)="updateResource()">
+                    <mat-tab *ngFor="let tab of tabs; let index = index">
+                        <ng-template mat-tab-label>
+                            {{tab}}
+                            <sup (click)="removeTab(index)"> <mat-icon style="font-size: 5px">close</mat-icon></sup>
+                        </ng-template>
+                        <!--<ng-template matTabContent>-->
+                            <div (drop)="dropEl($event)" (dragenter)="dragElenter($event)" (dragover)="dragElover($event)"(dragend)="dragElend($event)">
+                                <!--<h4>实验名称</h4>-->
+                                <div id="idsw-bpmn" class="bpmn" style="position: relative; width: 100%; height: 100%;">
+                                    <svg  class="svgbackgd" >
+                                        <defs>
+                                            <marker id="arrowhead" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                                <path d="M 0 0 L 10 5 L 0 10 z" stroke-width="0" stroke="#333"></path>
+                                            </marker>
+                                        </defs>
+                                    </svg>
+                                </div>
+                                <div style="height: 40px; border-top: solid 1px #e7e7e7; text-align: center; line-height: 40px; position: absolute;bottom: 2px; width: 100%">
+                                    <a class="btn btn-link" href="#"><i class="fa fa-play-circle-o" aria-hidden="true"></i>&nbsp;运行</a>
+                                    <a class="btn btn-link" href="#"><i class="fa fa-cloud-upload" aria-hidden="true"></i>&nbsp;部署</a>
+                                    <a class="btn btn-link" href="#"><i class="fa fa-share-alt" aria-hidden="true"></i>&nbsp;分享</a>
+                                </div>
+                            </div>
+                        <!--</ng-template>-->
+                        <!--Contents for {{tab}} tab-->
+
+                        <!--<button mat-raised-button-->
+                        <!--class="example-delete-tab-button"-->
+                        <!--[disabled]="tabs.length === 1"-->
+                        <!--(click)="removeTab(index)">-->
+                        <!--Delete Tab-->
+                        <!--</button>-->
+                        <!--<div  id="idsw-bpmn">-->
+                        <!--<div flex id="dsgridbg" style="height: 100%">-->
+                        <!--&lt;!&ndash;<section droppable="true">&ndash;&gt;-->
+                        <!--&lt;!&ndash;<div id="canvas">&ndash;&gt;-->
+                        <!--&lt;!&ndash;<svg class="svgbackgd">&ndash;&gt;-->
+                        <!--&lt;!&ndash;</svg>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<svg width="100%" height="100%">&ndash;&gt;-->
+                        <!--<svg class="svgbackgd">-->
+                        <!--<defs>-->
+                        <!--<marker id="arrowhead" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">-->
+                        <!--<path d="M 0 0 L 10 5 L 0 10 z" stroke-width="0" stroke="#333"></path>-->
+                        <!--</marker>-->
+                        <!--</defs>-->
+                        <!--</svg>-->
+                        <!--&lt;!&ndash;</div>&ndash;&gt;-->
+                        <!--&lt;!&ndash;</section>&ndash;&gt;-->
+                        <!--<div class="canvas-outer-container" [hidden]="canvas">-->
+                        <!--<div class="canvas-box">-->
+                        <!--<div class="canvas-image"></div>-->
+                        <!--<div class="canvas-text text-center">-->
+
+                        <!--<h5>Drag &amp; Drop the models from the left panel onto the canvas to create a Composite Solution</h5>-->
+                        <!--</div>-->
+
+                        <!--</div>-->
+                        <!--</div>-->
+
+                        <!--</div>-->
+
+            </div>
+            </mat-tab>
+            </mat-tab-group>
+            </div>
+
+        </mat-grid-tile>
+        <mat-grid-tile colspan = "2" rowspan = "13" style="background: lightcoral">
+            <!--<div style="height: -webkit-fill-available; width: -webkit-fill-available;">-->
+            <!---->
+            <!--</div>-->
+            <div style="height: -webkit-fill-available; width: -webkit-fill-available;">
+                <mat-tab-group>
+                    <mat-tab label="属性">属性</mat-tab>
+                    <mat-tab label="配置">配置</mat-tab>
+                </mat-tab-group>
+            </div>
+        </mat-grid-tile>
+        <mat-grid-tile colspan = "2" rowspan = "12" style="background: lightgray">
+            <div style="height: -webkit-fill-available; width: -webkit-fill-available;" id="left-wrapper">
+                <ul class="sidebar-nav">
+                    <li *ngFor="let cat of filteredItems | async">
+                        <a class="open">
+                            <i class="fa fa-folder-o" (click)="cat.expanded = !cat.expanded" expand [class]="cat.expanded ? 'fa fa-folder-open' : 'fa fa-folder'"></i>
+                            <span>{{cat.name}}</span>
+                        </a>
+                        <ul *ngIf="cat.expanded && cat.nodes.length > 0">
+                            <li *ngFor="let item of cat.nodes" class="node" [id]="item.id" draggable="true" (dragstart)="dragElStart($event)">
+                                <a >
+                                    <i class="fa fa-database"></i>
+                                    <span>{{item.name}}</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </mat-grid-tile>
+    </mat-grid-list>
+</mat-card>
+

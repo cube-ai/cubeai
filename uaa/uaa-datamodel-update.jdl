@@ -1,0 +1,18 @@
+entity Article {
+    uuid String,
+    authorLogin String,
+    authorName String,
+    subject1 String,
+    subject2 String,
+    subject3 String,
+    title String,
+    summary String,
+    tag1 String,
+    tag2 String,
+    tag3 String,
+    pictureUrl String maxlength(512),
+    content TextBlob,
+    displayOrder Long,
+    createdDate Instant,
+    modifiedDate Instant,
+}

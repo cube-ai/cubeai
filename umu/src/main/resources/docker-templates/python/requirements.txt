@@ -1,0 +1,4 @@
+flask
+h5py
+scipy
+gunicorn

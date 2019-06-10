@@ -1,0 +1,80 @@
+<mat-card class="page-title" *ngIf="ability">
+    <span>
+        AI模型部署实例 —— {{ability.solutionName}}
+    </span>
+
+    <div class="btn-toolbar float-right" role="toolbar">
+        <button mat-icon-button (click)="stopAbility()" matTooltip="停止实例运行" *ngIf="isEditing && ability.status === '运行'">
+            <mat-icon color="warn">stop</mat-icon>
+        </button>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <button mat-icon-button (click)="goBack()" matTooltip="返回">
+            <mat-icon color="primary">arrow_back</mat-icon>
+        </button>
+    </div>
+</mat-card>
+
+<mat-card *ngIf="ability">
+    <p>模型名称： {{ability.solutionName}}</p>
+    <p>模型作者： {{ability.solutionAuthor}}</p>
+    <p>部署日期： {{ability.createdDate | date:'yyyy-MM-dd HH:mm'}}</p>
+    <p>部 署 人： {{ability.deployer}}</p>
+    <p>运行状态： {{ability.status}}</p>
+</mat-card>
+<mat-card *ngIf="ability && ability.status === '运行'">
+    <p>API接口：  {{genAbilityUrl()}}</p>
+    <p>HTTP请求头:&nbsp;&nbsp;&nbsp;&nbsp;Content-Type: application/json&nbsp;&nbsp;&nbsp;&nbsp;Accept: application/json</p>
+    <p>模型方法和HTTP请求体格式请参考模型文档：&nbsp;&nbsp;&nbsp;&nbsp;
+        <button (click)="viewSolution()">查看模型</button>
+    </p>
+    <p *ngIf="ability.isPublic">
+        <span *ngIf="currentUser.authorities.includes('ROLE_OPERATOR')">
+            <mat-form-field style="width: 400px">
+                <input matInput type="text" placeholder="能力调用示范界面URL" [(ngModel)]="ability.demoUrl" (blur)="updateDemoUrl()">
+            </mat-form-field>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+        </span>
+        <button (click)="openDemoUrl()" *ngIf="ability.demoUrl">查看能力调用示范界面</button>
+    </p>
+</mat-card>
+
+<mat-card *ngIf="ability && ability.status === '运行'"">
+    <h4>接口测试</h4><br>
+    <p>
+        HTTP方法： POST
+    </p>
+    <p>
+        URL： {{genAbilityUrlPrefix()}}
+        <mat-form-field>
+            <input matInput type="text" placeholder="模型方法" [(ngModel)]="modelMethod">
+        </mat-form-field>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <button mat-raised-button color="primary" (click)="sendTestRequest()" [disabled]="!modelMethod || !requestBody || sending">
+            发送请求
+        </button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button mat-raised-button color="primary" (click)="genTestRequest()" *ngIf="!modelMethod && !requestBody">
+            <span>生成测试数据</span>
+        </button>
+        <button mat-raised-button color="accent" (click)="cleanTestRequest()" *ngIf="modelMethod || requestBody">
+            <span>清空测试数据</span>
+        </button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button mat-raised-button color="accent" (click)="cleanResponseBody()" [disabled]="!responseBody">
+            <span>清空响应体</span>
+        </button>
+    </p>
+    <div class="row">
+        <div class="col-md-6">
+            <mat-form-field style="width: 100%">
+                <textarea matInput style="height: 200px" [(ngModel)]="requestBody" placeholder="HTTP请求体"></textarea>
+            </mat-form-field>
+        </div>
+        <div class="col-md-6">
+            <mat-form-field style="width: 100%">
+                <textarea matInput style="height: 200px" [ngModel]="responseBody" placeholder="HTTP响应体" readonly></textarea>
+            </mat-form-field>
+        </div>
+    </div>
+    <br>
+</mat-card>

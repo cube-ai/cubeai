@@ -1,0 +1,10 @@
+version: '2'
+services:
+    consul-config-loader:
+        image: jhipster/consul-config-loader:v0.2.2
+        volumes:
+            - ./central-server-config:/config
+        environment:
+            - INIT_SLEEP_SECONDS=5
+            - CONSUL_URL=consul
+            - CONSUL_PORT=8500

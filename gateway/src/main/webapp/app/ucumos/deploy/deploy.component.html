@@ -1,0 +1,79 @@
+<mat-card class="page-title">
+    <span *ngIf="openMode === 'deploy' && solution">模型部署 —— {{solution.name}}</span>
+    <span *ngIf="openMode === 'view' && task">模型部署任务详情 —— {{task.taskName}}</span>
+
+    <div class="btn-toolbar float-right" role="toolbar">
+        <button mat-icon-button (click)="goBack()" matTooltip="返回">
+            <mat-icon color="primary">arrow_back</mat-icon>
+        </button>
+    </div>
+</mat-card>
+
+<mat-card>
+    <label>&nbsp;&nbsp;&nbsp;部署至：&nbsp;&nbsp;&nbsp;&nbsp;</label>
+    <mat-radio-group [(ngModel)]="deployTo" [disabled]="deployStarted">
+        <mat-radio-button value="local" color="primary">本地</mat-radio-button>
+        &nbsp;&nbsp;
+        <mat-radio-button value="ucumos" color="primary">CubeAI能力开放平台</mat-radio-button>
+    </mat-radio-group>
+</mat-card>
+
+<mat-card *ngIf="openMode === 'deploy' && deployTo === 'local'">
+    <div>请在本地安装有docker环境的系统中运行如下命令：</div>
+    <br>
+    <span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        {{genLocalDeployCmd()}}
+    </span>
+
+</mat-card>
+
+<mat-card *ngIf="deployTo === 'ucumos' && (solution || deployStarted)">
+    <div *ngIf="openMode === 'deploy'">
+        <label>部署模式：&nbsp;&nbsp;&nbsp;&nbsp;</label>
+        <mat-radio-group [(ngModel)]="deployMode" [disabled]="!canDeployToPublic() || deployStarted">
+            <mat-radio-button value="private" color="primary">私有</mat-radio-button>
+            &nbsp;&nbsp;
+            <mat-radio-button value="public" color="primary">开放</mat-radio-button>
+        </mat-radio-group>
+    </div>
+
+    <mat-card>
+        <div *ngIf="openMode === 'deploy'">
+            <button mat-raised-button color="primary" (click)="deploySolution()" [disabled]="deployStarted">
+                开始部署
+            </button>
+        </div>
+        <br>
+
+        <mat-card *ngIf="deployStarted && !statusCreateTaskError">
+            <mat-progress-bar mode="determinate" [value]="progressDeploy" color="primary" *ngIf="statusDeploy !== '失败'"></mat-progress-bar>
+            <mat-progress-bar mode="determinate" [value]="progressDeploy" color="warn" *ngIf="statusDeploy === '失败'"></mat-progress-bar>
+            <mat-form-field style="width: 100%">
+                <textarea matInput style="height: 100px; font-size: small"
+                          [(ngModel)]="detailDeploy" [readonly]="true">
+                </textarea>
+            </mat-form-field>
+        </mat-card>
+
+        <mat-card *ngIf="getCompleteSuccess() || getCompleteFail() || statusCreateTaskError">
+            <div class="row justify-content-center">
+                <div *ngIf="getCompleteSuccess()">
+                    <span class="alert alert-success" style="font-size: 20px">
+                        模型部署成功！
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <button (click)="jumpToNewAbility()">查看模型部署实例</button>
+                    </span>
+                </div>
+                <h4 class="alert alert-danger" *ngIf="getCompleteFail()">
+                    模型部署失败！
+                </h4>
+                <p class="alert alert-danger" *ngIf="statusCreateTaskError">
+                    等待超时！请查看任务列表中是否有后台任务正在执行。如无可能是系统繁忙，请稍后再试...
+                </p>
+            </div>
+        </mat-card>
+        <br><br>
+    </mat-card>
+</mat-card>
+

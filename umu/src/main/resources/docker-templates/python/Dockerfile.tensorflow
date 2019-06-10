@@ -1,0 +1,7 @@
+FROM ubuntu/python-tf:4.0.0
+WORKDIR /app
+ENV LANG C.UTF-8
+ADD . /app
+RUN pip3 install -r requirements.txt -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com
+EXPOSE 3330
+CMD ["acumos_model_runner", "model/"]

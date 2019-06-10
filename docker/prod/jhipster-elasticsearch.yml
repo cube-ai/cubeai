@@ -1,0 +1,15 @@
+version: '2'
+services:
+    jhipster-elasticsearch:
+        image: jhipster/jhipster-elasticsearch:v3.0.1
+        # Uncomment this as well as the volume section down below
+        # to have elasticsearch data persisted to a volume
+        # you will need to create a named volume with `docker volume create log-data`
+        #volumes:
+        #    - log-data:/usr/share/elasticsearch/data
+
+
+# Uncomment to use the log-data volume
+#volumes:
+#    log-data:
+#        driver: local

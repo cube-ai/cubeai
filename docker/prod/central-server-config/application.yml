@@ -1,0 +1,41 @@
+#common configuration shared between all applications
+configserver:
+    name: Docker JHipster Registry
+    status: Connected to Consul running in Docker
+
+jhipster:
+    security:
+        authentication:
+            jwt:
+                secret: my-secret-token-to-change-in-production
+    logging:
+        logstash: # forward logs to ELK
+            enabled: true
+            host: jhipster-logstash
+    metrics:
+        logs: # report metrics in the logs
+            enabled: true
+            report-frequency: 60 # in seconds
+spring:
+    zipkin:
+        base-url: http://jhipster-zipkin:9411
+        enabled: true
+
+nexus:
+    maven:
+        url: https://localhost:10001/repository/ucumos
+        username: username
+        password: password
+    docker:
+        host: localhost
+        port: 2375
+        registryUsername: username
+        registryPassword: password
+        imagetagPrefix: localhost:10002
+
+kubernetes:
+    ability:
+        internalIP: localhost
+    api:
+        url: https://localhost:60000
+        token: my-kubernetes-token-to-change-in-production

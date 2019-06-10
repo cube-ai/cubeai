@@ -1,0 +1,14 @@
+<mat-card style="margin-top: 60px">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div [hidden]="!errorMessage">
+                <div class="alert alert-danger">{{errorMessage}}
+                </div>
+            </div>
+            <br>
+            <div [hidden]="!error403" class="alert alert-danger">
+                未登录或登录已超时，请重新登录......
+            </div>
+        </div>
+    </div>
+</mat-card>

@@ -1,0 +1,56 @@
+{
+    "fluentMethods": true,
+    "relationships": [],
+    "fields": [
+        {
+            "fieldName": "uuid",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "userLogin",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "solutionUuid",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "parentUuid",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "commentText",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "maxlength"
+            ],
+            "fieldValidateRulesMaxlength": 512
+        },
+        {
+            "fieldName": "level",
+            "fieldType": "Integer"
+        },
+        {
+            "fieldName": "createdDate",
+            "fieldType": "Instant"
+        },
+        {
+            "fieldName": "modifiedDate",
+            "fieldType": "Instant"
+        }
+    ],
+    "changelogDate": "20190225070743",
+    "javadoc": "评论。一个Comment唯一属于一个Soultion。可以对评论进行回复。",
+    "entityTableName": "comment",
+    "dto": "no",
+    "pagination": "no",
+    "service": "no",
+    "jpaMetamodelFiltering": false,
+    "microserviceName": "umm"
+}

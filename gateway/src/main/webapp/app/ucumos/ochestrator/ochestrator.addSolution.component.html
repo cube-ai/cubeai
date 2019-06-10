@@ -1,0 +1,38 @@
+<form [formGroup]="formGroup">
+    <div class="modal-header">
+        <h4>创建解决方案</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" (click)="onClose()">
+            <span>&times;</span>
+        </button>
+    </div>
+
+    <div class="modal-body">
+        <mat-card>
+            <div class="row justify-content-center">
+                    <mat-form-field style="width: 100%">
+                        <input matInput formControlName="solution" type="text" placeholder="解决方案名称" maxlength="50">
+                        <mat-error *ngIf="(solution.dirty || solution.touched) && solution.hasError('required')">
+                            必须输入解决方案！
+                        </mat-error>
+                        <mat-error *ngIf="(solution.dirty || solution.touched) && solution.hasError('maxlength')">
+                            解决方案不能超过50个字符！
+                        </mat-error>
+                        <mat-error *ngIf="(solution.dirty || solution.touched) && solution.hasError('pattern')">
+                            解决方案只能包含字母、数字或者Email地址！
+                        </mat-error>
+                    </mat-form-field>
+            </div>
+        </mat-card>
+    </div>
+
+    <div class="modal-footer">
+        <button mat-raised-button (click)="onClose()">
+            <span class="fa fa-ban">&nbsp;取消</span>
+        </button>
+        <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="formGroup.invalid">
+            <span class="fa fa-share">&nbsp;确认</span>
+        </button>
+    </div>
+
+</form>
+

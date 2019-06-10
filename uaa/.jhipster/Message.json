@@ -1,0 +1,61 @@
+{
+    "fluentMethods": true,
+    "relationships": [],
+    "fields": [
+        {
+            "fieldName": "sender",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "receiver",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "subject",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "content",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "maxlength"
+            ],
+            "fieldValidateRulesMaxlength": 1024
+        },
+        {
+            "fieldName": "url",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "maxlength"
+            ],
+            "fieldValidateRulesMaxlength": 512
+        },
+        {
+            "fieldName": "urgent",
+            "fieldType": "Boolean"
+        },
+        {
+            "fieldName": "viewed",
+            "fieldType": "Boolean"
+        },
+        {
+            "fieldName": "deleted",
+            "fieldType": "Boolean"
+        },
+        {
+            "fieldName": "createdDate",
+            "fieldType": "Instant"
+        },
+        {
+            "fieldName": "modifiedDate",
+            "fieldType": "Instant"
+        }
+    ],
+    "changelogDate": "20190218062645",
+    "javadoc": "站内消息",
+    "entityTableName": "message",
+    "dto": "no",
+    "pagination": "no",
+    "service": "no",
+    "jpaMetamodelFiltering": false
+}

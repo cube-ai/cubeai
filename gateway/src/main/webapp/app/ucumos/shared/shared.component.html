@@ -1,0 +1,53 @@
+<mat-card class="page-title">
+    <span>好友分享</span>
+
+    <div class="btn-toolbar float-right" role="toolbar">
+        <button mat-icon-button (click)="refresh()" matTooltip="刷新">
+            <mat-icon color="primary">refresh</mat-icon>
+        </button>
+    </div>
+</mat-card>
+
+
+<mat-card>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
+                <th jhiSortBy="id"><span>序号</span> <span class="fa fa-sort"></span></th>
+                <th><span>模型UUID</span></th>
+                <th jhiSortBy="solutionName"><span>模型名称</span> <span class="fa fa-sort"></span></th>
+                <th jhiSortBy="SolutionAuthor"><span>模型作者</span> <span class="fa fa-sort"></span></th>
+                <th jhiSortBy="solutionCreatedDate"><span>创建日期</span> <span class="fa fa-sort"></span></th>
+                <th jhiSortBy="fromUserLogin"><span>分享人</span> <span class="fa fa-sort"></span></th>
+                <th jhiSortBy="shareDate"><span>分享日期</span> <span class="fa fa-sort"></span></th>
+                <th><span>取消分享</span></th>
+            </tr>
+            </thead>
+            <tbody *ngIf="solutionShareds">
+                <tr *ngFor="let solutionShared of solutionShareds; trackBy: trackIdentity">
+                    <td>{{solutionShared.id}}</td>
+                    <td><a (click)="viewSolution(solutionShared.solutionUuid)">{{solutionShared.solutionUuid}}</a></td>
+                    <td><a (click)="viewSolution(solutionShared.solutionUuid)">{{solutionShared.solutionName}}</a></td>
+                    <td>{{solutionShared.solutionAuthor}}</td>
+                    <td>{{solutionShared.solutionCreatedDate | date:'yyyy-MM-dd'}}</td>
+                    <td>{{solutionShared.fromUserLogin}}</td>
+                    <td>{{solutionShared.shareDate | date:'yyyy-MM-dd'}}</td>
+                    <td><a (click)="deleteShared(solutionShared.id)"><span class="fa fa-remove" style="color: red"></span></a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <div>
+        <mat-paginator #paginator
+                       [length]="totalItems"
+                       [pageSize]="itemsPerPage"
+                       [pageSizeOptions]="pageSizeOptions"
+                       (page)="reloadPage($event)"
+                       showFirstLastButtons>
+        </mat-paginator>
+    </div>
+</mat-card>
+
+

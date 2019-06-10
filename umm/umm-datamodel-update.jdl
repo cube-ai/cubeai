@@ -1,0 +1,20 @@
+/**
+  * 模型部署实例（能力）
+  */
+entity Deployment {
+    uuid String,
+    deployer String,
+    solutionUuid String,
+    solutionName String,
+    solutionAuthor String,
+    k8sPort Integer,
+    isPublic Boolean,
+    status String,
+    createdDate Instant,
+    modifiedDate Instant,
+    pictureUrl String maxlength(512),
+    modelType String,
+    toolkitType String,
+    callCount Long,
+    demoUrl String maxlength(512),
+}

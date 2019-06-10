@@ -1,0 +1,68 @@
+{
+    "fluentMethods": true,
+    "relationships": [],
+    "fields": [
+        {
+            "fieldName": "uuid",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "taskName",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "taskType",
+            "javadoc": "任务类型，直接用中文字符串表示。目前包括：\n模型上线，模型验证",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "taskStatus",
+            "javadoc": "任务状态，直接用中文字符串表示。目前包括：\n等待调度，正在执行，成功，失败",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "taskProgress",
+            "javadoc": "任务进度，取值为0-100的整数",
+            "fieldType": "Integer",
+            "fieldValidateRules": [
+                "max"
+            ],
+            "fieldValidateRulesMax": 100
+        },
+        {
+            "fieldName": "description",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "maxlength"
+            ],
+            "fieldValidateRulesMaxlength": 512
+        },
+        {
+            "fieldName": "targetUuid",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "userLogin",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "startDate",
+            "fieldType": "Instant"
+        },
+        {
+            "fieldName": "endDate",
+            "fieldType": "Instant"
+        }
+    ],
+    "changelogDate": "20190225070753",
+    "javadoc": "异步任务",
+    "entityTableName": "task",
+    "dto": "no",
+    "pagination": "no",
+    "service": "no",
+    "jpaMetamodelFiltering": false,
+    "microserviceName": "umm"
+}

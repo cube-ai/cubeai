@@ -1,0 +1,45 @@
+<div class="modal-header">
+    <h4>用户登录</h4>
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" (click)="onClose()">
+        <span>&times;</span>
+    </button>
+</div>
+
+<div class="modal-body">
+    <div class="modal-body">
+        <div>
+            <mat-form-field style="width: 100%">
+                <input matInput type="text" placeholder="用户名" [(ngModel)]="username">
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field style="width: 100%" >
+                <input matInput type="password" placeholder="密码" [(ngModel)]="password">
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field style="width: 75%">
+                <input matInput type="text" placeholder="校验码" [(ngModel)]="myCode">
+            </mat-form-field>
+            <a (click)="getVerifyCode()">
+                <img src="{{verifyPicture}}" alt="获取验证码">
+            </a>
+        </div>
+        <div class="alert alert-danger" *ngIf="authenticationError">
+            登录失败！ 请核对用户名、密码和验证码并重试...
+        </div>
+        <div class="alert alert-danger" *ngIf="this.data.reason">
+            {{this.data.reason}}
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button mat-raised-button (click)="onClose()">
+        <span class="fa fa-ban">&nbsp;取消</span>
+    </button>
+    <button mat-raised-button color="primary" (click)="login()">
+        <span class="fa fa-sign-in">&nbsp;登录</span>
+    </button>
+</div>
+

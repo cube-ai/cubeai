@@ -1,0 +1,48 @@
+<mat-card class="page-title">
+    <span>已发送</span>
+    <div class="btn-toolbar float-right" role="toolbar">
+        <a (click)="refresh()" matTooltip="刷新">
+            <mat-icon color="primary">refresh</mat-icon>
+        </a>
+        <span>&nbsp;&nbsp;</span>
+        <input name="search" type="text" class="form-control" placeholder="搜索" [(ngModel)]="filter"
+               (blur)="refresh()" style="width:200px">
+    </div>
+</mat-card>
+
+<mat-card>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
+                    <th width="10px"><span></span></th>
+                    <th jhiSortBy="receiver" width="120px"><span>收信人</span> <span class="fa fa-sort"></span></th>
+                    <th jhiSortBy="subject"><span>主题</span> <span class="fa fa-sort"></span></th>
+                    <th jhiSortBy="content"><span>正文</span> <span class="fa fa-sort"></span></th>
+                    <th jhiSortBy="createdDate" width="180px"><span>日期</span> <span class="fa fa-sort"></span></th>
+                </tr>
+            </thead>
+            <tbody *ngIf="messages">
+            <tr *ngFor="let message of messages">
+                <td width="10px" align="center"><span *ngIf="message.urgent" style="color: red">!</span></td>
+                <td width="120px">{{message.receiver}}</td>
+                <td><a (click)="viewMessage(message)">{{abbreviateText(message.subject, 20)}}</a></td>
+                <td>{{abbreviateText(message.content, 50)}}</td>
+                <td width="180px">{{message.createdDate | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <br>
+    <div>
+        <mat-paginator #paginator
+                       [length]="totalItems"
+                       [pageSize]="itemsPerPage"
+                       [pageSizeOptions]="pageSizeOptions"
+                       (page)="reloadPage($event)"
+                       showFirstLastButtons>
+        </mat-paginator>
+    </div>
+</mat-card>
+

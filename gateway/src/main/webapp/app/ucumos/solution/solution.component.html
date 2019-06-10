@@ -1,0 +1,585 @@
+<mat-card class="page-title" *ngIf="solution">
+    <span *ngIf="solution">
+        <span *ngIf="isEditing">编辑</span>
+        <span *ngIf="isViewing">查看</span>
+        AI模型
+        <span *ngIf="isReviewingPublish">上架审批</span>
+        <span *ngIf="isReviewingUnpublish">下架审批</span>
+        ——
+        {{solution.name}}
+        <span *ngIf="!solution.active" style="color: red">&nbsp;&nbsp;已删除</span>
+    </span>
+
+    <div class="btn-toolbar float-right" role="toolbar">
+        <button mat-raised-button color="primary" (click)="requestPublish()" *ngIf="canEditBaseInfo" [disabled]="sendingAction || !solution.version
+                || !solution.modelType || !solution.toolkitType || !solution.summary || !solution.tag1 || editingDescription || !description.content || !solution.pictureUrl || !requestReason">
+            <span class="fa fa-send">&nbsp;&nbsp;申请上架</span>
+        </button>
+        <button mat-raised-button color="primary" (click)="requestUnpublish()" [disabled]="sendingAction || !requestReason" *ngIf="canUnpublish">
+            <span class="fa fa-arrow-down">&nbsp;&nbsp;申请下架</span>
+        </button>
+        <button mat-raised-button color="primary" (click)="approvePublish(true)" [disabled]="!reviewComment || sendingAction" *ngIf="isReviewingPublish || isReviewingUnpublish">
+            <span class="fa fa-check">&nbsp;&nbsp;同意</span>
+        </button>
+        &nbsp;&nbsp;
+        <button mat-raised-button color="warn" (click)="approvePublish(false)" [disabled]="!reviewComment || sendingAction" *ngIf="isReviewingPublish || isReviewingUnpublish">
+            <span>&nbsp;&nbsp;</span><span class="fa fa-ban">&nbsp;&nbsp;拒绝</span>
+        </button>
+
+        &nbsp;&nbsp;
+        <button mat-icon-button (click)="deleteSolution()" matTooltip="删除模型" *ngIf="canEditBaseInfo">
+            <mat-icon color="warn">delete_sweep</mat-icon>
+        </button>
+        <button mat-icon-button (click)="restoreSolution()" matTooltip="找回模型" *ngIf="!solution.active">
+            <mat-icon color="warn">restore_from_trash</mat-icon>
+        </button>
+
+        <button mat-icon-button (click)="favoriteSolution()" matTooltip="已收藏！点击取消收藏..."
+                *ngIf="solution.active && solution.publishStatus === '上架' && solutionFavorite">
+            <mat-icon color="primary">favorite</mat-icon>
+        </button>
+        <button mat-icon-button (click)="favoriteSolution()" matTooltip="点击收藏此模型..."
+                *ngIf="solution.active && solution.publishStatus === '上架' && !solutionFavorite">
+            <mat-icon color="primary">favorite_border</mat-icon>
+        </button>
+        <button mat-icon-button (click)="shareSolution()" matTooltip="分享至好友" *ngIf="solution.active && solution.publishStatus === '上架'">
+            <mat-icon color="primary">share</mat-icon>
+        </button>
+
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <button mat-icon-button (click)="deploySolution()" matTooltip="部署模型" *ngIf="solution.active && solution.publishStatus === '上架'">
+            <mat-icon color="primary">cloud_upload</mat-icon>
+        </button>
+
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <button mat-icon-button (click)="goBack()" matTooltip="返回">
+            <mat-icon color="primary">arrow_back</mat-icon>
+        </button>
+    </div>
+</mat-card>
+
+<mat-card *ngIf="solution">
+    <mat-tab-group>
+        <mat-tab label="基本信息">
+            <div style="margin: 20px">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div>
+                            <mat-form-field>
+                                <input matInput [ngModel]="solution.name" type="text" placeholder="模型名称" disabled>
+                            </mat-form-field>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <mat-form-field>
+                                <input matInput [(ngModel)]="solution.version" type="text" placeholder="版本号" maxlength=30
+                                       [required]="canEditBaseInfo" [disabled]="!canEditBaseInfo">
+                            </mat-form-field>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <mat-form-field>
+                                <mat-select [(ngModel)]="solution.modelType" placeholder="模型类别"
+                                            [required]="canEditBaseInfo" [disabled]="!canEditBaseInfo">
+                                    <mat-option value="预测">
+                                        预测
+                                    </mat-option>
+                                    <mat-option value="分类">
+                                        分类
+                                    </mat-option>
+                                    <mat-option value="回归">
+                                        回归
+                                    </mat-option>
+                                    <mat-option value="其他">
+                                        其他
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <mat-form-field>
+                                <mat-select [(ngModel)]="solution.toolkitType" placeholder="模型工具"
+                                            [required]="canEditBaseInfo" [disabled]="!canEditBaseInfo">
+                                    <mat-option value="TensorFlow">
+                                        TensorFlow
+                                    </mat-option>
+                                    <mat-option value="Keras">
+                                        Keras
+                                    </mat-option>
+                                    <mat-option value="H2O">
+                                        H2O
+                                    </mat-option>
+                                    <mat-option value="Scikit-Learn">
+                                        Scikit-Learn
+                                    </mat-option>
+                                    <mat-option value="模型编排">
+                                        模型编排
+                                    </mat-option>
+                                    <mat-option value="其他">
+                                        其他
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <div>
+                            <mat-form-field>
+                                <input matInput [ngModel]="solution.authorName || solution.authorLogin" type="text" placeholder="作者" disabled>
+                            </mat-form-field>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <mat-form-field>
+                                <input matInput [ngModel]="solution.createdDate | date:'yyyy-MM-dd HH:mm'" type="text" placeholder="创建日期" disabled>
+                            </mat-form-field>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <mat-form-field>
+                                <input matInput [ngModel]="solution.modifiedDate | date:'yyyy-MM-dd HH:mm'" type="text" placeholder="修订日期" disabled>
+                            </mat-form-field>
+                        </div>
+
+                        <div *ngIf="canEditBaseInfo || solution.tag1">
+                            <mat-form-field>
+                                <input matInput [(ngModel)]="solution.tag1" type="text" placeholder="关键词" maxlength=20 [required]="canEditBaseInfo" [disabled]="!canEditBaseInfo">
+                            </mat-form-field>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <mat-form-field *ngIf="solution.tag1 && (canEditBaseInfo || solution.tag2)">
+                                <input matInput [(ngModel)]="solution.tag2" type="text" placeholder="关键词" maxlength=20 [disabled]="!canEditBaseInfo">
+                            </mat-form-field>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <mat-form-field *ngIf="solution.tag2 && (canEditBaseInfo || solution.tag3)">
+                                <input matInput [(ngModel)]="solution.tag3" type="text" placeholder="关键词" maxlength=20 [disabled]="!canEditBaseInfo">
+                            </mat-form-field>
+                        </div>
+
+                        <div>
+                            <mat-form-field style="width: 95%">
+                                <input matInput [(ngModel)]="solution.summary" type="text" maxlength=250 placeholder="摘要"
+                                       [required]="canEditBaseInfo" [disabled]="!canEditBaseInfo">
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <mat-card style="width: 200px; height: 200px">
+                            <a (click)="changeSolutionPicture()" *ngIf="canEditBaseInfo">
+                                <img matCardImage src="{{solution.pictureUrl}}" *ngIf="solution.pictureUrl" matTooltip="点击更改模型图标">
+                                <span *ngIf="!solution.pictureUrl" style="line-height: 150px">点击添加模型头像</span>
+                            </a>
+                            <img matCardImage src="{{solution.pictureUrl}}" alt="blank"  *ngIf="!canEditBaseInfo">
+                        </mat-card>
+                        <br>
+                        <div *ngIf="openAbilityUrl">
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <button (click)="jumpToAbility()">查看开放部署实例</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="isOwner || isReviewer">
+                    <mat-form-field>
+                        <input matInput [ngModel]="solution.publishStatus" type="text" placeholder="上架/下架状态" disabled>
+                    </mat-form-field>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <mat-form-field>
+                        <input matInput [ngModel]="solution.publishRequest" type="text" placeholder="上架/下架申请" disabled>
+                    </mat-form-field>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <mat-form-field *ngIf="canEditBaseInfo" style="width: 400px">
+                        <input matInput [(ngModel)]="requestReason" type="text" placeholder="申请上架理由" required>
+                    </mat-form-field>
+                    <mat-form-field *ngIf="canUnpublish" style="width: 400px">
+                        <input matInput [(ngModel)]="requestReason" type="text" placeholder="申请下架理由" required>
+                    </mat-form-field>
+                    <mat-form-field *ngIf="isReviewingPublish || isReviewingUnpublish" style="width: 400px">
+                        <input matInput [(ngModel)]="reviewComment" type="text" placeholder="审批意见" required>
+                    </mat-form-field>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <button (click)="viewApproveHistory()">
+                        查看审批历史
+                    </button>
+                </div>
+
+                <br>
+                <div style="font-size: larger">
+                    <span>模型概述</span>
+                    <span style="color: red" *ngIf="canEditBaseInfo && !description.content">&nbsp;*</span>
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <a (click)="enterEditDescription()" matTooltip="编辑" *ngIf="canEditBaseInfo && !editingDescription">
+                        <span class="fa fa-edit" style="color: #673ab7"></span>
+                    </a>
+                    <a (click)="saveDescription()" matTooltip="保存" *ngIf="canEditBaseInfo && editingDescription">
+                        <span class="fa fa-save" style="color: #673ab7"></span>
+                    </a>
+                </div>
+                <br>
+                <div *ngIf="canEditBaseInfo && editingDescription">
+                    <ueditor [(ngModel)]="description.content"
+                             [config]="{ wordCount: true }"
+                             [loadingTip]="'加载中……'"
+                             (onReady)="_ready($event)"
+                             (onDestroy)="_destroy()"
+                             (ngModelChange)="_change($event)">
+                    </ueditor>
+                </div>
+                <div *ngIf="!canEditBaseInfo || !editingDescription">
+                    <div [innerHTML]="description.content | html">
+                    </div>
+                </div>
+                <br><br>
+            </div>
+        </mat-tab>
+
+        <mat-tab label="元数据">
+            <div style="margin: 20px">
+                <h5>模型元数据如下：</h5>
+                <pre>{{metadataText}}</pre>
+            </div>
+        </mat-tab>
+
+        <mat-tab label="接口定义">
+            <div style="margin: 20px">
+                <h5>Protobuf格式的模型接口定义如下：</h5><br>
+                <pre>{{protobufText}}</pre>
+            </div>
+        </mat-tab>
+
+        <mat-tab label="构件">
+            <div style="margin: 20px">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>类型</th>
+                            <th>修改日期</th>
+                            <th>大小</th>
+                            <th width="100px">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody *ngIf="artifacts">
+                        <tr *ngFor="let artifact of artifacts">
+                            <td>{{artifact.name}}</td>
+                            <td>{{artifact.type}}</td>
+                            <td>{{artifact.modifiedDate | date:'yyyy-MM-dd HH:mm'}}</td>
+                            <td>
+                                <span *ngIf="artifact.fileSize < 1024">{{artifact.fileSize}} B</span>
+                                <span *ngIf="artifact.fileSize >= 1024">{{(artifact.fileSize / 1024) | number: '1.1-1'}} KB</span>
+                            </td>
+                            <td width="100px" nowrap>
+                                <span *ngIf="artifact.type !== 'DOCKER镜像'">
+                                    <a (click)="downloadFile(artifact.url)">
+                                        <span class="fa fa-download" style="color: #673ab7"></span>
+                                    </a>
+                                    <span *ngIf="isTextFile(artifact.url)">
+                                        &nbsp;&nbsp;
+                                        <a href="{{artifact.url}}" target="_blank">
+                                            <span class="fa fa-eye" style="color: #673ab7"></span>
+                                        </a>
+                                    </span>
+                                </span>
+                                <span *ngIf="artifact.type === 'DOCKER镜像'">
+                                    <a (click)="copyDockerUrl(artifact.url)" matTooltip="docker pull {{artifact.url}}">
+                                        <span class="fa fa-paste" style="color: #673ab7"></span>
+                                    </a>
+                                </span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </mat-tab>
+
+        <mat-tab label="文档/附件">
+            <div style="margin: 20px" *ngIf="canAddDocument">
+                <div>
+                    <span style="font-weight: bold">上传文档/附件 &nbsp;&nbsp;</span>
+                    <input type="file" ng2FileSelect [uploader]="uploader" accept=".pdf, .doc, .docx, .ppt, .pptx, .xls, .xlsx, .jpg, .jpeg, .png, .zip, .rar, .txt" />
+                    <span class="float-right">已选择 {{ uploader?.queue?.length }} 个文件</span>
+                </div>
+                <br>
+                <div *ngIf="uploader?.queue?.length > 0">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th width="50%">文件名</th>
+                                <th>大小</th>
+                                <th>状态</th>
+                                <th width="100px">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let item of uploader.queue">
+                            <td>{{ item?.file?.name }}</td>
+                            <td>{{ item?.file?.size/1024 | number:'1.1-1' }} KB</td>
+                            <td>
+                                <span *ngIf="item.isSuccess" style="color: forestgreen">上传成功</span>
+                                <span *ngIf="item.isCancel" style="color: #ffc107">上传被取消</span>
+                                <span *ngIf="item.isError" style="color: red">上传失败</span>
+                            </td>
+                            <td>
+                                <a (click)="upload(item)" *ngIf="!item.isReady && !item.isUploading && !item.isSuccess">
+                                    <span class="fa fa-upload" style="color: #673ab7" matTooltip="上传"></span>
+                                </a>
+                                &nbsp;&nbsp;
+                                <a (click)="item.cancel()" *ngIf="item.isUploading">
+                                    <span class="fa fa-ban" style="color: #ffc107" matTooltip="取消"></span>
+                                </a>
+                                <a (click)="item.remove()" *ngIf="!item.isUploading">
+                                    <span class="fa fa-remove" style="color: red" matTooltip="移除"></span>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <mat-progress-bar mode="determinate" [value]="uploader.progress"></mat-progress-bar>
+                </div>
+                <br>
+            </div>
+
+            <div style="margin: 20px">
+                <span style="font-weight: bold" *ngIf="canAddDocument">模型文档/附件</span>
+                <div *ngIf="!documents || documents.length < 1">
+                    无
+                </div>
+                <div class="table-responsive" *ngIf="documents && documents.length > 0">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>修改日期</th>
+                            <th>大小</th>
+                            <th width="100px">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody *ngIf="documents">
+                        <tr *ngFor="let document of documents">
+                            <td>{{document.name}}</td>
+                            <td>{{document.modifiedDate | date:'yyyy-MM-dd HH:mm'}}</td>
+                            <td>
+                                <span *ngIf="document.fileSize < 1024">{{document.fileSize}} B</span>
+                                <span *ngIf="document.fileSize >= 1024">{{(document.fileSize / 1024) | number: '1.1-1'}} KB</span>
+                            </td>
+                            <td width="100px" nowrap>
+                                <a (click)="downloadFile(document.url)" matTooltip="下载文档">
+                                    <span class="fa fa-download" style="color: #673ab7"></span>
+                                </a>
+                                <span *ngIf="canAddDocument">
+                                    &nbsp;&nbsp;
+                                    <a (click)="deleteDocument(document)" matTooltip="删除文档">
+                                        <span class="fa fa-trash" style="color: orangered"></span>
+                                    </a>
+                                </span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </mat-tab>
+
+    </mat-tab-group>
+</mat-card>
+
+<mat-divider></mat-divider>
+<mat-divider></mat-divider>
+<mat-divider></mat-divider>
+
+<mat-card *ngIf="solutionRating">
+    <h4>模型评价</h4>
+    <br>
+    <div class="row justify-content-center">
+        <div class="col-md-3" *ngIf="isViewing">
+            <span>我的评价</span>
+            <br>
+            <a (click)="ratingSolution(1)">
+                <span class="fa fa-star-o" *ngIf="solutionRating.ratingScore < 1"></span>
+                <span class="fa fa-star" style="color: #ffd151" *ngIf="solutionRating.ratingScore >= 1"></span>
+            </a>
+            <span>&nbsp;&nbsp;</span>
+            <a (click)="ratingSolution(2)">
+                <span class="fa fa-star-o" *ngIf="solutionRating.ratingScore < 2"></span>
+                <span class="fa fa-star" style="color: #ffd151" *ngIf="solutionRating.ratingScore >= 2"></span>
+            </a>
+            <span>&nbsp;&nbsp;</span>
+            <a (click)="ratingSolution(3)">
+                <span class="fa fa-star-o" *ngIf="solutionRating.ratingScore < 3"></span>
+                <span class="fa fa-star" style="color: #ffd151" *ngIf="solutionRating.ratingScore >= 3"></span>
+            </a>
+            <span>&nbsp;&nbsp;</span>
+            <a (click)="ratingSolution(4)">
+                <span class="fa fa-star-o" *ngIf="solutionRating.ratingScore < 4"></span>
+                <span class="fa fa-star" style="color: #ffd151" *ngIf="solutionRating.ratingScore >= 4"></span>
+            </a>
+            <span>&nbsp;&nbsp;</span>
+            <a (click)="ratingSolution(5)">
+                <span class="fa fa-star-o" *ngIf="solutionRating.ratingScore < 5"></span>
+                <span class="fa fa-star" style="color: #ffd151" *ngIf="solutionRating.ratingScore >= 5"></span>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <span>总评星级： </span>
+            {{solution.ratingAverage | number: '1.1-1'}}
+            <br>
+            <span>
+                    <span class="fa fa-star-o" *ngIf="solution.ratingAverage < 0.1"></span>
+                    <span class="fa fa-star-half" style="color: #ffd151" *ngIf="solution.ratingAverage >= 0.1 && solution.ratingAverage <= 0.9"></span>
+                    <span class="fa fa-star" style="color: #ffd151" *ngIf="solution.ratingAverage > 0.9"></span>
+                </span>
+            <span>&nbsp;&nbsp;</span>
+            <span>
+                    <span class="fa fa-star-o" *ngIf="solution.ratingAverage < 1.1"></span>
+                    <span class="fa fa-star-half" style="color: #ffd151" *ngIf="solution.ratingAverage >= 1.1 && solution.ratingAverage <= 1.9"></span>
+                    <span class="fa fa-star" style="color: #ffd151" *ngIf="solution.ratingAverage > 1.9"></span>
+                </span>
+            <span>&nbsp;&nbsp;</span>
+            <span>
+                    <span class="fa fa-star-o" *ngIf="solution.ratingAverage < 2.1"></span>
+                    <span class="fa fa-star-half" style="color: #ffd151" *ngIf="solution.ratingAverage >= 2.1 && solution.ratingAverage <= 2.9"></span>
+                    <span class="fa fa-star" style="color: #ffd151" *ngIf="solution.ratingAverage > 2.9"></span>
+                </span>
+            <span>&nbsp;&nbsp;</span>
+            <span>
+                    <span class="fa fa-star-o" *ngIf="solution.ratingAverage < 3.1"></span>
+                    <span class="fa fa-star-half" style="color: #ffd151" *ngIf="solution.ratingAverage >= 3.1 && solution.ratingAverage <= 3.9"></span>
+                    <span class="fa fa-star" style="color: #ffd151" *ngIf="solution.ratingAverage > 3.9"></span>
+                </span>
+            <span>&nbsp;&nbsp;</span>
+            <span>
+                    <span class="fa fa-star-o" *ngIf="solution.ratingAverage < 4.1"></span>
+                    <span class="fa fa-star-half" style="color: #ffd151" *ngIf="solution.ratingAverage >= 4.1 && solution.ratingAverage <= 4.9"></span>
+                    <span class="fa fa-star" style="color: #ffd151" *ngIf="solution.ratingAverage > 4.9"></span>
+                </span>
+        </div>
+        <div class="col-md-5">
+            总评价数： {{solution.ratingCount}}
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            总浏览量： {{solution.viewCount}}
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            总下载量： {{solution.downloadCount}}
+        </div>
+    </div>
+    <br>
+</mat-card>
+
+<mat-divider></mat-divider>
+<mat-divider></mat-divider>
+<mat-divider></mat-divider>
+
+<mat-card *ngIf="solutionRating">
+    <h4>评论留言<span style="font-size: 12px">&nbsp;&nbsp; {{solution.commentCount}}条</span></h4>
+    <mat-card *ngFor="let comment of comments">
+        <div class="row">
+            <div class="col-md-1">
+                <div style="text-align: right">
+                    <div>
+                        {{comment.userLogin}}
+                    </div>
+                    <div style="font-size: 10px">
+                        {{comment.createdDate | date:'yy-MM-dd HH:mm' }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-10">
+                <div style="font-size: 14px">
+                    {{comment.commentText}}
+                </div>
+                <br>
+                <div *ngIf="comment.isReplying">
+                    <mat-form-field style="width: 90%; font-size: 12px">
+                        <input matInput [(ngModel)]="comment.replyText" type="text" placeholder="回复：" maxlength=250>
+                    </mat-form-field>
+                    &nbsp;&nbsp;
+                    <button (click)="submitReplyComment(comment)" [disabled]="!comment.replyText">
+                        <span style="font-size: 12px">提交</span>
+                    </button>
+                </div>
+                <div style="font-size: 12px" *ngIf="comment.viewReply">
+                    <mat-card *ngFor="let reply1 of comment.replyComments" style="padding-top: 10px; padding-bottom: 10px">
+                        <div>
+                            <span>{{reply1.createdDate | date:'yy-MM-dd HH:mm'}}&nbsp;|&nbsp;{{reply1.userLogin}}</span>
+                            <div  class="pull-right">
+                                <a (click)="toggleViewComment(reply1)" matTooltip="展开回复" *ngIf="reply1.replyComments && reply1.replyComments.length > 0 && !reply1.viewReply">
+                                    <span class="fa fa-plus-square" style="color: #673ab7"></span>
+                                </a>
+                                <a (click)="toggleViewComment(reply1)" matTooltip="隐藏回复" *ngIf="reply1.replyComments && reply1.replyComments.length > 0 && reply1.viewReply">
+                                    <span class="fa fa-minus-square" style="color: #673ab7"></span>
+                                </a>
+                                &nbsp;&nbsp;
+                                <a (click)="toggleReplyComment(reply1)" matTooltip="回复" *ngIf="isViewing">
+                                    <span class="fa fa-reply" style="color: #673ab7"></span>
+                                </a>
+                                &nbsp;&nbsp;
+                                <a (click)="deleteReply(reply1, comment)" matTooltip="删帖" *ngIf="canDeleteComment(reply1)">
+                                    <span class="fa fa-trash" style="color: red"></span>
+                                </a>
+                            </div>
+                        </div>
+                        <div>
+                            {{reply1.commentText}}
+                        </div>
+                        <br>
+                        <div *ngIf="reply1.isReplying">
+                            <mat-form-field style="width: 90%; font-size: 12px">
+                                <input matInput [(ngModel)]="reply1.replyText" type="text" placeholder="回复：" maxlength=250>
+                            </mat-form-field>
+                            &nbsp;&nbsp;
+                            <button (click)="submitReplyComment(reply1)" [disabled]="!reply1.replyText">
+                                <span style="font-size: 12px">提交</span>
+                            </button>
+                        </div>
+                        <div *ngIf="reply1.viewReply">
+                            <mat-card *ngFor="let reply2 of reply1.replyComments" style="padding-top: 10px; padding-bottom: 10px">
+                                <div>
+                                    <span>{{reply2.createdDate | date:'yy-MM-dd HH:mm'}}&nbsp;|&nbsp;{{reply2.userLogin}}</span>
+                                    <div  class="pull-right">
+                                        <a (click)="deleteReply(reply2, reply1)" matTooltip="删帖" *ngIf="canDeleteComment(reply2)">
+                                            <span class="fa fa-trash" style="color: red"></span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div>
+                                    {{reply2.commentText}}
+                                </div>
+                            </mat-card>
+                        </div>
+                    </mat-card>
+                </div>
+            </div>
+            <div class="col-md-1">
+                <div>
+                    <a (click)="toggleViewComment(comment)" matTooltip="展开回复" *ngIf="comment.replyComments && comment.replyComments.length > 0 && !comment.viewReply">
+                        <span class="fa fa-plus-square" style="color: #673ab7"></span>
+                    </a>
+                    <a (click)="toggleViewComment(comment)" matTooltip="隐藏回复" *ngIf="comment.replyComments && comment.replyComments.length > 0 && comment.viewReply">
+                        <span class="fa fa-minus-square" style="color: #673ab7"></span>
+                    </a>
+                    &nbsp;&nbsp;
+                    <a (click)="toggleReplyComment(comment)" matTooltip="回复" *ngIf="isViewing">
+                        <span class="fa fa-reply" style="color: #673ab7"></span>
+                    </a>
+                    &nbsp;&nbsp;
+                    <a (click)="deleteComment(comment)" matTooltip="删帖" *ngIf="canDeleteComment(comment)">
+                        <span class="fa fa-trash" style="color: red"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </mat-card>
+    <br>
+    <div>
+        <mat-paginator #paginator
+                       [length]="totalItems"
+                       [pageSize]="itemsPerPage"
+                       [pageSizeOptions]="pageSizeOptions"
+                       (page)="reloadPage($event)"
+                       showFirstLastButtons>
+        </mat-paginator>
+    </div>
+    <br>
+    <div *ngIf="isViewing">
+        <mat-form-field style="width: 100%">
+            <textarea matInput style="height: 120px" [(ngModel)]="commentText" placeholder="发表评论" maxlength="512">
+            </textarea>
+        </mat-form-field>
+        <div style="text-align: right">
+            <button mat-raised-button color="primary" (click)="submitComment('0', 0)" [disabled]="!commentText">
+                <span>提交</span>
+            </button>
+        </div>
+    </div>
+    <br><br>
+</mat-card>

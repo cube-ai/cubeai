@@ -1,0 +1,159 @@
+<form [formGroup]="formGroup">
+    <div class="modal-header">
+        <h4>注册新用户</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" (click)="onClose()">
+            <span>&times;</span>
+        </button>
+    </div>
+
+    <div class="modal-body">
+        <mat-card *ngIf="status == 'begin'">
+            <div class="row">
+                <div class="col">
+                    <mat-form-field style="width: 100%">
+                        <input matInput formControlName="login" type="text" placeholder="用户帐号" maxlength="50">
+                        <mat-error *ngIf="(login.dirty || login.touched) && login.hasError('required')">
+                            必须输入用户帐号！
+                        </mat-error>
+                        <mat-error *ngIf="(login.dirty || login.touched) && login.hasError('maxlength')">
+                            用户帐号不能超过50个字符！
+                        </mat-error>
+                        <mat-error *ngIf="(login.dirty || login.touched) && login.hasError('pattern')">
+                            用户帐号只能包含字母、数字或者Email地址！
+                        </mat-error>
+                        <mat-error *ngIf="login.hasError('unique')">
+                            该帐号名已经存在，请另外选择一个！
+                        </mat-error>
+                        <mat-error *ngIf="login.pending">
+                            正在验证唯一性......
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col">
+                    <mat-form-field style="width: 100%">
+                        <input matInput formControlName="fullName" type="text" placeholder="真实姓名" maxlength="50">
+                        <mat-error *ngIf="(fullName.dirty || fullName.touched) && fullName.hasError('maxlength')">
+                            姓名长度不能超过50个字符！
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <mat-form-field style="width: 100%">
+                        <input matInput formControlName="email" type="email" placeholder="电子邮箱" maxlength="50">
+                        <mat-error *ngIf="(email.dirty || email.touched) && email.hasError('required')">
+                            必须输入电子邮箱地址！
+                        </mat-error>
+                        <mat-error *ngIf="(email.dirty || email.touched) && email.hasError('email')">
+                            电子邮箱地址无效！
+                        </mat-error>
+                        <mat-error *ngIf="(email.dirty || email.touched) && email.hasError('maxlength')">
+                            本字段长度不能超过50个字符！
+                        </mat-error>
+                        <mat-error *ngIf="(email.dirty || email.touched) && email.hasError('minlength')">
+                            本字段长度最少5个字符！
+                        </mat-error>
+                        <mat-error *ngIf="email.hasError('unique')">
+                            该email已存在，请另外选择一个！
+                        </mat-error>
+                        <mat-error *ngIf="email.pending">
+                            正在验证唯一性......
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col">
+                    <mat-form-field style="width: 100%">
+                        <input matInput formControlName="phone" type="tel" placeholder="手机号码"
+                               minlength=5 maxlength="20" pattern="^[0-9]*$">
+                        <mat-error *ngIf="(phone.dirty || phone.touched) && phone.hasError('required')">
+                            必须输入电话号码！
+                        </mat-error>
+                        <mat-error *ngIf="(phone.dirty || phone.touched) && phone.hasError('maxlength')">
+                            本字段长度不能超过20个字符！
+                        </mat-error>
+                        <mat-error *ngIf="(phone.dirty || phone.touched) && phone.hasError('minlength')">
+                            本字段长度最少5个字符！
+                        </mat-error>
+                        <mat-error *ngIf="(phone.dirty || phone.touched) && phone.hasError('pattern')">
+                            手机号码只能包含数字！
+                        </mat-error>
+                        <mat-error *ngIf="phone.hasError('unique')">
+                            该号码已存在，请另外选择一个！
+                        </mat-error>
+                        <mat-error *ngIf="phone.pending">
+                            正在验证唯一性......
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <mat-form-field style="width: 100%">
+                        <input matInput formControlName="password" type="password" placeholder="密码" (change)="confirmPassword.setValue('')">
+                        <mat-error *ngIf="password.value && password.hasError('passwordStrong')">
+                            {{password.errors.passwordStrong.value}}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col">
+                    <mat-form-field style="width: 100%">
+                        <input matInput formControlName="confirmPassword" type="password" placeholder="再次输入密码">
+                        <mat-error *ngIf="confirmPassword.value && confirmPassword.hasError('passwordMatch')">
+                            {{confirmPassword.errors.passwordMatch.value}}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+        </mat-card>
+
+        <mat-card *ngIf="status == 'success' || status == 'activate_fail'">
+            <div class="alert alert-success">
+                <p *ngIf="!data.activate">帐号注册成功！帐号激活密钥已发送至你注册时提供的电子邮箱： {{email.value}}</p>
+                <p>请在下面输入框中输入激活密钥来激活帐号，只有激活后帐号才能正常登录...</p>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <mat-form-field style="width: 100%">
+                        <input matInput formControlName="activateKey" type="text" placeholder="帐号激活密钥" maxlength="50">
+                        <mat-error *ngIf="!activateKey.value">
+                            请输入激活密钥...
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="alert alert-danger" *ngIf="status == 'activate_fail'">
+                <p>帐号激活失败，请检查激活密钥是否有效...</p>
+            </div>
+        </mat-card>
+
+        <mat-card *ngIf="status == 'fail'">
+            <div class="alert alert-danger">
+                <p>发送注册信息失败，请检查用户名或邮箱地址是否已注册...</p>
+            </div>
+        </mat-card>
+
+        <mat-card *ngIf="status == 'activate_success'">
+            <div class="alert alert-success">
+                <p>帐号激活成功，你可以使用注册时提供的帐号名和密码登录了...</p>
+            </div>
+        </mat-card>
+    </div>
+
+    <div class="modal-footer">
+        <button mat-raised-button (click)="onClose()" *ngIf="status !== 'activate_success'">
+            <span class="fa fa-ban">&nbsp;取消</span>
+        </button>
+        <button mat-raised-button (click)="onClose()" *ngIf="status === 'activate_success'">
+            <span class="fa fa-check-circle">&nbsp;确定</span>
+        </button>
+        <button mat-raised-button color="primary" (click)="onRegister()" [disabled]="formGroup.invalid" *ngIf="status === 'begin'">
+            <span class="fa fa-check-circle">&nbsp;注册</span>
+        </button>
+        <button mat-raised-button color="primary" (click)="onActivate()" [disabled]="!activateKey.value" *ngIf="status === 'success' || status === 'activate_fail'">
+            <span class="fa fa-check-circle">&nbsp;激活</span>
+        </button>
+    </div>
+
+</form>
+

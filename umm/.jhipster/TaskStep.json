@@ -1,0 +1,52 @@
+{
+    "fluentMethods": true,
+    "relationships": [],
+    "fields": [
+        {
+            "fieldName": "taskUuid",
+            "javadoc": "步骤所属任务的uuid。",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "stepName",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "stepStatus",
+            "javadoc": "步骤状态，直接用中文字符串表示。目前包括：\n执行，成功，失败",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "stepProgress",
+            "javadoc": "步骤进度，取值为0-100的整数",
+            "fieldType": "Integer",
+            "fieldValidateRules": [
+                "max"
+            ],
+            "fieldValidateRulesMax": 100
+        },
+        {
+            "fieldName": "description",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "maxlength"
+            ],
+            "fieldValidateRulesMaxlength": 512
+        },
+        {
+            "fieldName": "stepDate",
+            "fieldType": "Instant"
+        }
+    ],
+    "changelogDate": "20190225070754",
+    "javadoc": "任务步骤\n一个异步任务有多个步骤组成。每个步骤执行过程中，在该数据表中添加若干条步骤记录，其中的stepProgress依次递增。前端取出最新一条记录值来更新进度显示",
+    "entityTableName": "task_step",
+    "dto": "no",
+    "pagination": "no",
+    "service": "no",
+    "jpaMetamodelFiltering": false,
+    "microserviceName": "umm"
+}

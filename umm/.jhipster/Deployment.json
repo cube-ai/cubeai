@@ -1,0 +1,82 @@
+{
+    "fluentMethods": true,
+    "relationships": [],
+    "fields": [
+        {
+            "fieldName": "uuid",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "deployer",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "solutionUuid",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "solutionName",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "solutionAuthor",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "k8sPort",
+            "fieldType": "Integer"
+        },
+        {
+            "fieldName": "isPublic",
+            "fieldType": "Boolean"
+        },
+        {
+            "fieldName": "status",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "createdDate",
+            "fieldType": "Instant"
+        },
+        {
+            "fieldName": "modifiedDate",
+            "fieldType": "Instant"
+        },
+        {
+            "fieldName": "pictureUrl",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "maxlength"
+            ],
+            "fieldValidateRulesMaxlength": 512
+        },
+        {
+            "fieldName": "modelType",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "toolkitType",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "callCount",
+            "fieldType": "Long"
+        },
+        {
+            "fieldName": "demoUrl",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "maxlength"
+            ],
+            "fieldValidateRulesMaxlength": 512
+        }
+    ],
+    "changelogDate": "20190506111337",
+    "javadoc": "模型部署实例（能力）",
+    "entityTableName": "deployment",
+    "dto": "no",
+    "pagination": "no",
+    "service": "no",
+    "jpaMetamodelFiltering": false,
+    "microserviceName": "umm"
+}

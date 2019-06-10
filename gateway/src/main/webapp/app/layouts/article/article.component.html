@@ -1,0 +1,10 @@
+<div class="row justify-content-center" style="margin-top: 40px">
+    <mat-card *ngIf="content"  style="width: 100%">
+        <button mat-icon-button (click)="goBack()" matTooltip="返回" style="float: right">
+            <mat-icon color="primary">arrow_back</mat-icon>
+        </button>
+        <div [innerHTML]="content | html">
+        </div>
+    </mat-card>
+</div>
+

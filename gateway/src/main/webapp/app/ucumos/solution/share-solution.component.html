@@ -1,0 +1,44 @@
+<form [formGroup]="formGroup">
+    <div class="modal-header">
+        <h4>模型分享</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" (click)="onClose()">
+            <span>&times;</span>
+        </button>
+    </div>
+
+    <div class="modal-body">
+        <mat-card>
+            <div class="row justify-content-center">
+                    <mat-form-field style="width: 100%">
+                        <input matInput formControlName="toUserLogin" type="text" placeholder="好友用户帐号" maxlength="50">
+                        <mat-error *ngIf="(toUserLogin.dirty || toUserLogin.touched) && toUserLogin.hasError('required')">
+                            必须输入好友用户帐号！
+                        </mat-error>
+                        <mat-error *ngIf="(toUserLogin.dirty || toUserLogin.touched) && toUserLogin.hasError('maxlength')">
+                            用户帐号不能超过50个字符！
+                        </mat-error>
+                        <mat-error *ngIf="(toUserLogin.dirty || toUserLogin.touched) && toUserLogin.hasError('pattern')">
+                            用户帐号只能包含字母、数字或者Email地址！
+                        </mat-error>
+                        <mat-error *ngIf="toUserLogin.hasError('noExist')">
+                            该帐号名不存在，请另外选择一个！
+                        </mat-error>
+                        <mat-error *ngIf="toUserLogin.pending">
+                            正在验证唯一性......
+                        </mat-error>
+                    </mat-form-field>
+            </div>
+        </mat-card>
+    </div>
+
+    <div class="modal-footer">
+        <button mat-raised-button (click)="onClose()">
+            <span class="fa fa-ban">&nbsp;取消</span>
+        </button>
+        <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="formGroup.invalid">
+            <span class="fa fa-share">&nbsp;分享</span>
+        </button>
+    </div>
+
+</form>
+

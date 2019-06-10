@@ -1,0 +1,78 @@
+<mat-card class="page-title">
+    <span>我的任务</span>
+
+    <div class="btn-toolbar float-right" role="toolbar">
+        <button mat-icon-button (click)="refresh()" matTooltip="刷新">
+            <mat-icon color="primary">refresh</mat-icon>
+        </button>
+    </div>
+</mat-card>
+
+<mat-card>
+    <mat-form-field >
+        <mat-select [(ngModel)]="searchTaskStatus" (selectionChange)="refresh()">
+            <mat-option value="all">
+                全部
+            </mat-option>
+            <mat-option value="等待调度">
+                等待调度
+            </mat-option>
+            <mat-option value="正在执行">
+                正在执行
+            </mat-option>
+            <mat-option value="成功">
+                成功
+            </mat-option>
+            <mat-option value="失败">
+                失败
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
+                <th jhiSortBy="id"><span>id</span> <span class="fa fa-sort"></span></th>
+                <th><span>uuid</span></th>
+                <th jhiSortBy="taskType"><span>任务类型</span> <span class="fa fa-sort"></span></th>
+                <th><span>任务名称</span></th>
+                <th jhiSortBy="taskStatus"><span>任务状态</span> <span class="fa fa-sort"></span></th>
+                <th><span>任务进度</span></th>
+                <th><span>进度描述</span></th>
+                <th jhiSortBy="startDate"><span>开始时间</span> <span class="fa fa-sort"></span></th>
+                <th jhiSortBy="endDate"><span>结束时间</span> <span class="fa fa-sort"></span></th>
+            </tr>
+            </thead>
+            <tbody *ngIf="tasks">
+            <tr *ngFor="let task of tasks; trackBy: trackIdentity">
+                <td>{{task.id}}</td>
+                <td><a (click)="viewTaskDetails(task)" matTooltip="点击查看任务执行详情...">{{task.uuid}}</a></td>
+                <td>{{task.taskType}}</td>
+                <td><a (click)="viewTaskDetails(task)" matTooltip="点击查看任务执行详情...">{{task.taskName}}</a></td>
+                <td>
+                    <span *ngIf="task.taskStatus === '等待调度'" style="color: grey">{{task.taskStatus}}</span>
+                    <span *ngIf="task.taskStatus === '正在执行'" style="color: blue">{{task.taskStatus}}</span>
+                    <span *ngIf="task.taskStatus === '成功'" style="color: green">{{task.taskStatus}}</span>
+                    <span *ngIf="task.taskStatus === '失败'" style="color: red">{{task.taskStatus}}</span>
+                </td>
+                <td>{{task.taskProgress}}%</td>
+                <td>{{task.description}}</td>
+                <td>{{task.startDate | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                <td>{{task.endDate | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <br>
+    <div>
+        <mat-paginator #paginator
+                       [length]="totalItems"
+                       [pageSize]="itemsPerPage"
+                       [pageSizeOptions]="pageSizeOptions"
+                       (page)="reloadPage($event)"
+                       showFirstLastButtons>
+        </mat-paginator>
+    </div>
+</mat-card>

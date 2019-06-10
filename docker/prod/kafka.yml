@@ -1,0 +1,11 @@
+version: '2'
+services:
+    kafka:
+        image: wurstmeister/kafka:1.0.0
+        environment:
+            KAFKA_ADVERTISED_HOST_NAME: kafka
+            KAFKA_ADVERTISED_PORT: 9092
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+            KAFKA_CREATE_TOPICS: "topic-jhipster:1:1"
+        #ports:
+        #    - 9092:9092  # Uncomment to make Kafka available externally

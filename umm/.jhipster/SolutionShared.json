@@ -1,0 +1,51 @@
+{
+    "fluentMethods": true,
+    "relationships": [],
+    "fields": [
+        {
+            "fieldName": "fromUserLogin",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "toUserLogin",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "solutionUuid",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "solutionName",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "solutionAuthor",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "solutionCreatedDate",
+            "fieldType": "Instant"
+        },
+        {
+            "fieldName": "shareDate",
+            "fieldType": "Instant"
+        }
+    ],
+    "changelogDate": "20190225070752",
+    "javadoc": "模型分享",
+    "entityTableName": "solution_shared",
+    "dto": "no",
+    "pagination": "no",
+    "service": "no",
+    "jpaMetamodelFiltering": false,
+    "microserviceName": "umm"
+}
