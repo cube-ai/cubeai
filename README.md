@@ -87,7 +87,7 @@ CubeAI致力于在AI算法开发者和AI模型的实际使用者之间架设一�
             # apt-get update
             # apt-get install yarn
         
-- 代码脚手架工具
+- 微服务代码脚手架工具
 
     - [JHipster](https://www.jhipster.tech)
     
