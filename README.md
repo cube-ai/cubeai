@@ -13,7 +13,7 @@
 
 ## 平台简介
 
-**CubeAI ★ 智立方** 是参考 [Linux AI基金会(LFAI)](https://lfai.foundation/)开源项目[Acumos](https://www.acumos.org)的设计理念，由中国联通网络技术研究院完全自主开发的集AI模型开发、模型共享和能力开放等功能于一体的开源网络AI平台。
+**CubeAI ★ 智立方** 是参考 [Linux AI基金会（LFAI）](https://lfai.foundation/)开源项目[Acumos](https://www.acumos.org)的设计理念，由中国联通网络技术研究院完全自主开发的集AI模型开发、模型共享和能力开放等功能于一体的开源网络AI平台。
 
 CubeAI平台目前提供AI模型打包、模型导入、容器化封装、模型编排、模型发布、模型搜索、模型部署、AI能力开放、能力编排、能力演示等功能，支持AI模型的docker容器化封装和微服务化部署。
 
