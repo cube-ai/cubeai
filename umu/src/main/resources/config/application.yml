@@ -67,7 +67,7 @@ spring:
         mode: XHTML
     http:
         multipart:
-            enabled: true  # 为了使用CommonsMultipartFile，这里必须设为true （UTNA中必须为false，这里又必须为true，奇怪！！）
+            enabled: true  # 为了使用CommonsMultipartFile，这里必须设为true
             maxFileSize: 100Mb
             maxRequestSize: 1000MB
     kafka:
