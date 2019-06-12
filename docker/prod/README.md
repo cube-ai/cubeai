@@ -25,7 +25,7 @@
 
 5. 构建umo docker:
 
-        cd ~/cubeai/umu
+        cd ~/cubeai/umo
         ./mvnw clean verify -Pprod dockerfile:build -DskipTests
 
 6. 构建umd docker:

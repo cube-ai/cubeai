@@ -8,7 +8,7 @@
 
     打开一个terminal窗口，运行：
 
-        cd ~/cubeai/docker/prod
+        cd ~/cubeai/docker/dev
         docker-compose up
         
 2. 在集成开发环境（例如Intellij IDEA）中分别打开uaa, gateway, umm, umu, umo, umd, ability等微服务工程，编译并运行。参见各工程目录下的README文件。

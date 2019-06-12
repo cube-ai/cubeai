@@ -8,7 +8,7 @@ umu使用Consul来进行微服务注册和发现，以及集中的配置管理�
 
 umu使用uaa来进行用户管理（用户认证、授权、基于角色的访问控制等）。在umu启动时，它会尝试与uaa建立连接。如果uaa未就绪，则用户无法成功登录并执行相应的业务操作。
 
-本微服务初始代码框架使用开源工具Jhipster(http://www.jhipster.tech)生成。
+本微服务初始代码框架使用开源工具Jhipster( https://www.jhipster.tech )生成。
 
 ## 基本配置
 
