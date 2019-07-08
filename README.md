@@ -1,7 +1,7 @@
 # [![](./cubeai-logo.jpg)](https://cubeai.dimpt.com)
 
     版权所有 © 2019 中国联通网络技术研究院
-    https://cubeai.dimpt.com (即将于2019年7月初开放)
+    https://cubeai.dimpt.com
 
 [![GitHub releases](https://img.shields.io/github/release/cube-ai/cubeai.svg)](https://github.com/cube-ai/cubeai/releases)
 [![GitHub downloads](https://img.shields.io/github/downloads/cube-ai/cubeai/total.svg)](https://github.com/cube-ai/cubeai/releases)
