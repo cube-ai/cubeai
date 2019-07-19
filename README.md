@@ -1,4 +1,4 @@
-# [![](https://github.com/cube-ai/cubeai/blob/master/cubeai-logo.jpg)](https://cubeai.dimpt.com)
+# [![](https://code.ihub.org.cn/projects/207/repository/revisions/master/entry/cubeai-logo.jpg)](https://cubeai.dimpt.com)
 
 版权所有 © 2019 中国联通网络技术研究院
 
@@ -22,7 +22,7 @@ CubeAI致力于在AI模型开发者和模型的实际使用者之间架设一条
 
 ## 软件架构
 
-![](./https://github.com/cube-ai/cubeai/blob/master/cubeai-soft.jpg)
+![](https://code.ihub.org.cn/projects/207/repository/revisions/master/entry/cubeai-soft.jpg)
 
 本系统AI模型共享平台（AI商城）和AI能力开放平台基于[Spring Cloud](https://spring.io/projects/spring-cloud)微服务架构进行开发。前端采用[Angular 6.0](https://angular.io/)框架实现，编程语言主要为TypeScript和HTML；后端采用[Spring Boot](https://spring.io/projects/spring-boot)框架实现，编程语言主要为Java。部分微服务初始代码框架采用[Jhipster](https://www.jhipster.tech/)代码脚手架工具生成。
 
