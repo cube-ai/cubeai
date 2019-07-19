@@ -16,7 +16,7 @@ CubeAI致力于在AI模型开发者和模型的实际使用者之间架设一条
 
 ## 系统架构
 
-![](https://github.com/cube-ai/cubeai/blob/master/cubeai-auch.jpg)
+![](https://code.ihub.org.cn/projects/207/repository/revisions/master/entry/cubeai-arch.jpg)
 
 本系统由AI建模、AI模型共享（AI商城）和AI能力开放三大平台组成。其中AI建模目前暂采用线下形式，使用Acumos提供的客户端工具来实现模型打包。
 
