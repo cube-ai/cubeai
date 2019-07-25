@@ -82,9 +82,9 @@ public class UaaConfiguration extends AuthorizationServerConfigurerAdapter imple
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
                 .authorizeRequests()
-                .antMatchers("/api/articles").permitAll()
-                .antMatchers("/api/verify-codes").permitAll()
-                .antMatchers("/api/users/exist/**").permitAll()
+                .antMatchers("/api/articles").permitAll()  // huolongshe, 20190510
+                .antMatchers("/api/verify-codes").permitAll()  // huolongshe, 20190411
+                .antMatchers("/api/users/exist/**").permitAll()  // huolongshe, 20181017
                 .antMatchers("/api/register").permitAll()
                 .antMatchers("/api/activate").permitAll()
                 .antMatchers("/api/authenticate").permitAll()

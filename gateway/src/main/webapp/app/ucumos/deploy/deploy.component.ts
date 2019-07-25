@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 import {ActivatedRoute, Router} from '@angular/router';
-import {SnackBarService} from '../../shared';
+import {GlobalService, SnackBarService} from '../../shared';
 import {Principal, User} from '../../account';
 import {HttpClient} from '@angular/common/http';
 import {CookieService} from 'ngx-cookie';
@@ -40,6 +40,7 @@ export class DeployComponent implements OnInit, OnDestroy {
     pullingTaskSteps = false;
 
     constructor(
+        private globalService: GlobalService,
         private router: Router,
         private route: ActivatedRoute,
         private location: Location,
@@ -64,6 +65,10 @@ export class DeployComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        if (window.screen.width < 960) {
+            this.globalService.closeSideNav(); // 手机屏幕默认隐藏sideNav
+        }
+
         this.currentUser = this.principal.getCurrentAccount();
         this.deployMode = this.canDeployToPublic() ? 'public' : 'private';
 

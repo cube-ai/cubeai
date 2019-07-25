@@ -30,11 +30,11 @@ hystrix:
             execution:
                 isolation:
                     thread:
-                        timeoutInMilliseconds: 20000
+                        timeoutInMilliseconds: 60000
 
 ribbon:
-    ReadTimeout: 10000
-    ConnectTimeout: 10000
+    ReadTimeout: 60000
+    ConnectTimeout: 30000
 
 management:
     security:
@@ -67,7 +67,7 @@ spring:
         mode: XHTML
     http:
         multipart:
-            maxFileSize: 100Mb
+            maxFileSize: 900MB
             maxRequestSize: 1000MB
 security:
     basic:

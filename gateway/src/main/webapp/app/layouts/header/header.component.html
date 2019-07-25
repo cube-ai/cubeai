@@ -1,6 +1,6 @@
-<mat-toolbar class="header header-color">
+<mat-toolbar class="header header-color" id="divDesktop">
     <div *ngIf="isAuthenticated()">
-        <button mat-icon-button (click)="toggleSideNav()" style="margin-top: -6px">
+        <button mat-icon-button (click)="toggleSideNav()">
             <mat-icon>menu</mat-icon>
         </button>
         <span>&nbsp;&nbsp;</span>
@@ -10,37 +10,44 @@
     <span class="header-spacer"></span>
 
     <button mat-icon-button (click)="navigateToUcumos()" *ngIf="isAuthenticated()">
-        <span><i class="fa fa-fw fa-bank"></i></span>
+        <span><i class="fa fa-fw fa-cubes"></i></span>
         <span>&nbsp;AI 商城</span>
     </button>
 
-    <span class="header-split"></span>
-    <span class="header-split"></span>
+    <span class="header-split" *ngIf="isAuthenticated()"></span>
+    <span class="header-split" *ngIf="isAuthenticated()"></span>
     <button mat-icon-button (click)="navigateToAiAbility()" *ngIf="isAuthenticated()">
         <span><i class="fa fa-fw fa-mixcloud"></i></span>
         <span>&nbsp;AI能力开放</span>
     </button>
 
-    <span class="header-split"></span>
-    <span class="header-split"></span>
-    <button mat-icon-button *ngIf="isAuthenticated() && hasAuthority('ROLE_ADMIN')" (click)="navigateToAdmin()">
-        <span><i class="fa fa-fw fa-gears" aria-hidden="true"></i></span>
+    <span class="header-split" *ngIf="isAuthenticated()"></span>
+    <span class="header-split" *ngIf="isAuthenticated()"></span>
+    <button mat-icon-button *ngIf="isAuthenticated()"
+            class="dropdown-toggle"
+            [matMenuTriggerFor]="moreApplicationMenu">
+        <span><i class="fa fa-fw fa-futbol-o"></i></span>
+        <span>&nbsp;专题应用</span>
+    </button>
+
+    <span class="header-split" *ngIf="isAuthenticated() && (hasAuthority('ROLE_ADMIN') || hasAuthority('ROLE_CONTENT'))"></span>
+    <span class="header-split" *ngIf="isAuthenticated() && hasAuthority('ROLE_ADMIN') || hasAuthority('ROLE_CONTENT')"></span>
+    <button mat-icon-button *ngIf="isAuthenticated() && hasAuthority('ROLE_ADMIN') || hasAuthority('ROLE_CONTENT')" (click)="navigateToAdmin()">
+        <span><i class="fa fa-fw fa-gears"></i></span>
         <span>&nbsp;系统管理</span>
     </button>
 
-    <span class="header-split"></span>
-    <span class="header-split"></span>
-    <span class="header-split"></span>
+    <span class="header-split" *ngIf="isAuthenticated()"></span>
+    <span class="header-split" *ngIf="isAuthenticated()"></span>
+    <span class="header-split" *ngIf="isAuthenticated()"></span>
     <button mat-icon-button (click)="navigateToHelp()" matTooltip="帮助">
         <mat-icon>help_outline</mat-icon>
     </button>
 
     <span class="header-split" *ngIf="isAuthenticated()"></span>
-    <div *ngIf="isAuthenticated()">
-        <button mat-icon-button (click)="navigateToMessage()" matTooltip="站内消息">
-            <mat-icon matBadge="{{newMsgCount}}" matBadgePosition="above after" matBadgeSize="small">notifications_none</mat-icon>
-        </button>
-    </div>
+    <button mat-icon-button (click)="navigateToMessage()" matTooltip="站内消息" *ngIf="isAuthenticated()">
+        <mat-icon matBadge="{{newMsgCount}}" matBadgePosition="above after" matBadgeSize="small">notifications_none</mat-icon>
+    </button>
 
     <span class="header-split"></span>
     <div [ngSwitch]="isAuthenticated()">
@@ -87,6 +94,115 @@
         <button *ngSwitchCase="false" mat-menu-item (click)="requestResetPassword()">
             <span><i class="fa fa-fw fa-key"></i></span>
             <span>&nbsp;找回密码</span>
+        </button>
+    </ng-template>
+</mat-menu>
+
+<mat-menu #moreApplicationMenu="matMenu" [overlapTrigger]="false">
+    <ng-template matMenuContent>
+        <button mat-menu-item (click)="navigateToAiTraining()" *ngIf="isAuthenticated()">
+            <span><i class="fa fa-fw fa-retweet"></i></span>
+            <span>&nbsp;开发训练</span>
+        </button>
+        <button mat-menu-item (click)="navigateToAiSolution()" *ngIf="isAuthenticated()">
+            <span><i class="fa fa-fw fa-suitcase"></i></span>
+            <span>&nbsp;解决方案</span>
+        </button>
+        <button mat-menu-item (click)="navigateToAiResource()" *ngIf="isAuthenticated()">
+            <span><i class="fa fa-fw fa-empire"></i></span>
+            <span>&nbsp;资源中心</span>
+        </button>
+       <button mat-menu-item (click)="navigateToAiPartner()" *ngIf="isAuthenticated()">
+            <span><i class="fa fa-fw fa-universal-access"></i></span>
+            <span>&nbsp;合作伙伴</span>
+        </button>
+    </ng-template>
+</mat-menu>
+
+<mat-toolbar class="header header-color" id="divMobile">
+    <div *ngIf="isAuthenticated()">
+        <button mat-icon-button (click)="toggleSideNav()">
+            <mat-icon>menu</mat-icon>
+        </button>
+        <span>&nbsp;&nbsp;</span>
+    </div>
+    <img src="../../../content/images/cube-32.png">
+    <span>&nbsp;&nbsp;CubeAI&nbsp;★&nbsp;智立方</span>
+    <span class="header-spacer"></span>
+
+    <button mat-icon-button *ngIf="isAuthenticated()"
+            [matMenuTriggerFor]="mobileAppsMenu">
+        <mat-icon>apps</mat-icon>
+    </button>
+    &nbsp;
+    <button mat-icon-button
+            [matMenuTriggerFor]="mobileAccountMenu">
+        <mat-icon>account_circle</mat-icon>
+    </button>
+</mat-toolbar>
+
+<mat-menu [ngSwitch]="isAuthenticated()" #mobileAccountMenu="matMenu" [overlapTrigger]="false">
+    <ng-template matMenuContent>
+        <button *ngSwitchCase="true" mat-menu-item (click)="userSettings()">
+            <span><i class="fa fa-fw fa-vcard"></i></span>
+            <span>&nbsp;个人信息</span>
+        </button>
+        <button *ngSwitchCase="true" mat-menu-item (click)="changePassword()">
+            <span><i class="fa fa-fw fa-key"></i></span>
+            <span>&nbsp;修改密码</span>
+        </button>
+        <button *ngSwitchCase="true" mat-menu-item (click)="navigateToHelp()">
+            <span><i class="fa fa-fw fa-question-circle"></i></span>
+            <span>&nbsp;帮助</span>
+        </button>
+        <button *ngSwitchCase="true" mat-menu-item (click)="navigateToAboutMe()">
+            <span><i class="fa fa-fw fa-whatsapp"></i></span>
+            <span>&nbsp;关于</span>
+        </button>
+        <button *ngSwitchCase="true" mat-menu-item (click)="logout()">
+            <span><i class="fa fa-fw fa-sign-out"></i></span>
+            <span>&nbsp;退出</span>
+        </button>
+        <button *ngSwitchCase="false" mat-menu-item (click)="login()">
+            <span><i class="fa fa-fw fa-sign-in" aria-hidden="true"></i></span>
+            <span>&nbsp;登录</span>
+        </button>
+        <button *ngSwitchCase="false" mat-menu-item (click)="registerUser()">
+            <span><i class="fa fa-fw fa-user-plus"></i></span>
+            <span>&nbsp;注册</span>
+        </button>
+        <button *ngSwitchCase="false" mat-menu-item (click)="activateUser()">
+            <span><i class="fa fa-fw fa-fire"></i></span>
+            <span>&nbsp;激活</span>
+        </button>
+        <button *ngSwitchCase="false" mat-menu-item (click)="requestResetPassword()">
+            <span><i class="fa fa-fw fa-key"></i></span>
+            <span>&nbsp;找回密码</span>
+        </button>
+        <button *ngSwitchCase="false" mat-menu-item (click)="navigateToHelp()">
+            <span><i class="fa fa-fw fa-question-circle"></i></span>
+            <span>&nbsp;帮助</span>
+        </button>
+        <button *ngSwitchCase="false" mat-menu-item (click)="navigateToAboutMe()">
+            <span><i class="fa fa-fw fa-whatsapp"></i></span>
+            <span>&nbsp;关于</span>
+        </button>
+    </ng-template>
+</mat-menu>
+
+<mat-menu #mobileAppsMenu="matMenu" [overlapTrigger]="false">
+    <ng-template matMenuContent>
+        <button mat-menu-item (click)="navigateToUcumos()">
+            <span><i class="fa fa-fw fa-cubes"></i></span>
+            <span>&nbsp;AI 商城</span>
+        </button>
+        <button mat-menu-item (click)="navigateToAiAbility()">
+            <span><i class="fa fa-fw fa-mixcloud"></i></span>
+            <span>&nbsp;AI能力开放</span>
+        </button>
+        <button mat-menu-item (click)="navigateToAdmin()" *ngIf="hasAuthority('ROLE_ADMIN')">
+            <span><i class="fa fa-fw fa-gears"></i></span>
+            <span>&nbsp;系统管理</span>
         </button>
     </ng-template>
 </mat-menu>

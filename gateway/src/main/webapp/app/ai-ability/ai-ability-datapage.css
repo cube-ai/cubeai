@@ -33,7 +33,6 @@ td {
     font-size: 10px;
 }
 
-
 .solution-card {
     max-width: 240px;
     max-height: 350px;
@@ -41,14 +40,13 @@ td {
 }
 
 .solution-card-header {
-    height: 55px;
+    height: 70px;
 }
 
 .solution-card-title {
     width: 180px;
-    font-weight: bold;
-    margin-top: -15px;
-    margin-bottom: 5px;
+    font-size: 16px;
+    margin-bottom: 8px;
 }
 
 .solution-card-image {
@@ -56,7 +54,7 @@ td {
 }
 
 .solution-card-content {
-    height: 75px;
+    height: 60px;
 }
 
 /* Rating */
@@ -70,3 +68,8 @@ td {
     background:url('../../content/images/star_org.png') no-repeat;
 }
 
+
+@media(max-width:960px)
+{
+    #divDesktop {display: none}
+}

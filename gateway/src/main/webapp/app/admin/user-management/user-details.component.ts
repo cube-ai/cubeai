@@ -74,80 +74,84 @@ export class UserDetailsComponent implements OnInit {
 
     ngOnInit() {
         this.authorities = [];
-        this.userService.getAuthorities().forEach((authorityName) => {
-            const formControl = new FormControl(false);
-            this.authorities.push(new Authority(authorityName, formControl));
-            this.authoritySelections.push(formControl);
-        });
+        this.userService.getAuthorities().subscribe(
+            (res1) => {
+                res1.body.forEach((authorityName) => {
+                    const formControl = new FormControl(false);
+                    this.authorities.push(new Authority(authorityName, formControl));
+                    this.authoritySelections.push(formControl);
+                });
 
-        this.authorities.forEach((authority) => {
-            if (authority.name.includes('UTN+A') && authority.name !== 'ROLE_UTN+A.系统管理员') {
-                authority.selected.disable();
+                this.authorities.forEach((authority) => {
+                    if (authority.name.includes('UTN+A') && authority.name !== 'ROLE_UTN+A.系统管理员') {
+                        authority.selected.disable();
+                    }
+                });
+
+                switch (this.data.operation) {
+                    case 'create':
+                        this.createNew = true;
+                        this.editUser = false;
+                        this.viewUser = false;
+                        this.user = new User();
+                        this.login.setAsyncValidators([this.uniqueLoginValidator.validate()]);
+                        this.email.setAsyncValidators([this.uniqueEmailValidator.validate()]);
+                        this.phone.setAsyncValidators([this.uniquePhoneValidator.validate()]);
+                        this.password.setValidators([Validators.required, Validators.maxLength(50), Validators.minLength(4)]);
+                        this.activated.disable();
+                        break;
+                    case 'edit':
+                        this.createNew = false;
+                        this.editUser = true;
+                        this.viewUser = false;
+                        this.userService.find(this.data.login).subscribe((res) => {
+                            this.user = res.body;
+                            this.login.setValue(this.user.login);
+                            this.login.disable();
+                            this.fullName.setValue(this.user.fullName);
+                            this.email.setValue(this.user.email);
+                            this.phone.setValue(this.user.phone);
+                            this.password.setValue(null);
+                            this.activated.setValue(this.user.activated);
+                            this.authorities.forEach((authority) => {
+                                if (this.user.authorities.includes(authority.name)) {
+                                    authority.selected.setValue(true);
+                                }
+                            });
+                            this.email.setAsyncValidators([this.uniqueEmailValidator.validate(this.user.email)]);
+                            this.phone.setAsyncValidators([this.uniquePhoneValidator.validate(this.user.phone)]);
+                        });
+                        break;
+                    case 'view':
+                        this.createNew = false;
+                        this.editUser = false;
+                        this.viewUser = true;
+                        this.formGroup.disable();
+                        this.userService.find(this.data.login).subscribe((res) => {
+                            this.user = res.body;
+                            this.login.setValue(this.user.login);
+                            this.fullName.setValue(this.user.fullName);
+                            this.email.setValue(this.user.email);
+                            this.phone.setValue(this.user.phone);
+                            this.activated.setValue(this.user.activated);
+                            this.authorities.forEach((authority) => {
+                                if (this.user.authorities.includes(authority.name)) {
+                                    authority.selected.setValue(true);
+                                }
+                            });
+
+                            if (this.user.createdDate) {
+                                this.formGroup.get('createdDate').setValue(this.user.createdDate.toString());
+                            }
+                            if (this.user.lastModifiedDate) {
+                                this.formGroup.get('lastModifiedDate').setValue(this.user.lastModifiedDate.toString());
+                            }
+                            this.formGroup.get('lastModifiedBy').setValue(this.user.lastModifiedBy);
+                        });
+                        break;
+                }
             }
-        });
-
-        switch (this.data.operation) {
-            case 'create':
-                this.createNew = true;
-                this.editUser = false;
-                this.viewUser = false;
-                this.user = new User();
-                this.login.setAsyncValidators([this.uniqueLoginValidator.validate()]);
-                this.email.setAsyncValidators([this.uniqueEmailValidator.validate()]);
-                this.phone.setAsyncValidators([this.uniquePhoneValidator.validate()]);
-                this.password.setValidators([Validators.required, Validators.maxLength(50), Validators.minLength(4)]);
-                this.activated.disable();
-                break;
-            case 'edit':
-                this.createNew = false;
-                this.editUser = true;
-                this.viewUser = false;
-                this.userService.find(this.data.login).subscribe((res) => {
-                    this.user = res.body;
-                    this.login.setValue(this.user.login);
-                    this.login.disable();
-                    this.fullName.setValue(this.user.fullName);
-                    this.email.setValue(this.user.email);
-                    this.phone.setValue(this.user.phone);
-                    this.password.setValue(null);
-                    this.activated.setValue(this.user.activated);
-                    this.authorities.forEach((authority) => {
-                        if (this.user.authorities.includes(authority.name)) {
-                            authority.selected.setValue(true);
-                        }
-                    });
-                    this.email.setAsyncValidators([this.uniqueEmailValidator.validate(this.user.email)]);
-                    this.phone.setAsyncValidators([this.uniquePhoneValidator.validate(this.user.phone)]);
-                });
-                break;
-            case 'view':
-                this.createNew = false;
-                this.editUser = false;
-                this.viewUser = true;
-                this.formGroup.disable();
-                this.userService.find(this.data.login).subscribe((res) => {
-                    this.user = res.body;
-                    this.login.setValue(this.user.login);
-                    this.fullName.setValue(this.user.fullName);
-                    this.email.setValue(this.user.email);
-                    this.phone.setValue(this.user.phone);
-                    this.activated.setValue(this.user.activated);
-                    this.authorities.forEach((authority) => {
-                        if (this.user.authorities.includes(authority.name)) {
-                            authority.selected.setValue(true);
-                        }
-                    });
-
-                    if (this.user.createdDate) {
-                        this.formGroup.get('createdDate').setValue(this.user.createdDate.toString());
-                    }
-                    if (this.user.lastModifiedDate) {
-                        this.formGroup.get('lastModifiedDate').setValue(this.user.lastModifiedDate.toString());
-                    }
-                    this.formGroup.get('lastModifiedBy').setValue(this.user.lastModifiedBy);
-                });
-                break;
-        }
+        );
     }
 
     onClose(): void {

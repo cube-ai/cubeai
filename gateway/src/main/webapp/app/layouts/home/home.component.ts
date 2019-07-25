@@ -25,12 +25,12 @@ export class HomeComponent implements OnInit {
     solutions: Solution[] = [];
     @ViewChild(MatPaginator) paginator: MatPaginator;
     pageSizeOptions = PAGE_SIZE_OPTIONS;
-    itemsPerPage = ITEMS_PER_PAGE;
-    previousItemsPerPage = ITEMS_PER_PAGE;
+    itemsPerPage = 10;
+    previousItemsPerPage = 10;
     totalItems: number;
     page = 1;
     previousPage = 1;
-    predicate = 'id';
+    predicate = 'displayOrder';
     reverse = false;
 
     constructor(private router: Router,
@@ -65,6 +65,8 @@ export class HomeComponent implements OnInit {
             this.router.navigate(['/ucumos/market']);
         } else if (this.principal.hasAuthority('ROLE_ADMIN')) {
             this.router.navigate(['/admin/user-management']);
+        } else if (this.principal.hasAuthority('ROLE_CONTENT')) {
+            this.router.navigate(['/admin/bulletin']);
         } else {
             this.router.navigate(['/ucumos/market']);
         }
@@ -131,7 +133,7 @@ export class HomeComponent implements OnInit {
     sort() {
         const result = [this.predicate + ',' + (this.reverse ? 'asc' : 'desc')];
         if (this.predicate !== 'id') {
-            result.push('id');
+            result.push('id' + ',' + (this.reverse ? 'asc' : 'desc'));
         }
         return result;
     }
@@ -168,29 +170,41 @@ export class HomeComponent implements OnInit {
     }
 
     viewSolution(solution) {
-        const dialogRef = this.dialog.open(LoginComponent, {
+        const config = {
             width: '600px',
             data: {
                 reason: '登录后才能查看模块详情，请登录......',
                 redirectUrl: '/ucumos/solution/' + solution.uuid + '/' + 'view',
             }
-        });
+        };
+        if (window.screen.height < 800) {
+            config['height'] = '600px';
+        }
+        this.dialog.open(LoginComponent, config);
     }
 
     login() {
-        const dialogRef = this.dialog.open(LoginComponent, {
+        const config = {
             width: '600px',
-            data: {}
-        });
+            data: {},
+        };
+        if (window.screen.height < 800) {
+            config['height'] = '600px';
+        }
+        this.dialog.open(LoginComponent, config);
     }
 
     registerUser() {
-        const dialogRef = this.dialog.open(RegisterComponent, {
+        const config = {
             width: '800px',
             data: {
                 activate: false,
-            }
-        });
+            },
+        };
+        if (window.screen.height < 800) {
+            config['height'] = '600px';
+        }
+        this.dialog.open(RegisterComponent, config);
     }
 
     getRatingWidth(rating: number) {

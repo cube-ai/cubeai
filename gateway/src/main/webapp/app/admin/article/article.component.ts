@@ -51,12 +51,12 @@ export class ArticleComponent implements OnInit, OnDestroy {
             this.mode = params['mode'];
             this.id = params['id'];
 
-            if (!this.user.authorities.includes('ROLE_ADMIN') && this.mode === 'create') {
+            if (!this.user.authorities.includes('ROLE_CONTENT') && this.mode === 'create') {
                 this.snackBarService.error('你没有权限起草文稿！');
                 this.goBack();
             }
 
-            if (!this.user.authorities.includes('ROLE_ADMIN') && this.mode === 'edit') {
+            if (!this.user.authorities.includes('ROLE_CONTENT') && this.mode === 'edit') {
                 this.snackBarService.error('你没有权限编辑文稿！');
                 this.mode = 'view';
             }

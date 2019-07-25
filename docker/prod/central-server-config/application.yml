@@ -3,11 +3,27 @@ configserver:
     name: Docker JHipster Registry
     status: Connected to Consul running in Docker
 
+spring:
+    mail:
+        host: smtp.mail.com
+        port: 25
+        username: myname
+        password: mypassword
+        properties:
+            mail:
+                smtp:
+                    auth: true
+    zipkin:
+        base-url: http://jhipster-zipkin:9411
+        enabled: true
+
 jhipster:
     security:
         authentication:
             jwt:
                 secret: my-secret-token-to-change-in-production
+    mail: # specific JHipster mail property, for standard properties see MailProperties
+        from: myname@mail.com
     logging:
         logstash: # forward logs to ELK
             enabled: true
@@ -16,14 +32,10 @@ jhipster:
         logs: # report metrics in the logs
             enabled: true
             report-frequency: 60 # in seconds
-spring:
-    zipkin:
-        base-url: http://jhipster-zipkin:9411
-        enabled: true
 
 nexus:
     maven:
-        url: https://localhost:10001/repository/ucumos
+        url: https://localhost:8888/repository/ucumos
         username: username
         password: password
     docker:
@@ -31,11 +43,11 @@ nexus:
         port: 2375
         registryUsername: username
         registryPassword: password
-        imagetagPrefix: localhost:10002
+        imagetagPrefix: localhost:8888
 
 kubernetes:
     ability:
         internalIP: localhost
     api:
-        url: https://localhost:60000
-        token: my-kubernetes-token-to-change-in-production
+        url: https://localhost:55555
+        token: my-k8s-token

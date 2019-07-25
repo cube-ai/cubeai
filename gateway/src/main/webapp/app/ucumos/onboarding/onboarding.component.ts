@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
-import {SnackBarService} from '../../shared';
+import {GlobalService, SnackBarService} from '../../shared';
 import {Principal} from '../../account';
 import {FileUploader} from 'ng2-file-upload';
 import {FileItem} from 'ng2-file-upload/file-upload/file-item.class';
@@ -48,6 +48,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     pullingTaskSteps = false;
 
     constructor(
+        private globalService: GlobalService,
         private router: Router,
         private principal: Principal,
         private http: HttpClient,
@@ -68,6 +69,10 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        if (window.screen.width < 960) {
+            this.globalService.closeSideNav(); // 手机屏幕默认隐藏sideNav
+        }
+
         this.userLogin = this.principal.getCurrentAccount().login;
         this.taskUuid = uuid().replace(/-/g, '').toLowerCase();
         this.uploader = new FileUploader({

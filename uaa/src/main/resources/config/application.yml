@@ -50,6 +50,11 @@ spring:
             enabled: false
     thymeleaf:
         mode: XHTML
+    http:
+        multipart:
+            enabled: true  # 为了使用CommonsMultipartFile，这里必须设为true
+            maxFileSize: 900MB
+            maxRequestSize: 1000MB
 security:
     basic:
         enabled: false

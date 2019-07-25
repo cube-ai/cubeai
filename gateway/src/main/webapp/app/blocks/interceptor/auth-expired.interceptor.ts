@@ -28,13 +28,17 @@ export class AuthExpiredInterceptor implements HttpInterceptor {
                         principal.authenticate(null);
 
                         // TODO: 经测试，这里并没有弹出登录对话框，原因未知。
-                        this.dialog.open(LoginComponent, {
+                        const config = {
                             width: '600px',
                             data: {
                                 reason: '访问被拒绝，请重新登录......',
                                 redirectUrl: router.url,
                             }
-                        });
+                        };
+                        if (window.screen.height < 800) {
+                            config['height'] = '600px';
+                        }
+                        this.dialog.open(LoginComponent, config);
                     } else {
                         // 否则浏览器本地已经是未登录状态，则简单重定向至首页
                         if (router.url !== '/') {

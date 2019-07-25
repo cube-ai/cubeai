@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-
 import { JhiConfigurationService } from './configuration.service';
+import {GlobalService} from '../../shared';
 
 @Component({
     selector: 'jhi-configuration',
@@ -18,6 +18,7 @@ export class JhiConfigurationComponent implements OnInit {
     reverse: boolean;
 
     constructor(
+        private globalService: GlobalService,
         private configurationService: JhiConfigurationService
     ) {
         this.configKeys = [];
@@ -31,6 +32,10 @@ export class JhiConfigurationComponent implements OnInit {
     }
 
     ngOnInit() {
+        if (window.screen.width < 960) {
+            this.globalService.closeSideNav(); // 手机屏幕默认隐藏sideNav
+        }
+
         this.configurationService.get().subscribe((configuration) => {
             this.configuration = configuration;
 

@@ -3,7 +3,7 @@
         AI模型部署实例 —— {{ability.solutionName}}
     </span>
 
-    <div class="btn-toolbar float-right" role="toolbar">
+    <div class="btn-toolbar float-right" role="toolbar" id="divDesktop">
         <button mat-icon-button (click)="stopAbility()" matTooltip="停止实例运行" *ngIf="isEditing && ability.status === '运行'">
             <mat-icon color="warn">stop</mat-icon>
         </button>
@@ -20,6 +20,7 @@
     <p>部署日期： {{ability.createdDate | date:'yyyy-MM-dd HH:mm'}}</p>
     <p>部 署 人： {{ability.deployer}}</p>
     <p>运行状态： {{ability.status}}</p>
+    <p>调用次数： {{ability.callCount}}</p>
 </mat-card>
 <mat-card *ngIf="ability && ability.status === '运行'">
     <p>API接口：  {{genAbilityUrl()}}</p>
@@ -38,7 +39,7 @@
     </p>
 </mat-card>
 
-<mat-card *ngIf="ability && ability.status === '运行'"">
+<mat-card *ngIf="ability && ability.status === '运行'">
     <h4>接口测试</h4><br>
     <p>
         HTTP方法： POST
@@ -52,25 +53,25 @@
         <button mat-raised-button color="primary" (click)="sendTestRequest()" [disabled]="!modelMethod || !requestBody || sending">
             发送请求
         </button>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <button mat-raised-button color="primary" (click)="genTestRequest()" *ngIf="!modelMethod && !requestBody">
-            <span>生成测试数据</span>
-        </button>
-        <button mat-raised-button color="accent" (click)="cleanTestRequest()" *ngIf="modelMethod || requestBody">
-            <span>清空测试数据</span>
-        </button>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <button mat-raised-button color="accent" (click)="cleanResponseBody()" [disabled]="!responseBody">
-            <span>清空响应体</span>
-        </button>
     </p>
     <div class="row">
         <div class="col-md-6">
+            <button mat-raised-button color="primary" (click)="genTestRequest()" *ngIf="!modelMethod && !requestBody">
+                <span>生成测试数据</span>
+            </button>
+            <button mat-raised-button color="accent" (click)="cleanTestRequest()" *ngIf="modelMethod || requestBody">
+                <span>清空测试数据</span>
+            </button>
+            <br><br>
             <mat-form-field style="width: 100%">
                 <textarea matInput style="height: 200px" [(ngModel)]="requestBody" placeholder="HTTP请求体"></textarea>
             </mat-form-field>
         </div>
         <div class="col-md-6">
+            <button mat-raised-button color="accent" (click)="cleanResponseBody()" [disabled]="!responseBody">
+                <span>清空响应体</span>
+            </button>
+            <br><br>
             <mat-form-field style="width: 100%">
                 <textarea matInput style="height: 200px" [ngModel]="responseBody" placeholder="HTTP响应体" readonly></textarea>
             </mat-form-field>

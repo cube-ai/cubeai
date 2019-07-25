@@ -89,7 +89,7 @@ public class SolutionFavoriteResource {
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         SolutionFavorite solutionFavorite = solutionFavoriteRepository.findOne(id);
         if (null == userLogin || !userLogin.equals(solutionFavorite.getUserLogin())) {
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         solutionFavoriteRepository.delete(id);
@@ -98,7 +98,7 @@ public class SolutionFavoriteResource {
 
     /**
      * DELETE  /solution-favorites/solutionUuid : delete solutionFavorite by solutionUuid.
-     * @return the ResponseEntity with status 200 (OK) or 401 Unauthorized
+     * @return the ResponseEntity with status 200 (OK) or 403 Forbidden
      */
     @DeleteMapping("/solution-favorites/uuid/{solutionUuid}")
     @Timed
@@ -109,7 +109,7 @@ public class SolutionFavoriteResource {
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         SolutionFavorite solutionFavorite = solutionFavoriteRepository.findAllByUserLoginAndSolutionUuid(userLogin, solutionUuid).get(0);
         if (null == userLogin || !userLogin.equals(solutionFavorite.getUserLogin())) {
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         solutionFavoriteRepository.delete(solutionFavorite.getId());

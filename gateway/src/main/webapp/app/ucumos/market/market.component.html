@@ -1,7 +1,7 @@
 <mat-card class="page-title">
     <span>模型超市</span>
 
-    <div class="btn-toolbar float-right" role="toolbar">
+    <div class="btn-toolbar float-right" role="toolbar" id="divDesktop">
         <button mat-icon-button (click)="refresh()" matTooltip="刷新">
             <mat-icon color="primary">refresh</mat-icon>
         </button>
@@ -31,6 +31,11 @@
         <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
         <mat-form-field >
             <input matInput type="text" placeholder="作者" [(ngModel)]="searchAuthorLogin" (blur)="refresh()">
+        </mat-form-field>
+        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <mat-form-field >
+            <input matInput type="text" placeholder="单位" [(ngModel)]="searchCompany" (blur)="refresh()">
         </mat-form-field>
         <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
         <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
@@ -73,14 +78,14 @@
                 <mat-option value="Keras">
                     Keras
                 </mat-option>
-                <mat-option value="H2O">
-                    H2O
-                </mat-option>
                 <mat-option value="Scikit-Learn">
                     Scikit-Learn
                 </mat-option>
-                <mat-option value="模型编排">
-                    模型编排
+                <mat-option value="H2O">
+                    H2O
+                </mat-option>
+                <mat-option value="模型组合">
+                    模型组合
                 </mat-option>
             </mat-select>
         </mat-form-field>
@@ -91,14 +96,17 @@
         <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
         <mat-form-field >
             <mat-select placeholder="排序字段" [(ngModel)]="predicate" (selectionChange)="refresh()">
-                <mat-option value="id">
-                    序号
+                <mat-option value="displayOrder">
+                    默认
                 </mat-option>
                 <mat-option value="name">
                     模型名称
                 </mat-option>
                 <mat-option value="authorLogin">
                     作者
+                </mat-option>
+                <mat-option value="company">
+                    单位
                 </mat-option>
                 <mat-option value="createdDate">
                     日期
@@ -143,7 +151,6 @@
             <table class="table">
                 <thead>
                 <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
-                    <th jhiSortBy="id"><span>id</span> <span class="fa fa-sort"></span></th>
                     <th><span>uuid</span></th>
                     <th jhiSortBy="name"><span>模型名称</span> <span class="fa fa-sort"></span></th>
                     <th jhiSortBy="authorLogin"><span>作者</span> <span class="fa fa-sort"></span></th>
@@ -159,7 +166,6 @@
                 </thead>
                 <tbody *ngIf="solutions">
                     <tr *ngFor="let solution of solutions; trackBy: trackIdentity">
-                        <td>{{solution.id}}</td>
                         <td>{{solution.uuid}}</td>
                         <td><a (click)="viewSolution(solution)">{{solution.name}}</a></td>
                         <td>{{solution.authorLogin}}</td>
@@ -187,7 +193,7 @@
                         </div>
                     </mat-card-title>
                     <mat-card-subtitle>
-                        <span>{{solution.authorLogin}}</span>
+                        <span>{{solution.company || solution.authorName || solution.authorLogin}}</span>
                         <div class="pull-right">
                             <span>{{solution.createdDate | date:'yyyy-MM-dd'}}</span>
                         </div>

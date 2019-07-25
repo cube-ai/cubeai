@@ -21,3 +21,7 @@ Footer
 }
 
 
+@media(max-width:960px)
+{
+    #divFooter {display: none}
+}

@@ -63,3 +63,7 @@ Logo styles
 }
 
 
+@media(max-width:960px)
+{
+    #divDesktop {display: none}
+}

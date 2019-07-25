@@ -37,4 +37,7 @@ public interface UmmClient {
 
     @RequestMapping(value ="/api/deployments", method = RequestMethod.PUT)
     ResponseEntity<Deployment> updateDeployment(@RequestBody Deployment deployment);
+
+    @RequestMapping(value ="/api/deployments", method = RequestMethod.GET)
+    List<Deployment> getDeployment(@RequestParam(value = "uuid") String uuid);
 }

@@ -1,7 +1,7 @@
 <mat-card class="page-title">
     <span>我的模型</span>
 
-    <div class="btn-toolbar float-right" role="toolbar">
+    <div class="btn-toolbar float-right" role="toolbar" id="divDesktop">
         <button mat-icon-button (click)="onboarding()" matTooltip="导入新模型">
             <mat-icon color="primary">add</mat-icon>
         </button>
@@ -78,8 +78,8 @@
                 <mat-option value="Scikit-Learn">
                     Scikit-Learn
                 </mat-option>
-                <mat-option value="模型编排">
-                    模型编排
+                <mat-option value="模型组合">
+                    模型组合
                 </mat-option>
             </mat-select>
         </mat-form-field>
@@ -134,7 +134,7 @@
 </mat-card>
 
 <mat-card>
-    <mat-button-toggle-group #group="matButtonToggleGroup" [(ngModel)]="modelStatus" (change)="refresh()">
+    <mat-button-toggle-group #group="matButtonToggleGroup" [(ngModel)]="modelStatus" (change)="refresh()" style="height: 36px">
         <mat-button-toggle value="未上架" align="center">
             未上架
         </mat-button-toggle>
@@ -157,7 +157,6 @@
             <table class="table">
                 <thead>
                 <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
-                    <th jhiSortBy="id"><span>id</span> <span class="fa fa-sort"></span></th>
                     <th><span>uuid</span></th>
                     <th jhiSortBy="name"><span>模型名称</span> <span class="fa fa-sort"></span></th>
                     <th jhiSortBy="userLogin"><span>作者</span> <span class="fa fa-sort"></span></th>
@@ -173,7 +172,6 @@
                 </thead>
                 <tbody *ngIf="solutions">
                     <tr *ngFor="let solution of solutions; trackBy: trackIdentity">
-                        <td>{{solution.id}}</td>
                         <td>{{solution.uuid}}</td>
                         <td><a (click)="viewSolution(solution)">{{solution.name}}</a></td>
                         <td>{{solution.authorLogin}}</td>

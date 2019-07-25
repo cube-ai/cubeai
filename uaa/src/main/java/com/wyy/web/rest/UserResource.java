@@ -102,7 +102,7 @@ public class UserResource {
             throw new EmailAlreadyUsedException();
         } else {
             User newUser = userService.createUser(userDTO);
-            // mailService.sendCreationEmail(newUser);
+            // mailService.sendCreationEmail(newUser);  // huolongshe: 创建用户不发邮件通知
             return ResponseEntity.created(new URI("/api/users/" + newUser.getLogin()))
                 .headers(HeaderUtil.createAlert( "A user is created with identifier " + newUser.getLogin(), newUser.getLogin()))
                 .body(newUser);
@@ -162,6 +162,31 @@ public class UserResource {
     }
 
     /**
+     * @return create a new authority if not exist
+     */
+    @PostMapping("/users/authorities/{authority}")
+    @Timed
+    @Secured({AuthoritiesConstants.ADMIN})
+    public ResponseEntity<Void>  createAuthority(@PathVariable String authority) {
+        userService.createAuthority(authority);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * @return delete a authority
+     */
+    @DeleteMapping("/users/authorities/{authority}")
+    @Timed
+    @Secured({AuthoritiesConstants.ADMIN})
+    public ResponseEntity<Void>  deleteAuthority(@PathVariable String authority) {
+        if (userService.deleteAuthority(authority)) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
      * GET /users/:login : get the "login" user.
      *
      * @param login the login of the user to find
@@ -176,8 +201,8 @@ public class UserResource {
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         String userRoles = JwtUtil.getUserRoles(httpServletRequest);
         if (null == userLogin || !(userLogin.equals(login) || userLogin.equals("system") || (userRoles != null && userRoles.contains("ROLE_ADMIN")))) {
-            // 只能由申请者自己或者ROLE_MANAGER删除
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            // 只能由申请者自己或者ROLE_ADMIN查询用户信息
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         return ResponseUtil.wrapOrNotFound(
@@ -201,6 +226,7 @@ public class UserResource {
     }
 
     /**
+     * huolongshe, 20181017
      * GET /users/exist/login/:login : get the "login" user's existence.
      *
      * @param login the login of the user to find
@@ -219,6 +245,7 @@ public class UserResource {
     }
 
     /**
+     * huolongshe, 20181017
      * GET /users/exist/email/:email : get the "email" user's existence.
      *
      * @param email the email of the user to find
@@ -237,6 +264,7 @@ public class UserResource {
     }
 
     /**
+     * huolongshe, 20181017
      * GET /users/exist/phone/:phone : get the "phone" user's existence.
      *
      * @param phone the phone of the user to find

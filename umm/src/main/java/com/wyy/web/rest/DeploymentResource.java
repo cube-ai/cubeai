@@ -54,7 +54,7 @@ public class DeploymentResource {
     /**
      * POST  /deployments : Create a new solution.
      * @param deployment the deployment to create
-     * @return status 201 Created or status 401 Unauthorized
+     * @return status 201 Created or status 403 Forbidden
      */
     @PostMapping("/deployments")
     @Timed
@@ -65,7 +65,7 @@ public class DeploymentResource {
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin || !userLogin.equals("system")) {
             // createDeployment只能由umd微服务中的异步任务调用，不能由前端用户调用
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(403).build();
         }
 
         deployment.setId(null);
@@ -87,9 +87,16 @@ public class DeploymentResource {
      */
     @PutMapping("/deployments")
     @Timed
-    @Secured({"ROLE_OPERATOR"}) // TODO: 暂且设置更新权限，将来实际使用时再修改
-    public ResponseEntity<Deployment> updateDeployment(@Valid @RequestBody Deployment deployment) {
+    public ResponseEntity<Deployment> updateDeployment(HttpServletRequest httpServletRequest,
+                                                       @Valid @RequestBody Deployment deployment) {
         log.debug("REST request to update Deployment : {}", deployment);
+
+        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userRoles = JwtUtil.getUserRoles(httpServletRequest);
+        if (null == userLogin || !(userLogin.equals("system") || ((userRoles != null) && userRoles.contains("ROLE_OPERATOR")))) {
+            // updateDeployment只能由umd微服务中的异步任务调用，或者拥有ROLE_OPERATOR权限
+            return ResponseEntity.status(403).build();
+        }
 
         Deployment result = deploymentRepository.save(deployment);
         return ResponseEntity.ok()
@@ -116,12 +123,12 @@ public class DeploymentResource {
 
         if (null == uuid && null == isPublic) {
             // 查询条件中必须存在uuid或isPublic字段（可能同时存在），否则为非法访问
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin) {
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         Page<Deployment> page;

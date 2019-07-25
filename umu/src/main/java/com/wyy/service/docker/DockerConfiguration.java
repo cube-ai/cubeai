@@ -14,7 +14,7 @@ public class DockerConfiguration {
 	private String host;
 
     @Value("${nexus.docker.port}")
-	private Integer port;
+	private Integer port = 2375;
 
     @Value("${nexus.docker.registryUsername}")
 	private String registryUsername;

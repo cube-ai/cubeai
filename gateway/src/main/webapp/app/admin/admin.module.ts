@@ -2,6 +2,7 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MaterialModule} from '../material.module';
 import { GatewaySharedModule } from '../shared';
+import { FileUploadModule } from 'ng2-file-upload';
 import { UEditorModule } from 'ngx-ueditor';
 
 import {
@@ -12,6 +13,7 @@ import {
     UserMgmtComponent,
     UserDetailsComponent,
     UserPasswordComponent,
+    RoleMgmtComponent,
     JhiMetricsMonitoringModalComponent,
     JhiMetricsMonitoringComponent,
     JhiHealthModalComponent,
@@ -27,12 +29,15 @@ import {
     BulletinComponent,
     ArticleComponent,
     ArticleService,
+    AttachmentComponent,
+    AttachmentService,
 } from './';
 
 @NgModule({
     imports: [
         MaterialModule,
         GatewaySharedModule,
+        FileUploadModule,
         RouterModule.forChild(adminRoutes),
         UEditorModule.forRoot({
             js: [
@@ -52,6 +57,7 @@ import {
         UserMgmtComponent,
         UserDetailsComponent,
         UserPasswordComponent,
+        RoleMgmtComponent,
         JhiConfigurationComponent,
         JhiHealthCheckComponent,
         JhiDocsComponent,
@@ -61,6 +67,7 @@ import {
         JhiMetricsMonitoringModalComponent,
         BulletinComponent,
         ArticleComponent,
+        AttachmentComponent,
     ],
     entryComponents: [
         UserDetailsComponent,
@@ -75,6 +82,7 @@ import {
         GatewayRoutesService,
         UserResolve,
         ArticleService,
+        AttachmentService,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

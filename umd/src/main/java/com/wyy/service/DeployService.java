@@ -1,21 +1,13 @@
 package com.wyy.service;
 
 import com.wyy.domain.*;
-import io.kubernetes.client.custom.IntOrString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 import io.kubernetes.client.models.*;
-import io.kubernetes.client.ApiException;
-import io.kubernetes.client.Configuration;
-import io.kubernetes.client.apis.CoreV1Api;
-import io.kubernetes.client.util.Config;
-import io.kubernetes.client.apis.AppsV1Api;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @Service
@@ -40,7 +32,7 @@ public class DeployService {
         this.messageService = messageService;
     }
 
-    public void deploy(String taskUuid, String solutionAuthorName, Boolean isPublic) {
+    public void deploy(String taskUuid, Boolean isPublic) {
 
         Task task = ummClient.getTasks(taskUuid).get(0);
         this.saveTaskProgress(task, "正在执行", 5, "启动模型部署...", null);
@@ -54,15 +46,13 @@ public class DeployService {
             return;
         }
 
-        Configuration.setDefaultApiClient(Config.fromToken(this.k8sApiUrl, this.k8sApiToken, false));
-        CoreV1Api coreApi = new CoreV1Api();
-        AppsV1Api appsApi = new AppsV1Api();
+        KubernetesClient kubernetesClient = new KubernetesClient(k8sApiUrl, k8sApiToken, nameSpace);
 
         String msgSubject, msgContent;
-        if (this.doDeploy(task, solutionAuthorName, nameSpace, appsApi, coreApi, isPublic)) {
+        if (this.doDeploy(task, kubernetesClient, isPublic)) {
             msgSubject = "完成";
             msgContent = "完成";
-        } else if (this.revertDeploy(task, nameSpace, appsApi, coreApi)) {
+        } else if (kubernetesClient.deleteDeploy(task.getUuid())) {
             msgSubject = "失败";
             msgContent = "失败";
         } else {
@@ -76,35 +66,28 @@ public class DeployService {
             false);
     }
 
-    private boolean doDeploy(Task task, String solutionAuthorName, String nameSpace, AppsV1Api appsApi, CoreV1Api coreApi, Boolean isPublic) {
+    private boolean doDeploy(Task task, KubernetesClient kubernetesClient, Boolean isPublic) {
         this.saveTaskProgress(task, "正在执行", 10, "创建Kubernetes命名空间...", null);
-        try {
-            try {
-                coreApi.readNamespace(nameSpace, null, null, null);
-            } catch (ApiException e) {
-                coreApi.createNamespace(new V1Namespace().metadata(new V1ObjectMeta().name(nameSpace)),
-                    null, null, null);
-            }
-        } catch (ApiException e) {
+        if (!kubernetesClient.createNamespace()) {
             this.saveTaskStepProgress(task.getUuid(), "失败", 100, "创建Kubernetes命名空间失败。");
             this.saveTaskProgress(task, "失败", 100, "准备Kubernetes环境失败。", Instant.now());
             return false;
         }
         this.saveTaskProgress(task, "正在执行", 30, "准备Kubernetes环境成功...", null);
 
-        if (!this.createDeployment(task, nameSpace, appsApi)) {
+        if (!this.createDeployment(task, kubernetesClient)) {
             this.saveTaskProgress(task, "失败", 100, "创建Kubernetes部署对象失败。", Instant.now());
             return false;
         }
         this.saveTaskProgress(task, "正在执行", 60, "创建Kubernetes部署对象成功...", null);
 
-        if (!this.createService(task, nameSpace, coreApi)) {
+        if (!this.createService(task, kubernetesClient)) {
             this.saveTaskProgress(task, "失败", 100, "创建Kubernetes服务对象失败。", Instant.now());
             return false;
         }
         this.saveTaskProgress(task, "正在执行", 90, "创建Kubernetes服务对象成功。", null);
 
-        if (!this.saveData(task, solutionAuthorName, nameSpace, coreApi, isPublic)) {
+        if (!this.saveData(task, kubernetesClient, isPublic)) {
             this.saveTaskProgress(task, "失败", 100, "获取Kubernetes服务访问端口失败。", Instant.now());
             return false;
         }
@@ -112,7 +95,7 @@ public class DeployService {
         return true;
     }
 
-    private boolean createDeployment(Task task, String nameSpace, AppsV1Api appsApi) {
+    private boolean createDeployment(Task task, KubernetesClient kubernetesClient) {
         this.saveTaskStepProgress(task.getUuid(), "执行", 10,
             "提取Docker镜像文件...");
         List<Artifact> artifacts = this.ummClient.getArtifacts(task.getTargetUuid(), "DOCKER镜像");
@@ -125,39 +108,7 @@ public class DeployService {
 
         this.saveTaskStepProgress(task.getUuid(), "执行", 40,
             "创建Kubernetes部署对象...");
-        try {
-            Map<String, String> label = new HashMap<>();
-            label.put("ucumos", task.getUuid());
-            V1Deployment deployYaml = new V1DeploymentBuilder()
-                .withApiVersion("apps/v1")
-                .withKind("Deployment")
-                .withNewMetadata()
-                    .withNamespace(nameSpace)
-                    .withName("deployment-" + task.getUuid())
-                .endMetadata()
-                .withNewSpec()
-                    .withReplicas(1)
-                    .withNewSelector()
-                        .withMatchLabels(label)
-                    .endSelector()
-                    .withNewTemplate()
-                        .withNewMetadata()
-                            .withLabels(label)
-                        .endMetadata()
-                        .withNewSpec()
-                            .addNewContainer()
-                                .withName(task.getTargetUuid())
-                                .withImage(imageUrl)
-                                .addNewPort()
-                                .withContainerPort(3330)
-                                .endPort()
-                            .endContainer()
-                        .endSpec()
-                    .endTemplate()
-                .endSpec()
-                .build();
-                appsApi.createNamespacedDeployment(nameSpace, deployYaml, null, null, null);
-        } catch (ApiException e) {
+        if (!kubernetesClient.createDeployment(task.getUuid(), imageUrl, task.getTargetUuid())) {
             this.saveTaskStepProgress(task.getUuid(), "失败", 100,
                 "Kubernetes部署接口调用失败。");
             return false;
@@ -165,8 +116,7 @@ public class DeployService {
         // 30分钟内，每秒查询1次部署状态，连续30秒无法查询到状态报错。
         for (int i = 0, errCnt = 0; i < 1800; i++) {
             try {
-                V1Deployment deploymentStatus = appsApi.readNamespacedDeploymentStatus("deployment-" + task.getUuid(),
-                    nameSpace, null);
+                V1Deployment deploymentStatus = kubernetesClient.readDeploymentStatus(task.getUuid());
                 errCnt = 0;
                 Integer available = deploymentStatus.getStatus().getAvailableReplicas();
                 Integer ready = deploymentStatus.getStatus().getReadyReplicas();
@@ -195,30 +145,10 @@ public class DeployService {
         return false;
     }
 
-    private boolean createService(Task task, String nameSpace, CoreV1Api coreApi) {
+    private boolean createService(Task task, KubernetesClient kubernetesClient) {
         this.saveTaskStepProgress(task.getUuid(), "执行", 70,
             "创建Kubernetes服务对象...");
-        try {
-            Map<String, String> label = new HashMap<>();
-            label.put("ucumos", task.getUuid());
-            V1Service serviceYaml = new V1ServiceBuilder()
-                .withApiVersion("v1")
-                .withKind("Service")
-                .withNewMetadata()
-                    .withNamespace(nameSpace)
-                    .withName("service-" + task.getUuid())
-                .endMetadata()
-                .withNewSpec()
-                    .withType("NodePort")
-                    .withSelector(label)
-                    .addNewPort()
-                        .withPort(3330)
-                        .withTargetPort(new IntOrString(3330))
-                    .endPort()
-                .endSpec()
-                .build();
-            coreApi.createNamespacedService(nameSpace, serviceYaml, null, null, null);
-        } catch (ApiException e) {
+        if (!kubernetesClient.createService(task.getUuid())) {
             this.saveTaskStepProgress(task.getUuid(), "失败", 100,
                 "创建Kubernetes服务对象失败。");
             return false;
@@ -226,23 +156,26 @@ public class DeployService {
         return true;
     }
 
-    private boolean saveData(Task task, String solutionAuthorName, String nameSpace, CoreV1Api coreApi, Boolean isPublic) {
+    private boolean saveData(Task task, KubernetesClient kubernetesClient, Boolean isPublic) {
         this.saveTaskStepProgress(task.getUuid(), "执行", 90,
             "获取Kubernetes服务访问端口...");
         V1Service serviceStatus;
         try {
-            serviceStatus = coreApi.readNamespacedServiceStatus("service-" + task.getUuid(), nameSpace, null);
-        } catch (ApiException e) {
+            serviceStatus = kubernetesClient.readServiceStatus(task.getUuid());
+        } catch (Exception e) {
             this.saveTaskStepProgress(task.getUuid(), "失败", 100,
                 "获取Kubernetes服务访问端口失败。");
             return false;
         }
+
+        Solution solution = this.ummClient.getSolutions(task.getTargetUuid()).get(0);
         Deployment deployment = new Deployment();
         deployment.setUuid(task.getUuid());
         deployment.setDeployer(task.getUserLogin());
         deployment.setSolutionUuid(task.getTargetUuid());
         deployment.setSolutionName(task.getTaskName());
-        deployment.setSolutionAuthor(solutionAuthorName);
+        deployment.setSolutionAuthor(solution.getAuthorName());
+        deployment.setPictureUrl(solution.getPictureUrl());
         deployment.setk8sPort(serviceStatus.getSpec().getPorts().get(0).getNodePort());
         deployment.setIsPublic(isPublic);
         deployment.setStatus("运行");
@@ -250,26 +183,6 @@ public class DeployService {
 
         this.saveTaskStepProgress(task.getUuid(), "成功", 100,
             "模型部署成功。");
-        return true;
-    }
-
-    private boolean revertDeploy(Task task, String nameSpace, AppsV1Api appsApi, CoreV1Api coreApi) {
-		try {
-            coreApi.deleteNamespacedService("service-" + task.getUuid(), nameSpace, new V1DeleteOptions(),
-                null, null, null, null, null);
-        } catch (ApiException e) {
-            if(e.getCode() != 404) {
-                return false;
-            }
-        }
-        try {
-            appsApi.deleteNamespacedDeployment("deployment-" + task.getUuid(), nameSpace, new V1DeleteOptions(),
-                null, null, null, null, null);
-        } catch (ApiException e) {
-            if(e.getCode() != 404) {
-                return false;
-            }
-        }
         return true;
     }
 

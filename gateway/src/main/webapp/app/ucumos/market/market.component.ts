@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatPaginator, PageEvent} from '@angular/material';
-import {ConfirmService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService} from '../../shared';
+import {ConfirmService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService, GlobalService} from '../../shared';
 import {Principal} from '../../account';
 import {Solution} from '../model/solution.model';
 import {SolutionFavorite} from '../model/solution-favorite.model';
@@ -18,6 +18,7 @@ export class MarketComponent implements OnInit {
 
     filter = '';
     searchAuthorLogin = '';
+    searchCompany = '';
     searchName = '';
     searchTag = '';
     searchModelType = '';
@@ -34,10 +35,11 @@ export class MarketComponent implements OnInit {
     totalItems: number;
     page = 1;
     previousPage = 1;
-    predicate = 'id';
+    predicate = 'displayOrder';
     reverse = false;
 
     constructor(
+        private globalService: GlobalService,
         private principal: Principal,
         private router: Router,
         private confirmService: ConfirmService,
@@ -48,6 +50,10 @@ export class MarketComponent implements OnInit {
     }
 
     ngOnInit() {
+        if (window.screen.width < 960) {
+            this.globalService.toggleSideNav(); // 手机屏幕默认隐藏sideNav
+        }
+
         this.userLogin = this.principal.getCurrentAccount().login;
         this.findFavoriteSolutionUuidList();
         this.loadAll();
@@ -66,6 +72,9 @@ export class MarketComponent implements OnInit {
         };
         if (this.searchAuthorLogin) {
             queryOptions['authorLogin'] = this.searchAuthorLogin;
+        }
+        if (this.searchCompany) {
+            queryOptions['company'] = this.searchCompany;
         }
         if (this.searchName) {
             queryOptions['name'] = this.searchName;
@@ -99,7 +108,7 @@ export class MarketComponent implements OnInit {
     sort() {
         const result = [this.predicate + ',' + (this.reverse ? 'asc' : 'desc')];
         if (this.predicate !== 'id') {
-            result.push('id');
+            result.push('id' + ',' + (this.reverse ? 'asc' : 'desc'));
         }
         return result;
     }

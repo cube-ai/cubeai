@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { JhiHealthService } from './health.service';
 import { JhiHealthModalComponent } from './health-modal.component';
+import {GlobalService} from '../../shared';
 
 @Component({
     selector: 'jhi-health',
@@ -15,6 +16,7 @@ export class JhiHealthCheckComponent implements OnInit {
     updatingHealth: boolean;
 
     constructor(
+        private globalService: GlobalService,
         private modalService: NgbModal,
         private healthService: JhiHealthService
     ) {
@@ -22,6 +24,10 @@ export class JhiHealthCheckComponent implements OnInit {
     }
 
     ngOnInit() {
+        if (window.screen.width < 960) {
+            this.globalService.closeSideNav(); // 手机屏幕默认隐藏sideNav
+        }
+
         this.refresh();
     }
 

@@ -70,3 +70,7 @@ td {
     background:url('../../content/images/star_org.png') no-repeat;
 }
 
+@media(max-width:960px)
+{
+    #divDesktop {display: none}
+}

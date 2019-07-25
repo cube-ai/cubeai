@@ -34,20 +34,17 @@ public class DocumentResource {
         this.ummClient = ummClient;
     }
 
-    @RequestMapping(value = "/documents/{solutionUuid}/{fileName}", method = RequestMethod.POST, consumes = "multipart/form-data")
+    @RequestMapping(value = "/documents/{solutionUuid}", method = RequestMethod.POST, consumes = "multipart/form-data")
     @Timed
     public ResponseEntity<Void> uploadDocument(MultipartHttpServletRequest request,
-                                               @PathVariable("solutionUuid") String solutionUuid,
-                                               @PathVariable("fileName") String fileName) {
+                                               @PathVariable("solutionUuid") String solutionUuid) {
         log.debug("REST request to upload solution document file");
         MultipartFile multipartFile = request.getFile("document");
         if (null == multipartFile) {
             return ResponseEntity.badRequest().headers(HeaderUtil.createAlert("No file provided", "file upload")).build();
         }
 
-        // String fileName = multipartFile.getOriginalFilename();
-        fileName = fileName.replaceAll("。", ".");
-
+        String fileName = multipartFile.getOriginalFilename();
         long size = multipartFile.getSize();
         if (fileName == null || ("").equals(fileName) || size == 0) {
             return ResponseEntity.badRequest().headers(HeaderUtil.createAlert("No file content", "file upload")).build();
@@ -81,7 +78,7 @@ public class DocumentResource {
         }
 
         Solution solution = this.ummClient.getSolutions(solutionUuid).get(0);
-        String shortUrl = solution.getAuthorLogin()+ "/" + solutionUuid + "/document/" + fileName;
+        String shortUrl = solution.getAuthorLogin() + "/" + solutionUuid + "/document/" + fileName;
         String longUrl= this.nexusArtifactClient.addArtifact(shortUrl, file4);
 
         if (null == longUrl) {

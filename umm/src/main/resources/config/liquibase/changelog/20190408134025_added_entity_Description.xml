@@ -37,7 +37,7 @@
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->
         </createTable>
 
-        <!-- 为SolutionUuid字段建索引，使用Jhipster导入模型后手工添加-->
+        <!-- Huolongshe: 为SolutionUuid字段建索引，使用Jhipster导入模型后手工添加-->
         <createIndex indexName="idx_description_solution_uuid"
                      tableName="description"
                      unique="true">

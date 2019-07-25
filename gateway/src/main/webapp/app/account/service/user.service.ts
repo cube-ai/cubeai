@@ -45,8 +45,16 @@ export class UserService {
         return this.http.get<number>(`${this.resourceUrl}/exist/phone/${phone}`, { observe: 'response' });
     }
 
-    getAuthorities(): string[] {
-        return ['ROLE_ADMIN', 'ROLE_USER', 'ROLE_MANAGER', 'ROLE_OPERATOR', 'ROLE_DEVELOPER'];
+    getAuthorities(): Observable<HttpResponse<string[]>> {
+        return this.http.get<string[]>(this.resourceUrl + '/authorities', { observe: 'response' });
+    }
+
+    createAuthority(authority: string): Observable<HttpResponse<any>> {
+        return this.http.post<any>(this.resourceUrl + '/authorities/' + authority, {}, { observe: 'response' });
+    }
+
+    deleteAuthority(authority: string): Observable<HttpResponse<any>> {
+        return this.http.delete(this.resourceUrl + '/authorities/' + authority, { observe: 'response' });
     }
 
 }

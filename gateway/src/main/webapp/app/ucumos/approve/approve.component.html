@@ -1,7 +1,7 @@
 <mat-card class="page-title">
     <span>模型审批</span>
 
-    <div class="btn-toolbar float-right" role="toolbar">
+    <div class="btn-toolbar float-right" role="toolbar" id="divDesktop">
         <button mat-icon-button (click)="refresh()" matTooltip="刷新">
             <mat-icon color="primary">refresh</mat-icon>
         </button>
@@ -9,7 +9,7 @@
 </mat-card>
 
 <mat-card>
-    <mat-button-toggle-group #group="matButtonToggleGroup" [(ngModel)]="reviewTab" (change)="refresh()">
+    <mat-button-toggle-group #group="matButtonToggleGroup" [(ngModel)]="reviewTab" (change)="refresh()" style="height: 36px">
         <mat-button-toggle value="等待审批" align="center">
             等待审批
         </mat-button-toggle>
@@ -17,58 +17,41 @@
             已审批
         </mat-button-toggle>
     </mat-button-toggle-group>
-    <br><br>
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
-                <th jhiSortBy="id"><span>序号</span> <span class="fa fa-sort"></span></th>
-                <th><span>模型uuid</span></th>
-                <th jhiSortBy="solutionName"><span>模型名称</span> <span class="fa fa-sort"></span></th>
-                <th jhiSortBy="requestType"><span>申请类型</span> <span class="fa fa-sort"></span></th>
-                <th><span>申请理由</span></th>
-                <th jhiSortBy="requestUserLogin"><span>申请人</span> <span class="fa fa-sort"></span></th>
-                <th jhiSortBy="requestDate"><span>申请日期</span> <span class="fa fa-sort"></span></th>
-                <th jhiSortBy="reviewUserLogin" *ngIf="reviewTab === '已审批'"><span>审批人</span></th>
-                <th jhiSortBy="reviewDate" *ngIf="reviewTab === '已审批'"><span>审批日期</span> <span class="fa fa-sort"></span></th>
-                <th jhiSortBy="reviewResult" *ngIf="reviewTab === '已审批'"><span>审批结果</span> <span class="fa fa-sort"></span></th>
-                <th><span *ngIf="reviewTab !== '已审批'">操作</span></th>
-            </tr>
-            </thead>
-            <tbody *ngIf="publishRequests">
-                <tr *ngFor="let publishRequest of publishRequests; trackBy: trackIdentity">
-                    <td>{{publishRequest.id}}</td>
-                    <td>
-                        <a (click)="viewSolution(publishRequest.solutionUuid)" matTooltip="查看模型详情"  *ngIf="reviewTab === '已审批'">
-                            {{publishRequest.solutionUuid}}
-                        </a>
-                        <a (click)="reviewRequest(publishRequest)" matTooltip="查看模型并审批"  *ngIf="reviewTab !== '已审批'">
-                            {{publishRequest.solutionUuid}}
-                        </a>
-                    </td>
-                    <td>{{publishRequest.solutionName}}</td>
-                    <td>
-                        <span style="color: blue" *ngIf="publishRequest.requestType === '申请上架'">{{publishRequest.requestType}}</span>
-                        <span style="color: #f47741" *ngIf="publishRequest.requestType === '申请下架'">{{publishRequest.requestType}}</span>
-                    </td>
-                    <td>{{publishRequest.requestReason}}</td>
-                    <td>{{publishRequest.requestUserLogin}}</td>
-                    <td>{{publishRequest.requestDate | date:'yy-MM-dd HH:mm'}}</td>
-                    <td *ngIf="reviewTab === '已审批'">{{publishRequest.reviewUserLogin}}</td>
-                    <td *ngIf="reviewTab === '已审批'">{{publishRequest.reviewDate | date:'yy-MM-dd HH:mm'}}</td>
-                    <td *ngIf="reviewTab === '已审批'">
-                        <span *ngIf="publishRequest.reviewResult === '批准'" style="color: green" matTooltip="{{publishRequest.reviewComment}}">批准</span>
-                        <span *ngIf="publishRequest.reviewResult === '拒绝'" style="color: red" matTooltip="{{publishRequest.reviewComment}}">拒绝</span>
-                    </td>
-                    <td *ngIf="reviewTab !== '已审批'">
-                        <a (click)="reviewRequest(publishRequest)">
-                            <span style="color: #673ab7">查看模型并审批</span>
-                        </a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <br>
+    <div *ngIf="publishRequests">
+        <mat-card *ngFor="let publishRequest of publishRequests; trackBy: trackIdentity" style="font-size: 14px; margin: 10px 0">
+            <a (click)="treatRequest(publishRequest)">
+                <div class="row">
+                    <div class="col-md-3">
+                        <span style="font-size: 20px; margin-top: 20px">
+                            {{publishRequest.solutionName}}
+                        </span>
+                    </div>
+                    <div class="col-md-3">
+                        <span *ngIf="publishRequest.requestType === '申请上架'" style="color: blue">{{publishRequest.requestType}}</span>
+                        <span *ngIf="publishRequest.requestType === '申请下架'" style="color: #f47741">{{publishRequest.requestType}}</span>
+                        <br>
+                        <span>{{publishRequest.requestUserLogin}}</span>
+                        <span>&nbsp;&nbsp;</span>
+                        <span>{{publishRequest.requestDate | date:'yy-MM-dd HH:mm'}}</span>
+                        <br>
+                        <span>{{publishRequest.requestReason}}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <span *ngIf="publishRequest.reviewResult === '批准'" style="color: green">批准</span>
+                        <span *ngIf="publishRequest.reviewResult === '拒绝'" style="color: red">拒绝</span>
+                        <br>
+                        <span>{{publishRequest.reviewUserLogin}}</span>
+                        <span>&nbsp;&nbsp;</span>
+                        <span>{{publishRequest.reviewDate | date:'yy-MM-dd HH:mm'}}</span>
+                        <br>
+                        <span>{{publishRequest.reviewComment}}</span>
+                    </div>
+                </div>
+            </a>
+        </mat-card>
     </div>
+
     <br>
     <div>
         <mat-paginator #paginator

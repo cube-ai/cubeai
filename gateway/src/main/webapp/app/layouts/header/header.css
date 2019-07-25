@@ -66,3 +66,11 @@ Header
 .mybadge:empty {
     display: none;
 }
+
+#divMobile{display:none}
+
+@media(max-width:960px)
+{
+    #divMobile {display: flex}
+    #divDesktop {display:none}
+}

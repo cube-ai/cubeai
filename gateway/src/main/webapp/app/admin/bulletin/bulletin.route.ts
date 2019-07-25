@@ -7,7 +7,7 @@ export const bulletinRoutes: Routes = [
         path: 'bulletin',
         component: BulletinComponent,
         data: {
-            authorities: ['ROLE_ADMIN'],
+            authorities: ['ROLE_CONTENT'],
             pageTitle: '文稿管理'
         },
         canActivate: [UserRouteAccessService],

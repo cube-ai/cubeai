@@ -1,7 +1,7 @@
 <mat-card class="page-title">
     <span>我的收藏</span>
 
-    <div class="btn-toolbar float-right" role="toolbar">
+    <div class="btn-toolbar float-right" role="toolbar" id="divDesktop">
         <button mat-icon-button (click)="refresh()" matTooltip="刷新">
             <mat-icon color="primary">refresh</mat-icon>
         </button>
@@ -9,32 +9,29 @@
 </mat-card>
 
 <mat-card>
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
-                <th jhiSortBy="id"><span>序号</span> <span class="fa fa-sort"></span></th>
-                <th><span>模型UUID</span></th>
-                <th jhiSortBy="solutionName"><span>模型名称</span> <span class="fa fa-sort"></span></th>
-                <th jhiSortBy="solutionAuthor"><span>作者</span> <span class="fa fa-sort"></span></th>
-                <th jhiSortBy="solutionCreatedDate"><span>创建日期</span> <span class="fa fa-sort"></span></th>
-                <th jhiSortBy="favoriteDate"><span>收藏日期</span> <span class="fa fa-sort"></span></th>
-                <th><span>取消收藏</span></th>
-            </tr>
-            </thead>
-            <tbody *ngIf="solutionFavorites">
-                <tr *ngFor="let solutionFavorite of solutionFavorites; trackBy: trackIdentity">
-                    <td>{{solutionFavorite.id}}</td>
-                    <td><a (click)="viewSolution(solutionFavorite.solutionUuid)">{{solutionFavorite.solutionUuid}}</a></td>
-                    <td><a (click)="viewSolution(solutionFavorite.solutionUuid)">{{solutionFavorite.solutionName}}</a></td>
-                    <td>{{solutionFavorite.solutionAuthor}}</td>
-                    <td>{{solutionFavorite.solutionCreatedDate | date:'yyyy-MM-dd'}}</td>
-                    <td>{{solutionFavorite.favoriteDate | date:'yyyy-MM-dd'}}</td>
-                    <td><a (click)="deleteFavorite(solutionFavorite.id)"><span class="fa fa-remove" style="color: red"></span></a></td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="row" *ngIf="solutionFavorites">
+        <div *ngFor="let solutionFavorite of solutionFavorites; trackBy: trackIdentity">
+            <mat-card style="font-size: 14px; margin: 10px; width: 240px" class="pull-right">
+                <a (click)="viewSolution(solutionFavorite.solutionUuid)">
+                    <div>
+                        <span style="font-size: 18px">
+                            {{solutionFavorite.solutionName}}
+                        </span>
+                        <br>
+                        <span>作者：{{solutionFavorite.solutionAuthor}}&nbsp;&nbsp;</span>
+                        <br>
+                        <span>创建：{{solutionFavorite.solutionCreatedDate | date:'yyyy-MM-dd'}}</span>
+                        <br>
+                        <span>收藏：{{solutionFavorite.favoriteDate | date:'yyyy-MM-dd'}}</span>
+                    </div>
+                </a>
+                <div class="float-right">
+                    <a (click)="deleteFavorite(solutionFavorite.id)"><span class="fa fa-remove" style="color: red"></span></a>
+                </div>
+            </mat-card>
+        </div>
     </div>
+
     <br>
     <div>
         <mat-paginator #paginator

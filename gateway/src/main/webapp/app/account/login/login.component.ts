@@ -83,6 +83,8 @@ export class LoginComponent implements OnInit, OnDestroy {
             this.router.navigate(['/ucumos/market']);
         } else if (this.principal.hasAuthority('ROLE_ADMIN')) {
             this.router.navigate(['/admin/user-management']);
+        } else if (this.principal.hasAuthority('ROLE_CONTENT')) {
+            this.router.navigate(['/admin/bulletin']);
         } else {
             this.router.navigate(['/ucumos/market']);
         }

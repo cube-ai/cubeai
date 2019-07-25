@@ -2,7 +2,7 @@
     <span *ngIf="openMode === 'deploy' && solution">模型部署 —— {{solution.name}}</span>
     <span *ngIf="openMode === 'view' && task">模型部署任务详情 —— {{task.taskName}}</span>
 
-    <div class="btn-toolbar float-right" role="toolbar">
+    <div class="btn-toolbar float-right" role="toolbar" id="divDesktop">
         <button mat-icon-button (click)="goBack()" matTooltip="返回">
             <mat-icon color="primary">arrow_back</mat-icon>
         </button>
@@ -59,11 +59,11 @@
         <mat-card *ngIf="getCompleteSuccess() || getCompleteFail() || statusCreateTaskError">
             <div class="row justify-content-center">
                 <div *ngIf="getCompleteSuccess()">
-                    <span class="alert alert-success" style="font-size: 20px">
+                    <span class="alert alert-success" style="font-size: 18px">
                         模型部署成功！
-                        &nbsp;&nbsp;&nbsp;&nbsp;
-                        <button (click)="jumpToNewAbility()">查看模型部署实例</button>
                     </span>
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <button (click)="jumpToNewAbility()">查看模型部署实例</button>
                 </div>
                 <h4 class="alert alert-danger" *ngIf="getCompleteFail()">
                     模型部署失败！

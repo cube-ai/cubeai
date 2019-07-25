@@ -55,7 +55,7 @@ public class SolutionRatingResource {
     /**
      * PUT  /solution-ratings/score : Updates an existing solutionRating's score.
      * @param jsonObject JSONObject with fields to be updated
-     * @return the ResponseEntity with status 200 (OK) and with body the updated solutionRating, or with status 401 Unauthorized
+     * @return the ResponseEntity with status 200 (OK) and with body the updated solutionRating, or with status 403 Forbidden
      */
     @PutMapping("/solution-ratings/score")
     @Timed
@@ -66,7 +66,7 @@ public class SolutionRatingResource {
         SolutionRating solutionRating = solutionRatingRepository.findOne(jsonObject.getLong("id"));
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin || !userLogin.equals(solutionRating.getUserLogin())) {
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         solutionRating.setRatingScore(jsonObject.getInteger("score"));

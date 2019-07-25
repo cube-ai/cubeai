@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { JhiMetricsMonitoringModalComponent } from './metrics-modal.component';
 import { JhiMetricsService } from './metrics.service';
+import {GlobalService} from '../../shared';
 
 @Component({
     selector: 'jhi-metrics',
@@ -18,6 +19,7 @@ export class JhiMetricsMonitoringComponent implements OnInit {
     JCACHE_KEY: string;
 
     constructor(
+        private globalService: GlobalService,
         private modalService: NgbModal,
         private metricsService: JhiMetricsService
     ) {
@@ -25,6 +27,10 @@ export class JhiMetricsMonitoringComponent implements OnInit {
     }
 
     ngOnInit() {
+        if (window.screen.width < 960) {
+            this.globalService.closeSideNav(); // 手机屏幕默认隐藏sideNav
+        }
+
         this.refresh();
     }
 

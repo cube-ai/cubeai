@@ -15,6 +15,9 @@ export class AiAbilityComponent implements AfterViewInit, OnDestroy {
 
     ngAfterViewInit() {
         this.globalService.setSideNav(this.sideNav);
+        if (window.screen.width < 960) {
+            this.sideNav.toggle(false); // 手机屏幕默认隐藏sideNav
+        }
     }
 
     ngOnDestroy() {

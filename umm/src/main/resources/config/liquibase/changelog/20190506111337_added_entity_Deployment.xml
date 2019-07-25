@@ -87,7 +87,7 @@
         <dropDefaultValue tableName="deployment" columnName="created_date" columnDataType="datetime"/>
         <dropDefaultValue tableName="deployment" columnName="modified_date" columnDataType="datetime"/>
 
-        <!-- 为uuid字段建索引，使用Jhipster导入模型后手工添加-->
+        <!-- Huolongshe: 为uuid字段建索引，使用Jhipster导入模型后手工添加-->
         <createIndex indexName="idx_deployment_uuid"
                      tableName="deployment"
                      unique="true">

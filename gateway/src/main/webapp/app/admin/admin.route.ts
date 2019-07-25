@@ -8,8 +8,10 @@ import {
     metricsRoute,
     gatewayRoute,
     userMgmtRoute,
+    roleMgmtRoute,
     bulletinRoutes,
     articleRoutes,
+    attachmentRoutes,
 } from './';
 
 import { UserRouteAccessService } from '../shared';
@@ -19,7 +21,7 @@ export const adminRoutes: Routes = [{
     path: 'admin',
     component: AdminComponent,
     data: {
-        authorities: ['ROLE_ADMIN'],
+        authorities: ['ROLE_ADMIN', 'ROLE_CONTENT'],
     },
     canActivate: [UserRouteAccessService],
     children: [
@@ -29,8 +31,10 @@ export const adminRoutes: Routes = [{
         healthRoute,
         gatewayRoute,
         ...userMgmtRoute,
+        ...roleMgmtRoute,
         ...bulletinRoutes,
         ...articleRoutes,
+        ...attachmentRoutes,
         metricsRoute
     ]
 },

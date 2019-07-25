@@ -63,8 +63,8 @@ spring:
     mail:
         host: localhost
         port: 25
-        username: user
-        password: password
+        username: cubeai@localhost
+        password: cubeai
         properties:
             mail:
                 smtp:
@@ -133,7 +133,7 @@ jhipster:
             client-id: internal
             client-secret: internal
     mail: # specific JHipster mail property, for standard properties see MailProperties
-        from: user@localhost
+        from: cubeai@localhost
         base-url: http://127.0.0.1:9999
     metrics: # DropWizard Metrics configuration, used by MetricsConfiguration
         jmx.enabled: true

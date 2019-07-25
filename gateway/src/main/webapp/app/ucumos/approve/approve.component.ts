@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatPaginator, PageEvent} from '@angular/material';
-import {ConfirmService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService} from '../../shared';
+import {ConfirmService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService, GlobalService} from '../../shared';
 import {PublishRequestService} from '../service/publish-request.service';
 import {PublishRequest} from '../model/publish-request.model';
 import {Router} from '@angular/router';
@@ -28,6 +28,7 @@ export class ApproveComponent implements OnInit {
     reverse = false;
 
     constructor(
+        private globalService: GlobalService,
         private router: Router,
         private confirmService: ConfirmService,
         private snackBarService: SnackBarService,
@@ -36,6 +37,10 @@ export class ApproveComponent implements OnInit {
     }
 
     ngOnInit() {
+        if (window.screen.width < 960) {
+            this.globalService.closeSideNav(); // 手机屏幕默认隐藏sideNav
+        }
+
         this.loadAll();
     }
 
@@ -126,6 +131,14 @@ export class ApproveComponent implements OnInit {
 
     viewSolution(solutionUuid: string) {
         this.router.navigate(['/ucumos/solution/' + solutionUuid + '/' + 'view']);
+    }
+
+    treatRequest(publishRequest: PublishRequest) {
+        if (this.reviewTab === '已审批') {
+            this.viewSolution(publishRequest.solutionUuid);
+        } else {
+            this.reviewRequest(publishRequest);
+        }
     }
 
 }

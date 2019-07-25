@@ -37,7 +37,7 @@ public class TaskResource {
     /**
      * POST  /tasks : Create a new task.
      * @param task the task to create
-     * @return the ResponseEntity with status 201 (Created) or 401 Unauthorized
+     * @return the ResponseEntity with status 201 (Created) or 403 Forbidden
      */
     @PostMapping("/tasks")
     @Timed
@@ -47,7 +47,7 @@ public class TaskResource {
 
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin || !userLogin.equals(task.getUserLogin())) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(403).build();
         }
 
         taskRepository.save(task);
@@ -57,7 +57,7 @@ public class TaskResource {
     /**
      * PUT  /tasks : Updates an existing task.
      * @param task the task to update
-     * @return the ResponseEntity with status 200 (OK) or 401 Unauthorized
+     * @return the ResponseEntity with status 200 (OK) or 403 Forbidden
      */
     @PutMapping("/tasks")
     @Timed
@@ -68,7 +68,7 @@ public class TaskResource {
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         // updateTask只能由umu微服务中的异步任务OnBoardingServie调用，不能由前端用户调用
         if (null == userLogin || !userLogin.equals("system")) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(403).build();
         }
 
         Task result = taskRepository.save(task);
@@ -123,7 +123,7 @@ public class TaskResource {
      * DELETE  /tasks/:id : delete the "id" task.
      *
      * @param id the id of the task to delete
-     * @return the ResponseEntity with status 200 (OK) or 401 Unauthorized
+     * @return the ResponseEntity with status 200 (OK) or 403 Forbidden
      */
     @DeleteMapping("/tasks/{id}")
     @Timed
@@ -134,7 +134,7 @@ public class TaskResource {
         Task task = taskRepository.findOne(id);
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin || !userLogin.equals(task.getUserLogin())) {
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         taskRepository.delete(id);
