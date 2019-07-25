@@ -84,9 +84,9 @@ module.exports = (options) => ({
             { from: './src/main/webapp/favicon.ico', to: 'favicon.ico' },
             { from: './src/main/webapp/manifest.webapp', to: 'manifest.webapp' },
             // jhipster-needle-add-assets-to-webpack - JHipster will add/remove third-party resources in this array
-            // { from: './src/main/webapp/robots.txt', to: 'robots.txt' },
-            { from: './src/main/webapp/static/', to: 'static'},
-            { from: './src/main/webapp/content/images/solution', to: 'content/images/solution'}
+            // { from: './src/main/webapp/robots.txt', to: 'robots.txt' }, // huolongshe, 20190412
+            { from: './src/main/webapp/static/', to: 'static'},  // huolongshe, 20180904
+            { from: './src/main/webapp/content/images/solution', to: 'content/images/solution'}  // huolongshe, 20190320
         ]),
         new webpack.ProvidePlugin({
             $: "jquery",

@@ -77,53 +77,81 @@ export class HeaderComponent implements OnInit {
     }
 
     login() {
-        const dialogRef = this.dialog.open(LoginComponent, {
+        const config = {
             width: '600px',
-            data: { }
-        });
+            data: {},
+        };
+        if (window.screen.height < 800) {
+            config['height'] = '600px';
+        }
+        this.dialog.open(LoginComponent, config);
     }
 
     userSettings() {
-        const dialogRef = this.dialog.open(SettingsComponent, {
+        const config = {
             width: '600px',
             data: {},
-        });
+        };
+        if (window.screen.height < 800) {
+            config['height'] = '600px';
+        }
+        this.dialog.open(SettingsComponent, config);
     }
 
     changePassword() {
-        const dialogRef = this.dialog.open(PasswordComponent, {
+        const config = {
             width: '600px',
             data: {},
-        });
+        };
+        if (window.screen.height < 800) {
+            config['height'] = '600px';
+        }
+       this.dialog.open(PasswordComponent, config);
     }
 
     requestResetPassword() {
-        const dialogRef = this.dialog.open(PasswordResetComponent, {
+        const config = {
             width: '800px',
-            data: {}
-        });
+            data: {},
+        };
+        if (window.screen.height < 800) {
+            config['height'] = '600px';
+        }
+        this.dialog.open(PasswordResetComponent, config);
     }
 
     registerUser() {
-        const dialogRef = this.dialog.open(RegisterComponent, {
+        const config = {
             width: '800px',
             data: {
                 activate: false,
-            }
-        });
+            },
+        };
+        if (window.screen.height < 800) {
+            config['height'] = '600px';
+        }
+        this.dialog.open(RegisterComponent, config);
     }
 
     activateUser() {
-        const dialogRef = this.dialog.open(RegisterComponent, {
+        const config = {
             width: '800px',
             data: {
                 activate: true,
-            }
-        });
+            },
+        };
+        if (window.screen.height < 800) {
+            config['height'] = '600px';
+        }
+        this.dialog.open(RegisterComponent, config);
     }
 
     navigateToHelp() {
         this.router.navigate(['/article/cubeai-help']);
+    }
+
+    navigateToAboutMe() {
+        this.router.navigate(['/article/cubeai-aboutme']);
     }
 
     navigateToMessage() {
@@ -131,7 +159,11 @@ export class HeaderComponent implements OnInit {
     }
 
     navigateToAdmin() {
-        this.router.navigate(['/admin/user-management']);
+        if (this.principal.hasAuthority('ROLE_ADMIN')) {
+            this.router.navigate(['/admin/user-management']);
+        } else if (this.principal.hasAuthority('ROLE_CONTENT')) {
+            this.router.navigate(['/admin/bulletin']);
+        }
     }
 
     navigateToUcumos() {
@@ -140,6 +172,22 @@ export class HeaderComponent implements OnInit {
 
     navigateToAiAbility() {
         this.router.navigate(['/ai-ability/open-ability']);
+    }
+
+    navigateToAiTraining() {
+        this.router.navigate(['/article/ai-training']);
+    }
+
+    navigateToAiSolution() {
+        this.router.navigate(['/article/ai-solution']);
+    }
+
+    navigateToAiResource() {
+        this.router.navigate(['/article/ai-resource']);
+    }
+
+    navigateToAiPartner() {
+        this.router.navigate(['/article/ai-partner']);
     }
 
 }

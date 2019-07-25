@@ -59,7 +59,7 @@ public class ArticleResource {
      */
     @PostMapping("/articles")
     @Timed
-    @Secured({"ROLE_ADMIN"})
+    @Secured({"ROLE_CONTENT"})
     public ResponseEntity<Article> createArticle(HttpServletRequest httpServletRequest,
                                                  @Valid @RequestBody Article article) {
         log.debug("REST request to save Article : {}", article);
@@ -75,21 +75,14 @@ public class ArticleResource {
     /**
      * PUT  /articles : Updates an existing article.
      * @param article the article to update
-     * @return the ResponseEntity with status 200 (OK) and with body the updated article, or with status 401 Unauthorized
+     * @return the ResponseEntity with status 200 (OK) and with body the updated article
      */
     @PutMapping("/articles")
     @Timed
-    @Secured({"ROLE_ADMIN"})
-    public ResponseEntity<Article> updateArticle(HttpServletRequest httpServletRequest,
-                                                 @Valid @RequestBody Article article) throws URISyntaxException {
+    @Secured({"ROLE_CONTENT"})
+    public ResponseEntity<Article> updateArticle(@Valid @RequestBody Article article) {
         log.debug("REST request to update Article : {}", article);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        if (null == userLogin || !userLogin.equals(article.getAuthorLogin())) {
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
-        }
-
-        article.setAuthorLogin(userLogin);
         article.setModifiedDate(Instant.now());
         Article result = articleRepository.save(article);
         return ResponseEntity.ok()
@@ -192,6 +185,7 @@ public class ArticleResource {
      */
     @GetMapping("/articles/{id}")
     @Timed
+    @Secured({"ROLE_CONTENT"})
     public ResponseEntity<Article> getArticle(@PathVariable Long id) {
         log.debug("REST request to get Article : {}", id);
         Article article = articleRepository.findOne(id);
@@ -205,7 +199,7 @@ public class ArticleResource {
      */
     @DeleteMapping("/articles/{id}")
     @Timed
-    @Secured({"ROLE_ADMIN"})
+    @Secured({"ROLE_CONTENT"})
     public ResponseEntity<Void> deleteArticle(HttpServletRequest httpServletRequest,
                                               @PathVariable Long id) {
         log.debug("REST request to delete Article : {}", id);
@@ -213,7 +207,7 @@ public class ArticleResource {
         Article article = articleRepository.findOne(id);
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin || !userLogin.equals(article.getAuthorLogin())) {
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         articleRepository.delete(id);

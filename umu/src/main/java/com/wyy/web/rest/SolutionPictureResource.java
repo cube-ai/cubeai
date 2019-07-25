@@ -35,17 +35,16 @@ public class SolutionPictureResource {
         this.ummClient = ummClient;
     }
 
-    @RequestMapping(value = "/solution-picture/{solutionUuid}/{fileName}", method = RequestMethod.POST, consumes = "multipart/form-data")
+    @RequestMapping(value = "/solution-picture/{solutionUuid}", method = RequestMethod.POST, consumes = "multipart/form-data")
     @Timed
     public ResponseEntity<Void> uploadSolutionPicture(MultipartHttpServletRequest request,
-                                               @PathVariable("solutionUuid") String solutionUuid,
-                                               @PathVariable("fileName") String fileName) {
-        log.debug("REST request to upload solution picture file");
+                                               @PathVariable("solutionUuid") String solutionUuid) {
+        log.info("REST request to upload solution picture file");
 
         String userLogin = JwtUtil.getUserLogin(request);
         Solution solution = this.ummClient.getSolutions(solutionUuid).get(0);
         if (null == userLogin || !userLogin.equals(solution.getAuthorLogin())) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         MultipartFile multipartFile = request.getFile("picture");
@@ -53,7 +52,7 @@ public class SolutionPictureResource {
             return ResponseEntity.badRequest().headers(HeaderUtil.createAlert("No file provided", "file upload")).build();
         }
 
-        fileName = fileName.replaceAll("。", ".");
+        String fileName = multipartFile.getOriginalFilename();
 
         long size = multipartFile.getSize();
         if (fileName == null || ("").equals(fileName) || size == 0) {

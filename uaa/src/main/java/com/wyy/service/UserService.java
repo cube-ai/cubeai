@@ -105,7 +105,7 @@ public class UserService {
         newUser.setImageUrl(userDTO.getImageUrl());
         newUser.setLangKey(userDTO.getLangKey());
         // new user is not active
-        newUser.setActivated(false);
+        newUser.setActivated(false);  // huolongshe: 用户注册后不激活
         // new user gets registration key
         newUser.setActivationKey(RandomUtil.generateActivationKey());
 
@@ -145,7 +145,7 @@ public class UserService {
             user.setAuthorities(authorities);
         }
         // String encryptedPassword = passwordEncoder.encode(RandomUtil.generatePassword());
-        String encryptedPassword = passwordEncoder.encode(userDTO.getPassword());
+        String encryptedPassword = passwordEncoder.encode(userDTO.getPassword()); // huolongshe: 创建用户时直接设置密码
         user.setPassword(encryptedPassword);
         user.setResetKey(RandomUtil.generateResetKey());
         user.setResetDate(Instant.now());
@@ -200,7 +200,7 @@ public class UserService {
                 user.setLangKey(userDTO.getLangKey());
                 String password = userDTO.getPassword();
                 if (password != null && !password.equals("")) {
-                    String encryptedPassword = passwordEncoder.encode(password);
+                    String encryptedPassword = passwordEncoder.encode(password);  // huolongshe: 允许管理员为用户重设密码
                     user.setPassword(encryptedPassword);
                 }
                 Set<Authority> managedAuthorities = user.getAuthorities();
@@ -278,6 +278,24 @@ public class UserService {
      */
     public List<String> getAuthorities() {
         return authorityRepository.findAll().stream().map(Authority::getName).collect(Collectors.toList());
+    }
+
+    public void createAuthority(String authorityText) {
+        List<String> authorities = this.getAuthorities();
+        if (!authorities.contains(authorityText)) {
+            Authority authority = new Authority();
+            authority.setName(authorityText);
+            authorityRepository.save(authority);
+        }
+    }
+
+    public Boolean deleteAuthority(String authority) {
+        try {
+            authorityRepository.delete(authority);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }

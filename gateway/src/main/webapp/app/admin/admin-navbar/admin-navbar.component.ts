@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import {Principal} from '../../account';
 
 @Component({
     selector: 'jhi-admin-navbar',
@@ -7,4 +8,12 @@ import { Component } from '@angular/core';
         'admin-navbar.css'
     ]
 })
-export class AdminNavbarComponent {}
+export class AdminNavbarComponent {
+    constructor(
+        private principal: Principal,
+    ) {}
+
+    hasAuthority(authority: string) {
+        return this.principal.hasAuthority(authority);
+    }
+}

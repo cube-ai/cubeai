@@ -10,7 +10,7 @@
         <span *ngIf="!solution.active" style="color: red">&nbsp;&nbsp;已删除</span>
     </span>
 
-    <div class="btn-toolbar float-right" role="toolbar">
+    <div class="btn-toolbar float-right" role="toolbar" id="divDesktop">
         <button mat-raised-button color="primary" (click)="requestPublish()" *ngIf="canEditBaseInfo" [disabled]="sendingAction || !solution.version
                 || !solution.modelType || !solution.toolkitType || !solution.summary || !solution.tag1 || editingDescription || !description.content || !solution.pictureUrl || !requestReason">
             <span class="fa fa-send">&nbsp;&nbsp;申请上架</span>
@@ -47,7 +47,7 @@
         </button>
 
         &nbsp;&nbsp;&nbsp;&nbsp;
-        <button mat-icon-button (click)="deploySolution()" matTooltip="部署模型" *ngIf="solution.active && solution.publishStatus === '上架'">
+        <button mat-icon-button (click)="deploySolution()" matTooltip="部署模型" *ngIf="solution.active && solution.publishStatus === '上架' && solution.tag1 !== '网络AI'">
             <mat-icon color="primary">cloud_upload</mat-icon>
         </button>
 
@@ -56,7 +56,47 @@
             <mat-icon color="primary">arrow_back</mat-icon>
         </button>
     </div>
+
+    <div class="btn-toolbar float-right" role="toolbar" id="divMobile">
+        <button mat-icon-button
+                [matMenuTriggerFor]="mobileMenu">
+            <mat-icon>settings</mat-icon>
+        </button>
+    </div>
 </mat-card>
+
+<mat-menu #mobileMenu="matMenu" [overlapTrigger]="false">
+    <button mat-menu-item (click)="requestPublish()" *ngIf="canEditBaseInfo" [disabled]="sendingAction || !solution.version
+                || !solution.modelType || !solution.toolkitType || !solution.summary || !solution.tag1 || editingDescription || !description.content || !solution.pictureUrl || !requestReason">
+        <span class="fa fa-send">&nbsp;&nbsp;申请上架</span>
+    </button>
+    <button mat-menu-item (click)="requestUnpublish()" [disabled]="sendingAction || !requestReason" *ngIf="canUnpublish">
+        <span class="fa fa-arrow-down">&nbsp;&nbsp;申请下架</span>
+    </button>
+    <button mat-menu-item (click)="approvePublish(true)" [disabled]="!reviewComment || sendingAction" *ngIf="isReviewingPublish || isReviewingUnpublish">
+        <span class="fa fa-check">&nbsp;&nbsp;同意</span>
+    </button>
+    <button mat-menu-item (click)="approvePublish(false)" [disabled]="!reviewComment || sendingAction" *ngIf="isReviewingPublish || isReviewingUnpublish">
+        <span>&nbsp;&nbsp;</span><span class="fa fa-ban">&nbsp;&nbsp;拒绝</span>
+    </button>
+    <button mat-menu-item (click)="deleteSolution()" *ngIf="canEditBaseInfo">
+        <span>&nbsp;&nbsp;</span><span class="fa fa-remove">&nbsp;&nbsp;删除模型</span>
+    </button>
+    <button mat-menu-item (click)="restoreSolution()" *ngIf="solution && !solution.active">
+        <span>&nbsp;&nbsp;</span><span class="fa fa-recycle">&nbsp;&nbsp;找回模型</span>
+    </button>
+    <button mat-menu-item (click)="favoriteSolution()"
+            *ngIf="solution && solution.active && solution.publishStatus === '上架' && solutionFavorite">
+        <span>&nbsp;&nbsp;</span><span class="fa fa-heart">&nbsp;&nbsp;取消收藏</span>
+    </button>
+    <button mat-menu-item (click)="favoriteSolution()"
+            *ngIf="solution && solution.active && solution.publishStatus === '上架' && !solutionFavorite">
+        <span>&nbsp;&nbsp;</span><span class="fa fa-heart-o">&nbsp;&nbsp;收藏</span>
+    </button>
+    <button mat-menu-item (click)="deploySolution()" *ngIf="solution && solution.active && solution.publishStatus === '上架' && solution.tag1 !== '网络AI'">
+        <span>&nbsp;&nbsp;</span><span class="fa fa-superpowers">&nbsp;&nbsp;部署模型</span>
+    </button>
+</mat-menu>
 
 <mat-card *ngIf="solution">
     <mat-tab-group>
@@ -64,6 +104,24 @@
             <div style="margin: 20px">
                 <div class="row">
                     <div class="col-md-8">
+                        <div *ngIf="isReviewer">
+                            <mat-form-field>
+                                <input matInput [(ngModel)]="solution.subject1" type="text" placeholder="主题1" maxlength=20>
+                            </mat-form-field>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <mat-form-field>
+                                <input matInput [(ngModel)]="solution.subject2" type="text" placeholder="主题2" maxlength=20>
+                            </mat-form-field>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <mat-form-field>
+                                <input matInput [(ngModel)]="solution.subject3" type="text" placeholder="主题3" maxlength=20>
+                            </mat-form-field>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <mat-form-field>
+                                <input matInput [(ngModel)]="solution.displayOrder" type="number" placeholder="显示控制">
+                            </mat-form-field>
+                        </div>
+
                         <div>
                             <mat-form-field>
                                 <input matInput [ngModel]="solution.name" type="text" placeholder="模型名称" disabled>
@@ -107,8 +165,8 @@
                                     <mat-option value="Scikit-Learn">
                                         Scikit-Learn
                                     </mat-option>
-                                    <mat-option value="模型编排">
-                                        模型编排
+                                    <mat-option value="模型组合">
+                                        模型组合
                                     </mat-option>
                                     <mat-option value="其他">
                                         其他
@@ -116,9 +174,15 @@
                                 </mat-select>
                             </mat-form-field>
                         </div>
+
                         <div>
                             <mat-form-field>
                                 <input matInput [ngModel]="solution.authorName || solution.authorLogin" type="text" placeholder="作者" disabled>
+                            </mat-form-field>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <mat-form-field>
+                                <input matInput [(ngModel)]="solution.company" type="text" placeholder="单位" maxlength=20
+                                       [disabled]="!canEditBaseInfo">
                             </mat-form-field>
                             &nbsp;&nbsp;&nbsp;&nbsp;
                             <mat-form-field>
@@ -287,7 +351,8 @@
             <div style="margin: 20px" *ngIf="canAddDocument">
                 <div>
                     <span style="font-weight: bold">上传文档/附件 &nbsp;&nbsp;</span>
-                    <input type="file" ng2FileSelect [uploader]="uploader" accept=".pdf, .doc, .docx, .ppt, .pptx, .xls, .xlsx, .jpg, .jpeg, .png, .zip, .rar, .txt" />
+                    <input type="file" ng2FileSelect [uploader]="uploader"
+                           accept=".pdf, .doc, .docx, .ppt, .pptx, .xls, .xlsx, .jpg, .jpeg, .png, .zip, .rar, .txt" />
                     <span class="float-right">已选择 {{ uploader?.queue?.length }} 个文件</span>
                 </div>
                 <br>
@@ -354,7 +419,7 @@
                                 <span *ngIf="document.fileSize >= 1024">{{(document.fileSize / 1024) | number: '1.1-1'}} KB</span>
                             </td>
                             <td width="100px" nowrap>
-                                <a (click)="downloadFile(document.url)" matTooltip="下载文档">
+                                <a href="{{document.url}}" download matTooltip="下载文档">
                                     <span class="fa fa-download" style="color: #673ab7"></span>
                                 </a>
                                 <span *ngIf="canAddDocument">

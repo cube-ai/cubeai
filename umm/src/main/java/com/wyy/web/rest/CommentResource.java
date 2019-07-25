@@ -86,7 +86,7 @@ public class CommentResource {
     /**
      * DELETE  /comments/:id : delete the "id" comment.
      * @param id the id of the comment to delete
-     * @return the ResponseEntity with status 200 (OK) or with status 401 Unauthorized
+     * @return the ResponseEntity with status 200 (OK) or with status 403 Forbidden
      */
     @DeleteMapping("/comments/{id}")
     @Timed
@@ -99,7 +99,7 @@ public class CommentResource {
         String userRoles = JwtUtil.getUserRoles(httpServletRequest);
         if (null == userLogin || userRoles == null || !(userLogin.equals(comment.getUserLogin()) || userRoles.contains("ROLE_MANAGER"))) {
             // 只能由申请者自己或者ROLE_MANAGER删除
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         commentRepository.delete(id);

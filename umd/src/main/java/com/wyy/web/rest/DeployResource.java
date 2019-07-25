@@ -64,7 +64,6 @@ public class DeployResource {
         JSONObject taskCommand = new JSONObject();
         taskCommand.put("taskType", "ucumos-deploy");
         taskCommand.put("taskUuid", task.getUuid());
-        taskCommand.put("solutionAuthorName", solution.getAuthorName());
         taskCommand.put("isPublic", jsonObject.getBoolean("public"));
 
         try {

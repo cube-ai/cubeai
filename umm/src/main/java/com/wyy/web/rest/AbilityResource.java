@@ -58,7 +58,16 @@ public class AbilityResource {
     public List<Deployment> getAllDeployments(@RequestParam(value = "uuid") String uuid) {
         log.debug("REST request to get all Deployments by uuid");
 
-        return this.deploymentRepository.findAllByUuid(uuid);
+        List<Deployment> deploymentList = this.deploymentRepository.findAllByUuid(uuid);
+
+        if (!deploymentList.isEmpty()) {
+            // 该接口只有在用户调用AI能力时才会被调用，所以选择在这里递加能力的接口调用次数
+            Deployment deployment = deploymentList.get(0);
+            deployment.setCallCount(deployment.getCallCount() + 1);
+            this.deploymentRepository.save(deployment);
+        }
+
+        return deploymentList;
     }
 
 }

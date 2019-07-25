@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatPaginator, PageEvent} from '@angular/material';
-import {ConfirmService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService} from '../../shared';
+import {ConfirmService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService, GlobalService} from '../../shared';
 import {Principal} from '../../account';
 import {SolutionFavorite} from '../model/solution-favorite.model';
 import {SolutionSharedService} from '../service/solution-shared.service';
@@ -29,6 +29,7 @@ export class SharedComponent implements OnInit {
     reverse = false;
 
     constructor(
+        private globalService: GlobalService,
         private principal: Principal,
         private router: Router,
         private confirmService: ConfirmService,
@@ -38,6 +39,9 @@ export class SharedComponent implements OnInit {
     }
 
     ngOnInit() {
+        if (window.screen.width < 960) {
+            this.globalService.closeSideNav(); // 手机屏幕默认隐藏sideNav
+        }
         this.userLogin = this.principal.getCurrentAccount().login;
         this.loadAll();
     }

@@ -3,7 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {MatDialog, MatPaginator, PageEvent} from '@angular/material';
 import { Location } from '@angular/common';
 import { Subscription } from 'rxjs/Subscription';
-import {ConfirmService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService} from '../../shared';
+import {ConfirmService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService, GlobalService} from '../../shared';
 import {Principal, User} from '../../account';
 import {Solution} from '../model/solution.model';
 import {Artifact} from '../model/artifact.model';
@@ -30,7 +30,10 @@ import {v4 as uuid} from 'uuid';
 
 @Component({
     templateUrl: './solution.component.html',
-    styleUrls: ['../ucumos-datapage.css'],
+    styleUrls: [
+        './solution.css',
+        '../ucumos-datapage.css',
+    ],
 })
 export class SolutionComponent implements OnInit, OnDestroy {
 
@@ -75,6 +78,7 @@ export class SolutionComponent implements OnInit, OnDestroy {
     previousPage = 1;
 
     constructor(
+        private globalService: GlobalService,
         private dialog: MatDialog,
         private route: ActivatedRoute,
         private router: Router,
@@ -122,10 +126,25 @@ export class SolutionComponent implements OnInit, OnDestroy {
                 }).subscribe();
             }
         }
+
+        if (this.isReviewer) {
+            this.solutionService.updateSubjects({
+                id: this.solution.id,
+                subject1: this.solution.subject1,
+                subject2: this.solution.subject2,
+                subject3: this.solution.subject3,
+                displayOrder: this.solution.displayOrder,
+            }).subscribe();
+        }
+
         this.subscription.unsubscribe();
     }
 
     ngOnInit() {
+        if (window.screen.width < 960) {
+            this.globalService.closeSideNav(); // 手机屏幕默认隐藏sideNav
+        }
+
         this.currentUser = this.principal.getCurrentAccount() ? this.principal.getCurrentAccount() : null;
         this.subscription = this.route.params.subscribe((params) => {
             this.solutionUuid = params['solutionUuid'];
@@ -194,7 +213,7 @@ export class SolutionComponent implements OnInit, OnDestroy {
                 this.loadComments();
 
                 this.uploader = new FileUploader({
-                    url: SERVER_API_URL + 'umu/api/documents/' + this.solution.uuid,
+                    url: SERVER_API_URL + 'zuul/umu/api/documents/' + this.solution.uuid,
                     method: 'POST',
                     itemAlias: 'document',
                 });
@@ -238,12 +257,6 @@ export class SolutionComponent implements OnInit, OnDestroy {
         if (this.findExistDocument(fileItem.file.name)) {
             this.snackBarService.error('本模型中已存在同名文档！请删除现有文档后再上传新文档...');
         } else {
-            const fileName = fileItem.file.name.replace(/\./g, '。');
-            this.uploader.setOptions({
-                url: SERVER_API_URL + 'umu/api/documents/' + this.solution.uuid + '/' + fileName,
-                method: 'POST',
-                itemAlias: 'document',
-            });
             fileItem.upload();
         }
     }
@@ -483,18 +496,21 @@ export class SolutionComponent implements OnInit, OnDestroy {
     }
 
     changeSolutionPicture() {
-        const dialogRef = this.dialog.open(PictureSelectComponent, {
+        const config = {
             width: '800px',
             data: {
                 pictureUrl: this.solution.pictureUrl,
             },
-        });
+        };
+        if (window.screen.height < 800) {
+            config['height'] = '600px';
+        }
+        const dialogRef = this.dialog.open(PictureSelectComponent, config);
 
         dialogRef.afterClosed().subscribe((selectedImgFile) => {
-            const fileName = selectedImgFile.name.replace(/\./g, '。');
             if (selectedImgFile) {
                 const fileUploader = new FileUploader({
-                    url: SERVER_API_URL + 'umu/api/solution-picture/' + this.solution.uuid + '/' + fileName,
+                    url: SERVER_API_URL + 'zuul/umu/api/solution-picture/' + this.solution.uuid,
                     method: 'POST',
                     itemAlias: 'picture',
                 });
@@ -522,13 +538,17 @@ export class SolutionComponent implements OnInit, OnDestroy {
     }
 
     viewApproveHistory() {
-        const dialogRef = this.dialog.open(ApproveHistoryComponent, {
+        const config = {
             width: '900px',
             data: {
                 solutionUuid: this.solution.uuid,
                 solutionName: this.solution.name,
             },
-        });
+        };
+        if (window.screen.height < 800) {
+            config['height'] = '600px';
+        }
+        const dialogRef = this.dialog.open(ApproveHistoryComponent, config);
     }
 
     requestPublish() {

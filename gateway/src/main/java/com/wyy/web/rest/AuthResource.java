@@ -53,6 +53,10 @@ public class AuthResource {
     public ResponseEntity<OAuth2AccessToken> authenticate(HttpServletRequest request, HttpServletResponse response, @RequestBody
         Map<String, String> params) {
 
+        if (params.get("username").equals("system")) {
+            return ResponseEntity.badRequest().build();
+        }
+
         int verifyResult = this.uaaClient.validateVerifyCode(params);
         if (1 == verifyResult) {
             return authenticationService.authenticate(request, response, params);

@@ -8,7 +8,7 @@ UAA主要使用OAuth2和JWT技术进行用户认证和授权，以及基于角�
 
 UAA使用Consul来进行微服务注册和发现，以及集中的配置管理。在UAA启动时，它首先尝试与Consul建立连接。如果Consul未就绪，则UAA将启动失败。
 
-本微服务初始代码框架使用开源工具Jhipster( https://www.jhipster.tech )生成。
+本微服务初始代码框架使用开源工具Jhipster(http://www.jhipster.tech)生成。
 
 ## 基本配置
 

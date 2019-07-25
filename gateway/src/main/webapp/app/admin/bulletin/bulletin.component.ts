@@ -1,5 +1,5 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {ConfirmService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService} from '../../shared';
+import {ConfirmService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService, GlobalService} from '../../shared';
 import {ArticleService} from '../article/article.service';
 import {Article} from '../article/article.model';
 import {Router} from '@angular/router';
@@ -28,6 +28,7 @@ export class BulletinComponent implements OnInit {
     reverse = false;
 
     constructor(
+        private globalService: GlobalService,
         private router: Router,
         private principal: Principal,
         private confirmService: ConfirmService,
@@ -37,6 +38,10 @@ export class BulletinComponent implements OnInit {
     }
 
     ngOnInit() {
+        if (window.screen.width < 960) {
+            this.globalService.closeSideNav(); // 手机屏幕默认隐藏sideNav
+        }
+
         this.user = this.principal.getCurrentAccount();
         this.loadAll();
     }
@@ -100,15 +105,15 @@ export class BulletinComponent implements OnInit {
     }
 
     canCreate(): boolean {
-        return this.user.authorities.includes('ROLE_ADMIN');
+        return this.user.authorities.includes('ROLE_CONTENT');
     }
 
     canEdit(article: Article): boolean {
-        return this.user.authorities.includes('ROLE_ADMIN');
+        return this.user.authorities.includes('ROLE_CONTENT');
     }
 
     canDelete(article: Article): boolean {
-        return this.user.authorities.includes('ROLE_ADMIN');
+        return this.user.authorities.includes('ROLE_CONTENT');
     }
 
     createArticle() {
@@ -129,6 +134,8 @@ export class BulletinComponent implements OnInit {
                 this.articleService.delete(article.id).subscribe(
                     () => {
                         this.refresh();
+                    }, () => {
+                        this.snackBarService.error('删除失败！可能是没有权限...');
                     }
                 );
             }

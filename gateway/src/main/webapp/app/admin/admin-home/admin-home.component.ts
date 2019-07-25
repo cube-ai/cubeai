@@ -14,6 +14,10 @@ export class AdminHomeComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.router.navigate(['/admin/user-management']);
+        if (this.principal.hasAuthority('ROLE_ADMIN')) {
+            this.router.navigate(['/admin/user-management']);
+        } else if (this.principal.hasAuthority('ROLE_CONTENT')) {
+            this.router.navigate(['/admin/bulletin']);
+        }
     }
 }

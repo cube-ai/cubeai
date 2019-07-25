@@ -34,8 +34,18 @@ export class GlobalService {
         }
     }
 
+    closeSideNav() {
+        if (this.sideNav) {
+            this.sideNav.toggle(false);
+        }
+    }
+
     setSideNav(sideNav) {
         this.sideNav = sideNav;
+    }
+
+    getSideNav(): any {
+        return this.sideNav;
     }
 
 }

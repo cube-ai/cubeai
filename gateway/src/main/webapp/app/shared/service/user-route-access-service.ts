@@ -36,13 +36,17 @@ export class UserRouteAccessService implements CanActivate {
                 }
                 return canActivate;
             } else {
-                this.dialog.open(LoginComponent, {
+                const config = {
                     width: '600px',
                     data: {
                         reason: '登录超时，请重新登录......',
                         redirectUrl: url,
                     }
-                });
+                };
+                if (window.screen.height < 800) {
+                    config['height'] = '600px';
+                }
+                this.dialog.open(LoginComponent, config);
                 return false;
             }
         }));

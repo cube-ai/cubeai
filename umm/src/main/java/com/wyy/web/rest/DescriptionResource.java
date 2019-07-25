@@ -32,7 +32,7 @@ public class DescriptionResource {
     /**
      * PUT  /descriptions/content : Updates an existing description's content.
      * @param jsonObject the JSONObject with content to be updated
-     * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 401 Unauthorized
+     * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 403 Forbidden
      */
     @PutMapping("/descriptions/content")
     @Timed
@@ -44,7 +44,7 @@ public class DescriptionResource {
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin || !userLogin.equals(description.getAuthorLogin())) {
             // description中的content字段只能由作者自己修改
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         description.setContent(jsonObject.getString("content"));
@@ -82,7 +82,7 @@ public class DescriptionResource {
     /**
      * DELETE  /descriptions/:id : delete the "id" description.
      * @param id the id of the description to delete
-     * @return the ResponseEntity with status 200 (OK) or 401 Unauthorized
+     * @return the ResponseEntity with status 200 (OK) or 403 Forbidden
      */
     @DeleteMapping("/descriptions/{id}")
     @Timed
@@ -93,7 +93,7 @@ public class DescriptionResource {
         Description description = descriptionRepository.findOne(id);
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin || !userLogin.equals(description.getAuthorLogin())) {
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         descriptionRepository.delete(id);

@@ -25,9 +25,11 @@ public class KafkaConsumer {
     private final Logger log = LoggerFactory.getLogger(KafkaConsumer.class);
 
     private final DeployService deployService;
+    private final LifeCircleManagementService lifeCircleManagementService;
 
-    KafkaConsumer(DeployService deployService) {
+    KafkaConsumer(DeployService deployService, LifeCircleManagementService lifeCircleManagementService) {
         this.deployService = deployService;
+        this.lifeCircleManagementService = lifeCircleManagementService;
     }
 
     @PostConstruct
@@ -59,11 +61,14 @@ public class KafkaConsumer {
 
         JSONObject taskCommand = JSONObject.parseObject(message);
         String taskType = taskCommand.getString("taskType");
+        String taskUuid = taskCommand.getString("taskUuid");
 
-        if (taskType.equals("ucumos-deploy")) {
-            String taskUuid = taskCommand.getString("taskUuid");
-            if (null != taskUuid) {
-                this.deployService.deploy(taskUuid, taskCommand.getString("solutionAuthorName"), taskCommand.getBoolean("isPublic"));
+        if (null != taskUuid) {
+            if (taskType.equals("ucumos-deploy")) {
+                this.deployService.deploy(taskUuid, taskCommand.getBoolean("isPublic"));
+            }
+            if (taskType.equals("ucumos-lcm-stop")) {
+                this.lifeCircleManagementService.stop(taskUuid, taskCommand.getString("deploymentUuid"));
             }
         }
     }

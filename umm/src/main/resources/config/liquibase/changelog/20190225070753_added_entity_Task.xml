@@ -67,7 +67,7 @@
         <dropDefaultValue tableName="task" columnName="start_date" columnDataType="datetime"/>
         <dropDefaultValue tableName="task" columnName="end_date" columnDataType="datetime"/>
 
-        <!-- 为uui字段建索引，使用Jhipster导入模型后手工添加-->
+        <!-- Huolongshe: 为uui字段建索引，使用Jhipster导入模型后手工添加-->
         <createIndex indexName="idx_task_uuid"
                      tableName="task"
                      unique="true">

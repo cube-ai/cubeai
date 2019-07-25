@@ -47,6 +47,11 @@ public class AccessControlFilter extends ZuulFilter {
     public boolean shouldFilter() {
         String requestUri = RequestContext.getCurrentContext().getRequest().getRequestURI();
 
+        // 使用ng2-file-upload上传文件时，如果通过zuul路由，URL前面需要加'zuul'前缀
+        if (requestUri.startsWith("/zuul")) {
+            requestUri = requestUri.substring(5);
+        }
+
         // If the request Uri does not start with the path of the authorized endpoints, we block the request
         for (Route route : routeLocator.getRoutes()) {
             String serviceUrl = route.getFullPath();

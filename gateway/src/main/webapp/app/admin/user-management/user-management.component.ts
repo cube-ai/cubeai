@@ -2,7 +2,7 @@ import {Component, OnInit, OnDestroy, ViewChild} from '@angular/core';
 import {MatDialog, MatPaginator, PageEvent} from '@angular/material';
 import { UserDetailsComponent } from './user-details.component';
 import {UserPasswordComponent} from './user-password.component';
-import {ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService, ConfirmService} from '../../shared';
+import {ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService, ConfirmService, GlobalService} from '../../shared';
 import {Principal, User, UserService} from '../../account';
 
 @Component({
@@ -29,6 +29,7 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
     toLastPage = false;
 
     constructor(
+        private globalService: GlobalService,
         private dialog: MatDialog,
         private userService: UserService,
         private principal: Principal,
@@ -38,6 +39,10 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        if (window.screen.width < 960) {
+            this.globalService.closeSideNav(); // 手机屏幕默认隐藏sideNav
+        }
+
         this.currentAccount = this.principal.getCurrentAccount();
         this.loadAll();
     }

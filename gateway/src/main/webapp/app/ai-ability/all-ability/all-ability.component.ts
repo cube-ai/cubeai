@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatPaginator, PageEvent} from '@angular/material';
-import {ConfirmService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService} from '../../shared';
+import {ConfirmService, GlobalService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService} from '../../shared';
 import {Principal} from '../../account';
 import {Ability} from '../model/ability.model';
 import {AbilityService} from '../service/ability.service';
@@ -27,6 +27,7 @@ export class AllAbilityComponent implements OnInit {
     reverse = false;
 
     constructor(
+        private globalService: GlobalService,
         private principal: Principal,
         private router: Router,
         private confirmService: ConfirmService,
@@ -36,6 +37,9 @@ export class AllAbilityComponent implements OnInit {
     }
 
     ngOnInit() {
+        if (window.screen.width < 960) {
+            this.globalService.closeSideNav(); // 手机屏幕默认隐藏sideNav
+        }
         this.loadAll();
     }
 

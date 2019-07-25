@@ -68,7 +68,7 @@ spring:
     http:
         multipart:
             enabled: true  # 为了使用CommonsMultipartFile，这里必须设为true
-            maxFileSize: 100Mb
+            maxFileSize: 900MB
             maxRequestSize: 1000MB
     kafka:
         consumer:

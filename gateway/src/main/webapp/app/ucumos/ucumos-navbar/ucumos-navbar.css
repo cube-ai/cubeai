@@ -57,3 +57,9 @@ Logo styles
     background-size: contain;
     width: 100%;
 }
+
+@media(max-width:960px)
+{
+    #divDesktop {display: none}
+    #menuDesktop {display: none}
+}

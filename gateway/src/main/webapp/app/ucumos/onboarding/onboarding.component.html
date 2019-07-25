@@ -123,11 +123,11 @@
         <mat-card *ngIf="getCompleteSuccess() || getCompleteFail() || statusCreateTaskError">
             <div class="row justify-content-center">
                 <div *ngIf="getCompleteSuccess()">
-                    <span class="alert alert-success" style="font-size: 20px">
+                    <span class="alert alert-success" style="font-size: 18px">
                         模型导入成功！
-                        &nbsp;&nbsp;&nbsp;&nbsp;
-                        <button (click)="jumpToMyModel()">查看模型</button>
                     </span>
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <button (click)="jumpToMyModel()">查看模型</button>
                 </div>
                 <h4 class="alert alert-danger" *ngIf="getCompleteFail()">
                     模型导入失败！

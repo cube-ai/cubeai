@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { GatewayRoutesService } from './gateway-routes.service';
 import { GatewayRoute } from './gateway-route.model';
+import {GlobalService} from '../../shared';
 
 @Component({
     selector: 'jhi-gateway',
@@ -16,11 +17,16 @@ export class JhiGatewayComponent implements OnInit {
     updatingRoutes: Boolean;
 
     constructor(
+        private globalService: GlobalService,
         private gatewayRoutesService: GatewayRoutesService
     ) {
     }
 
     ngOnInit() {
+        if (window.screen.width < 960) {
+            this.globalService.closeSideNav(); // 手机屏幕默认隐藏sideNav
+        }
+
         this.refresh();
     }
 

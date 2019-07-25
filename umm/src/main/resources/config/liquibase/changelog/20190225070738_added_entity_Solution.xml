@@ -148,7 +148,7 @@
         <dropDefaultValue tableName="solution" columnName="modified_date" columnDataType="datetime"/>
         <dropDefaultValue tableName="solution" columnName="last_download" columnDataType="datetime"/>
 
-        <!-- 为uuid字段建索引，使用Jhipster导入模型后手工添加-->
+        <!-- Huolongshe: 为uuid字段建索引，使用Jhipster导入模型后手工添加-->
         <createIndex indexName="idx_solution_uuid"
                      tableName="solution"
                      unique="true">

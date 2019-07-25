@@ -1,7 +1,7 @@
 <mat-card class="page-title">
     <span>我的能力</span>
 
-    <div class="btn-toolbar float-right" role="toolbar">
+    <div class="btn-toolbar float-right" role="toolbar" id="divDesktop">
         <button mat-icon-button (click)="refresh()" matTooltip="刷新">
             <mat-icon color="primary">refresh</mat-icon>
         </button>
@@ -12,40 +12,30 @@
 </mat-card>
 
 <mat-card>
-    <div>
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
-                    <th jhiSortBy="id"><span>编号</span> <span class="fa fa-sort"></span></th>
-                    <th jhiSortBy="solutionName"><span>模型名称</span> <span class="fa fa-sort"></span></th>
-                    <th jhiSortBy="solutionAuthor"><span>模型作者</span> <span class="fa fa-sort"></span></th>
-                    <th jhiSortBy="deployer"><span>部署人</span> <span class="fa fa-sort"></span></th>
-                    <th jhiSortBy="createdDate"><span>部署日期</span> <span class="fa fa-sort"></span></th>
-                    <th>AI模型能力开放API接口</th>
-                    <th width="60px">操作</th>
-                </tr>
-                </thead>
-                <tbody *ngIf="abilities">
-                    <tr *ngFor="let ability of abilities; trackBy: trackIdentity">
-                        <td>{{ability.id}}</td>
-                        <td><a (click)="viewSolution(ability.solutionUuid)" matTooltip="查看模型">{{ability.solutionName}}</a></td>
-                        <td>{{ability.solutionAuthor}}</td>
-                        <td>{{ability.deployer}}</td>
-                        <td>{{ability.createdDate | date:'yyyy-MM-dd'}}</td>
-                        <td>
-                            <a (click)="viewAbility(ability)" matTooltip="查看模型实例">
-                                {{genAbilityUrl(ability)}}
-                            </a>
-                        </td>
-                        <td width="60px">
-                            <a (click)="viewAbility(ability)" matTooltip="查看模型实例">
-                                <span class="fa fa-eye" style="color: #673ab7"></span>
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="row">
+        <div *ngFor="let ability of abilities; trackBy: trackIdentity">
+            <mat-card class="solution-card pull-right">
+                <mat-card-header class="solution-card-header">
+                    <mat-card-title class="solution-card-title">
+                        <a (click)="viewSolution(ability.solutionUuid)" matTooltip="查看模型">{{ability.solutionName}}</a>
+                    </mat-card-title>
+                    <mat-card-subtitle>
+                        <span>{{ability.solutionAuthor}}</span>
+                        <div class="pull-right">
+                            <span>{{ability.callCount}}</span>
+                        </div>
+                    </mat-card-subtitle>
+                </mat-card-header>
+                <div class="solution-card-image">
+                    <a (click)="viewAbility(ability)">
+                        <img mat-card-image src="{{ability.pictureUrl}}" *ngIf="ability.pictureUrl">
+                        <img mat-card-image src="../../../content/images/solution/default.jpg" *ngIf="!ability.pictureUrl">
+                    </a>
+                </div>
+                <mat-card-content class="solution-card-content float-right">
+                    <span>{{ability.deployer}}|{{ability.createdDate | date:'yy-MM-dd'}}部署</span>
+                </mat-card-content>
+            </mat-card>
         </div>
     </div>
     <br>

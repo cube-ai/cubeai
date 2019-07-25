@@ -69,7 +69,7 @@ public class SolutionSharedResource {
     /**
      * DELETE  /solution-shareds/:id : delete the "id" solutionShared.
      * @param id the id of the solutionShared to delete
-     * @return the ResponseEntity with status 200 (OK) or 401 Unauthorized
+     * @return the ResponseEntity with status 200 (OK) or 403 Forbidden
      */
     @DeleteMapping("/solution-shareds/{id}")
     @Timed
@@ -80,7 +80,7 @@ public class SolutionSharedResource {
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         SolutionShared solutionFavorite = solutionSharedRepository.findOne(id);
         if (null == userLogin || !userLogin.equals(solutionFavorite.getToUserLogin())) {
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         solutionSharedRepository.delete(id);

@@ -17,7 +17,7 @@
     <br><br>
 </div>
 
-<div class="row justify-content-center">
+<div class="row justify-content-center" id="divDesktop">
     <div class="row">
         <mat-card style="margin: 30px 0 0 0; width: 960px">
             <div [innerHTML]="homepageIntro | html">
@@ -35,6 +35,82 @@
     </mat-card>
 
     <mat-card style="margin: 30px 30px; width: 1320px">
+        <div class="row">
+            <div *ngFor="let solution of solutions; trackBy: trackIdentity">
+                <mat-card class="solution-card pull-right">
+                    <mat-card-header class="solution-card-header">
+                        <mat-card-title class="solution-card-title">
+                            {{solution.name}}
+                            <div class="pull-right" *ngIf="false">
+                                <a matTooltip="删除"><span>x</span></a>
+                            </div>
+                        </mat-card-title>
+                        <mat-card-subtitle>
+                            <span>{{solution.company || solution.authorName || solution.authorLogin}}</span>
+                            <div class="pull-right">
+                                <span>{{solution.createdDate | date:'yyyy-MM-dd'}}</span>
+                            </div>
+                        </mat-card-subtitle>
+                    </mat-card-header>
+                    <div class="solution-card-image">
+                        <a (click)="viewSolution(solution)">
+                            <img mat-card-image src="{{solution.pictureUrl}}" *ngIf="solution.pictureUrl">
+                            <img mat-card-image src="../../../content/images/solution/default.jpg" *ngIf="!solution.pictureUrl">
+                        </a>
+
+                    </div>
+                    <mat-card-content class="solution-card-content">
+                        <span class="fa fa-star-o" matTooltip="点评数">{{solution.ratingCount}}</span>
+                        <div class="star-bg pull-right" matTooltip="点评星级：{{solution.ratingAverage}}">
+                            <div class="star-over" [ngStyle]="{'width': getRatingWidth(solution.ratingAverage)}"></div>
+                        </div>
+                        <div style="margin-top: 2px">
+                            <span class="fa fa-eye" matTooltip="浏览量">{{solution.viewCount}}</span>
+                            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                            <span class="fa fa-download" matTooltip="下载量">{{solution.downloadCount}}</span>
+                            <div class="pull-right">
+                                <span class="fa fa-commenting-o" matTooltip="评论数">{{solution.commentCount}}</span>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+        <br>
+        <div *ngIf="solutions.length > 0">
+            <mat-paginator #paginator
+                           [length]="totalItems"
+                           [pageSize]="itemsPerPage"
+                           [pageSizeOptions]="pageSizeOptions"
+                           (page)="reloadPage($event)"
+                           showFirstLastButtons>
+            </mat-paginator>
+        </div>
+    </mat-card>
+
+    <mat-card style="margin: 0 30px 30px 30px; width: 1320px">
+        <div [innerHTML]="homepagePartners | html">
+        </div>
+    </mat-card>
+</div>
+
+<div class="row justify-content-center" id="divMobile">
+    <mat-card style="margin: 30px 30px 30px 30px">
+        <div [innerHTML]="homepageIntro | html">
+        </div>
+    </mat-card>
+
+    <mat-card style="margin: 0 30px 30px 30px">
+        <div [innerHTML]="homepageNews | html">
+        </div>
+    </mat-card>
+
+    <mat-card style="margin: 30px 30px 0 30px">
+        <div [innerHTML]="homepageArch | html" id="divImg">
+        </div>
+    </mat-card>
+
+    <mat-card style="margin: 30px 30px">
         <div class="row">
             <div *ngFor="let solution of solutions; trackBy: trackIdentity">
                 <mat-card class="solution-card pull-right">
@@ -88,10 +164,11 @@
         </div>
     </mat-card>
 
-    <mat-card style="margin: 0 30px 30px 30px; width: 1320px">
+    <mat-card style="margin: 0 30px 30px 30px">
         <div [innerHTML]="homepagePartners | html">
         </div>
     </mat-card>
 </div>
+
 <br>
 

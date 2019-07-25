@@ -61,7 +61,7 @@ public class SolutionResource {
     /**
      * POST  /solutions : Create a new solution.
      * @param solution the solution to create
-     * @return status 201 Created or status 401 Unauthorized
+     * @return status 201 Created or status 403 Forbidden
      */
     @PostMapping("/solutions")
     @Timed
@@ -72,7 +72,7 @@ public class SolutionResource {
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || userLogin.equals("system"))) {
             // createSolution只能由umu微服务中的异步任务OnBoardingServie调用，或者作者自己调用
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(403).build();
         }
 
         solution.setId(null);
@@ -88,7 +88,7 @@ public class SolutionResource {
         solution.setModifiedDate(Instant.now());
         this.solutionRepository.save(solution);
 
-        // 为solution创建描述，其uuid设为与solution的uuid一致。
+        // 为solution创建描述，其uuid设为与solution的uuid一致。 ----huolongshe
         // description表只能在这里创建
         Description description = new Description();
         description.setSolutionUuid(solution.getUuid());
@@ -114,7 +114,7 @@ public class SolutionResource {
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin || !userLogin.equals(solution.getAuthorLogin())) {
             // solution中的下属基础信息只能由作者自己修改
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         solution.setCompany(jsonObject.getString("company"));
@@ -148,7 +148,7 @@ public class SolutionResource {
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin || !userLogin.equals(solution.getAuthorLogin())) {
             // solution中的pictureUrl字段只能由作者自己修改
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         solution.setPictureUrl(jsonObject.getString("pictureUrl"));
@@ -161,7 +161,7 @@ public class SolutionResource {
     /**
      * PUT  /solutions/active : 更新Solution的 active
      * @param jsonObject the JSONObject with active to be updated
-     * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 401
+     * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 403 Forbidden
      */
     @PutMapping("/solutions/active")
     @Timed
@@ -173,7 +173,7 @@ public class SolutionResource {
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin || !userLogin.equals(solution.getAuthorLogin())) {
             // solution中的active字段只能由作者自己修改
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         solution.setActive(jsonObject.getBoolean("active"));
@@ -198,7 +198,7 @@ public class SolutionResource {
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin || !userLogin.equals(solution.getAuthorLogin())) {
             // 模型上架/下架申请只能由作者自己提出
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         PublishRequest publishRequest = new PublishRequest();
@@ -374,6 +374,7 @@ public class SolutionResource {
         @RequestParam(value = "uuid", required = false) String uuid,
         @RequestParam(value = "name", required = false) String name,
         @RequestParam(value = "authorLogin", required = false) String authorLogin,
+        @RequestParam(value = "company", required = false) String company,
         @RequestParam(value = "modelType", required = false) String modelType,
         @RequestParam(value = "toolkitType", required = false) String toolkitType,
         @RequestParam(value = "publishStatus", required = false) String publishStatus,
@@ -389,12 +390,12 @@ public class SolutionResource {
 
         if (null == uuid && null == publishStatus) {
             // 查询条件中必须存在uuid或publishStatus字段（不可能同时存在），否则为非法访问
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null != publishStatus && publishStatus.equals("下架") && null != authorLogin && !authorLogin.equals(userLogin)) {
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         Page<Solution> page;
@@ -415,10 +416,13 @@ public class SolutionResource {
                     predicates1.add(criteriaBuilder.equal(root.get("uuid"), uuid));
                 }
                 if (null != name) {
-                    predicates1.add(criteriaBuilder.like(root.get("name"), "%"+name+"%"));
+                    predicates1.add(criteriaBuilder.equal(root.get("name"), name));
                 }
                 if (null != authorLogin) {
-                    predicates1.add(criteriaBuilder.like(root.get("authorLogin"), "%"+authorLogin+"%"));
+                    predicates1.add(criteriaBuilder.equal(root.get("authorLogin"), authorLogin));
+                }
+                if (null != company) {
+                    predicates1.add(criteriaBuilder.equal(root.get("company"), company));
                 }
                 if (null != modelType) {
                     predicates1.add(criteriaBuilder.equal(root.get("modelType"), modelType));
@@ -530,7 +534,7 @@ public class SolutionResource {
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || userLogin.equals("system"))) {
             // solution只能由作者自己删除，或者由umu微服务中的onboardService异步服务删除
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         solutionRepository.delete(id);

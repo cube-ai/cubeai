@@ -7,7 +7,7 @@ export const articleRoutes: Routes = [
         path: 'article/:mode/:id',
         component: ArticleComponent,
         data: {
-            authorities: ['ROLE_ADMIN'],
+            authorities: ['ROLE_CONTENT'],
             pageTitle: '文稿'
         },
         canActivate: [UserRouteAccessService],

@@ -1,7 +1,7 @@
 <mat-card class="page-title">
     <span>我的任务</span>
 
-    <div class="btn-toolbar float-right" role="toolbar">
+    <div class="btn-toolbar float-right" role="toolbar" id="divDesktop">
         <button mat-icon-button (click)="refresh()" matTooltip="刷新">
             <mat-icon color="primary">refresh</mat-icon>
         </button>
@@ -29,40 +29,35 @@
         </mat-select>
     </mat-form-field>
 
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
-                <th jhiSortBy="id"><span>id</span> <span class="fa fa-sort"></span></th>
-                <th><span>uuid</span></th>
-                <th jhiSortBy="taskType"><span>任务类型</span> <span class="fa fa-sort"></span></th>
-                <th><span>任务名称</span></th>
-                <th jhiSortBy="taskStatus"><span>任务状态</span> <span class="fa fa-sort"></span></th>
-                <th><span>任务进度</span></th>
-                <th><span>进度描述</span></th>
-                <th jhiSortBy="startDate"><span>开始时间</span> <span class="fa fa-sort"></span></th>
-                <th jhiSortBy="endDate"><span>结束时间</span> <span class="fa fa-sort"></span></th>
-            </tr>
-            </thead>
-            <tbody *ngIf="tasks">
-            <tr *ngFor="let task of tasks; trackBy: trackIdentity">
-                <td>{{task.id}}</td>
-                <td><a (click)="viewTaskDetails(task)" matTooltip="点击查看任务执行详情...">{{task.uuid}}</a></td>
-                <td>{{task.taskType}}</td>
-                <td><a (click)="viewTaskDetails(task)" matTooltip="点击查看任务执行详情...">{{task.taskName}}</a></td>
-                <td>
-                    <span *ngIf="task.taskStatus === '等待调度'" style="color: grey">{{task.taskStatus}}</span>
-                    <span *ngIf="task.taskStatus === '正在执行'" style="color: blue">{{task.taskStatus}}</span>
-                    <span *ngIf="task.taskStatus === '成功'" style="color: green">{{task.taskStatus}}</span>
-                    <span *ngIf="task.taskStatus === '失败'" style="color: red">{{task.taskStatus}}</span>
-                </td>
-                <td>{{task.taskProgress}}%</td>
-                <td>{{task.description}}</td>
-                <td>{{task.startDate | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-                <td>{{task.endDate | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-            </tr>
-            </tbody>
-        </table>
+    <div *ngIf="tasks">
+        <mat-card *ngFor="let task of tasks; trackBy: trackIdentity" style="font-size: 14px; margin: 10px 0">
+            <a (click)="viewTaskDetails(task)">
+                <div class="row">
+                    <div class="col-md-3">
+                        <span style="font-size: 20px">
+                            {{task.taskName}}
+                        </span>
+                        <br>
+                        <span>{{task.taskType}}</span>
+                    </div>
+                    <div class="col-md-2">
+                        <span *ngIf="task.taskStatus === '等待调度'" style="color: grey">{{task.taskStatus}}</span>
+                        <span *ngIf="task.taskStatus === '正在执行'" style="color: blue">{{task.taskStatus}}</span>
+                        <span *ngIf="task.taskStatus === '成功'" style="color: green">{{task.taskStatus}}</span>
+                        <span *ngIf="task.taskStatus === '失败'" style="color: red">{{task.taskStatus}}</span>
+                        <br>
+                        <span>{{task.taskProgress}}%</span>
+                    </div>
+                    <div class="col-md-7">
+                        <span> {{task.description}}</span>
+                        <br>
+                        <span>
+                        {{task.startDate | date:'yyyy-MM-dd HH:mm:ss'}} —— {{task.endDate | date:'yyyy-MM-dd HH:mm:ss'}}
+                    </span>
+                    </div>
+                </div>
+            </a>
+        </mat-card>
     </div>
 
     <br>

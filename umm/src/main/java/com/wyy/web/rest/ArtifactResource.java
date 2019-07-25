@@ -37,7 +37,7 @@ public class ArtifactResource {
     /**
      * POST  /artifacts : Create a new artifact.
      * @param artifact the artifact to create
-     * @return status 201 Created or status 400 (Bad Request)
+     * @return status 201 Created or status 403 Forbidden
      */
     @PostMapping("/artifacts")
     @Timed
@@ -49,7 +49,7 @@ public class ArtifactResource {
         Solution solution = solutionRepository.findAllByUuid(artifact.getSolutionUuid()).get(0);
         if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || userLogin.equals("system"))) {
             // createArtifact只能由umu微服务中的异步任务OnBoardingServie调用，或者solution的作者调用
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(403).build();
         }
 
         artifact.setCreatedDate(Instant.now());
@@ -94,7 +94,7 @@ public class ArtifactResource {
     /**
      * DELETE  /artifacts/:id : delete the "id" artifact.
      * @param id the id of the artifact to delete
-     * @return the ResponseEntity with status 200 (OK) or 401 Unauthorized
+     * @return the ResponseEntity with status 200 (OK) or 403 Forbidden
      */
     @DeleteMapping("/artifacts/{id}")
     @Timed
@@ -108,7 +108,7 @@ public class ArtifactResource {
 
         if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || userLogin.equals("system"))) {
             // 只能由作者自己删除，或者由umu微服务中的onboardService异步服务删除
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         artifactRepository.delete(id);

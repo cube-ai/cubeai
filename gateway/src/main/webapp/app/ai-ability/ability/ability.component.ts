@@ -3,7 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {MatDialog} from '@angular/material';
 import { Location } from '@angular/common';
 import { Subscription } from 'rxjs/Subscription';
-import {ConfirmService, SnackBarService} from '../../shared';
+import {ConfirmService, GlobalService, SnackBarService} from '../../shared';
 import {Principal, User} from '../../account';
 import {AbilityService} from '../index';
 import {Ability} from '../model/ability.model';
@@ -29,6 +29,7 @@ export class AbilityComponent implements OnInit, OnDestroy {
     exampleRequestBody: string;
 
     constructor(
+        private globalService: GlobalService,
         private dialog: MatDialog,
         private route: ActivatedRoute,
         private router: Router,
@@ -51,6 +52,10 @@ export class AbilityComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        if (window.screen.width < 960) {
+            this.globalService.closeSideNav(); // 手机屏幕默认隐藏sideNav
+        }
+
         this.currentUser = this.principal.getCurrentAccount() ? this.principal.getCurrentAccount() : null;
         this.subscription = this.route.params.subscribe((params) => {
             this.abilityUuid = params['abilityUuid'];
@@ -142,6 +147,7 @@ export class AbilityComponent implements OnInit, OnDestroy {
             .then((res) => {
                 this.responseBody = JSON.stringify(JSON.parse(res), null, 4);
                 this.sending = false;
+                this.ability.callCount ++;
             })
             .catch((error) => {
                 this.responseBody = error;
@@ -160,8 +166,8 @@ export class AbilityComponent implements OnInit, OnDestroy {
                 this.ability.status = '停止';
                 this.abilityService.stop(this.ability).subscribe(
                     (res) => {
-                        this.ability = res.body;
-                        this.snackBarService.success('成功停止实例运行。');
+                        this.snackBarService.success('停止命令已发出，请稍后刷新能力列表查看结果...');
+                        this.ability.status = '正在停止...';
                     }, () => {
                         this.ability.status = oldStatus;
                     }

@@ -37,7 +37,7 @@ public class DocumentResource {
     /**
      * POST  /documents : Create a new document.
      * @param document the document to create
-     * @return the ResponseEntity with status 201 (Created) and with body the new document, or with status 400 (Bad Request) or 401 Unauthorized
+     * @return the ResponseEntity with status 201 (Created) and with body the new document, or with status 400 (Bad Request) or 403 Forbidden
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PostMapping("/documents")
@@ -54,7 +54,7 @@ public class DocumentResource {
         }
         Solution solution = solutions.get(0);
         if (null == userLogin || !userLogin.equals(solution.getAuthorLogin())) {
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         document.setAuthorLogin(userLogin);
@@ -98,7 +98,7 @@ public class DocumentResource {
     /**
      * DELETE  /documents/:id : delete the "id" document.
      * @param id the id of the document to delete
-     * @return the ResponseEntity with status 200 (OK) or 401 Unauthorized
+     * @return the ResponseEntity with status 200 (OK) or 403 Forbidden
      */
     @DeleteMapping("/documents/{id}")
     @Timed
@@ -109,7 +109,7 @@ public class DocumentResource {
         Document document = documentRepository.findOne(id);
         String userLogin = JwtUtil.getUserLogin(httpServletRequest);
         if (null == userLogin || !userLogin.equals(document.getAuthorLogin())) {
-            return ResponseEntity.status(401).build(); // 401 Unauthorized
+            return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         documentRepository.delete(id);
