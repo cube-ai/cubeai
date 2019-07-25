@@ -1,14 +1,8 @@
-# [![](./cubeai-logo.jpg)](https://cubeai.dimpt.com)
+# [![](https://code.ihub.org.cn/projects/207/repository/revisions/master/entry/cubeai-logo.jpg)](https://cubeai.dimpt.com)
 
-    版权所有 © 2019 中国联通网络技术研究院
-    https://cubeai.dimpt.com
+版权所有 © 2019 中国联通网络技术研究院
 
-[![GitHub releases](https://img.shields.io/github/release/cube-ai/cubeai.svg)](https://github.com/cube-ai/cubeai/releases)
-[![GitHub downloads](https://img.shields.io/github/downloads/cube-ai/cubeai/total.svg)](https://github.com/cube-ai/cubeai/releases)
-[![GitHub issues](https://img.shields.io/github/issues/cube-ai/cubeai.svg)](https://github.com/cube-ai/cubeai/issues)
-[![GitHub forks](https://img.shields.io/github/forks/cube-ai/cubeai.svg)](https://github.com/cube-ai/cubeai/network)
-[![GitHub stars](https://img.shields.io/github/stars/cube-ai/cubeai.svg)](https://github.com/cube-ai/cubeai/stargazers)
-[![GitHub license](https://img.shields.io/github/license/cube-ai/cubeai.svg)](https://github.com/cube-ai/cubeai/blob/master/LICENSE)
+https://cubeai.dimpt.com
 
 ---
 
@@ -22,13 +16,13 @@ CubeAI致力于在AI模型开发者和模型的实际使用者之间架设一条
 
 ## 系统架构
 
-![](./cubeai-arch.jpg)
+![](https://code.ihub.org.cn/projects/207/repository/revisions/master/entry/cubeai-arch.jpg)
 
 本系统由AI建模、AI模型共享（AI商城）和AI能力开放三大平台组成。其中AI建模目前暂采用线下形式，使用Acumos提供的客户端工具来实现模型打包。
 
 ## 软件架构
 
-![](./cubeai-soft.jpg)
+![](https://code.ihub.org.cn/projects/207/repository/revisions/master/entry/cubeai-soft.jpg)
 
 本系统AI模型共享平台（AI商城）和AI能力开放平台基于[Spring Cloud](https://spring.io/projects/spring-cloud)微服务架构进行开发。前端采用[Angular 6.0](https://angular.io/)框架实现，编程语言主要为TypeScript和HTML；后端采用[Spring Boot](https://spring.io/projects/spring-boot)框架实现，编程语言主要为Java。部分微服务初始代码框架采用[Jhipster](https://www.jhipster.tech/)代码脚手架工具生成。
 
