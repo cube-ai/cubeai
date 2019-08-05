@@ -1,4 +1,4 @@
-# [![]./cubeai-logo.jpg)](https://cubeai.dimpt.com)
+# [![](./cubeai-logo.jpg)](https://cubeai.dimpt.com)
 
 版权所有 © 2019 中国联通网络技术研究院
 
