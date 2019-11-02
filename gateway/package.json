@@ -38,7 +38,7 @@
     "rxjs": "6.0.0",
     "rxjs-compat": "6.0.0",
     "sockjs-client": "1.1.4",
-    "swagger-ui": "2.2.10",
+    "swagger-ui": "3.23.11",
     "tether": "1.4.0",
     "webstomp-client": "1.0.6",
     "zone.js": "0.8.19",
