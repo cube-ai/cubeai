@@ -1,0 +1,89 @@
+# ===================================================================
+# Spring Boot configuration.
+#
+# This configuration is used for unit/integration tests.
+#
+# More information on profiles: http://www.jhipster.tech/profiles/
+# More information on configuration properties: http://www.jhipster.tech/common-application-properties/
+# ===================================================================
+
+# ===================================================================
+# Standard Spring Boot properties.
+# Full reference is available at:
+# http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+# ===================================================================
+
+
+spring:
+    application:
+        name: ucomposer
+    jackson:
+        serialization.write_dates_as_timestamps: false
+    cache:
+        type: simple
+    mail:
+        host: localhost
+    messages:
+        basename: i18n/messages
+    mvc:
+        favicon:
+            enabled: false
+    thymeleaf:
+        mode: XHTML
+
+liquibase:
+    contexts: test
+
+server:
+    port: 10344
+    address: localhost
+
+info:
+    project:
+        version: #project.version#
+
+# ===================================================================
+# JHipster specific properties
+#
+# Full reference is available at: http://www.jhipster.tech/common-application-properties/
+# ===================================================================
+
+jhipster:
+    async:
+        core-pool-size: 1
+        max-pool-size: 50
+        queue-capacity: 10000
+    # To test logstash appender
+    logging:
+        logstash:
+            enabled: true
+            host: localhost
+            port: 5000
+            queue-size: 512
+    security:
+        authentication:
+            jwt:
+                secret: ce80f8629d81c3f3f88f574327cc8b7260cdfef9
+                # Token is valid 24 hours
+                token-validity-in-seconds: 86400
+        client-authorization:
+            access-token-uri: http://uaa/oauth/token
+            token-service-id: uaa
+            client-id: internal
+            client-secret: internal
+    metrics: # DropWizard Metrics configuration, used by MetricsConfiguration
+        jmx.enabled: true
+        logs: # Reports Dropwizard metrics in the logs
+            enabled: true
+            report-frequency: 60 # in seconds
+
+# ===================================================================
+# Application specific properties
+# Add your own application properties here, see the ApplicationProperties class
+# to have type-safe configuration, like in the JHipsterProperties above
+#
+# More documentation is available at:
+# http://www.jhipster.tech/common-application-properties/
+# ===================================================================
+
+application:
