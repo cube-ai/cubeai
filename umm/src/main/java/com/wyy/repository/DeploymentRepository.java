@@ -18,5 +18,5 @@ import java.util.List;
 public interface DeploymentRepository extends JpaRepository<Deployment, Long>, JpaSpecificationExecutor {
 
     List<Deployment> findAllByUuid(String uuid);
-    Page<Deployment> findAllBySolutionNameLikeAndSolutionAuthorLikeAndDeployerLike(String filter1, String filter2, String filter3, Pageable pageable);
+
 }

@@ -419,7 +419,9 @@ public class SolutionResource {
                     predicates1.add(criteriaBuilder.equal(root.get("name"), name));
                 }
                 if (null != authorLogin) {
-                    predicates1.add(criteriaBuilder.equal(root.get("authorLogin"), authorLogin));
+                    predicates1.add(criteriaBuilder.or(
+                        criteriaBuilder.equal(root.get("authorLogin"), authorLogin),
+                        criteriaBuilder.equal(root.get("authorName"), authorLogin)));
                 }
                 if (null != company) {
                     predicates1.add(criteriaBuilder.equal(root.get("company"), company));
@@ -455,6 +457,7 @@ public class SolutionResource {
                 if (null != filter) {
                     predicates3.add(criteriaBuilder.like(root.get("name"), "%"+filter+"%"));
                     predicates3.add(criteriaBuilder.like(root.get("authorLogin"), "%"+filter+"%"));
+                    predicates3.add(criteriaBuilder.like(root.get("authorName"), "%"+filter+"%"));
                     predicates3.add(criteriaBuilder.like(root.get("modelType"), "%"+filter+"%"));
                     predicates3.add(criteriaBuilder.like(root.get("toolkitType"), "%"+filter+"%"));
                     predicates3.add(criteriaBuilder.like(root.get("summary"), "%"+filter+"%"));
@@ -462,7 +465,7 @@ public class SolutionResource {
                     predicates3.add(criteriaBuilder.like(root.get("tag2"), "%"+filter+"%"));
                     predicates3.add(criteriaBuilder.like(root.get("tag3"), "%"+filter+"%"));
                     predicates3.add(criteriaBuilder.like(root.get("company"), "%"+filter+"%"));
-                    predicates3.add(criteriaBuilder.like(root.get("coAuthors"), "%"+filter+"%"));
+                    // predicates3.add(criteriaBuilder.like(root.get("coAuthors"), "%"+filter+"%"));
                 }
 
                 Predicate predicate1 = criteriaBuilder.and(predicates1.toArray(new Predicate[predicates1.size()]));

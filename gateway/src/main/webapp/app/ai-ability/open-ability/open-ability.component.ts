@@ -26,7 +26,7 @@ export class OpenAbilityComponent implements OnInit {
     totalItems: number;
     page = 1;
     previousPage = 1;
-    predicate = 'id';
+    predicate = 'displayOrder';
     reverse = false;
 
     constructor(
@@ -72,8 +72,9 @@ export class OpenAbilityComponent implements OnInit {
     sort() {
         const result = [this.predicate + ',' + (this.reverse ? 'asc' : 'desc')];
         if (this.predicate !== 'id') {
-            result.push('id');
+            result.push('id' + ',' + (this.reverse ? 'asc' : 'desc'));
         }
+
         return result;
     }
 

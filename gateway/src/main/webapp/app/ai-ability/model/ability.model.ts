@@ -5,6 +5,7 @@ export class Ability {
     public solutionUuid?: string;
     public solutionName?: string;
     public solutionAuthor?: string;
+    public solutionCompany?: string;
     public k8sPort?: number;
     public isPublic?: boolean;
     public status?: string;
@@ -15,4 +16,8 @@ export class Ability {
     public toolkitType: string;
     public callCount: number;
     public demoUrl: string;
+    public subject1?: string;
+    public subject2?: string;
+    public subject3?: string;
+    public displayOrder?: string;
 }

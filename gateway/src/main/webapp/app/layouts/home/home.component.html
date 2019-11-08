@@ -122,7 +122,7 @@
                             </div>
                         </mat-card-title>
                         <mat-card-subtitle>
-                            <span>{{solution.authorLogin}}</span>
+                            <span>{{solution.company || solution.authorName || solution.authorLogin}}</span>
                             <div class="pull-right">
                                 <span>{{solution.createdDate | date:'yyyy-MM-dd'}}</span>
                             </div>

@@ -12,6 +12,19 @@
 </mat-card>
 
 <mat-card>
+    <mat-form-field >
+        <mat-select [(ngModel)]="searchStatus" (selectionChange)="refresh()">
+            <mat-option value="运行">
+                运行中
+            </mat-option>
+            <mat-option value="停止">
+                已停止
+            </mat-option>
+            <mat-option value="all">
+                全部
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
     <div>
         <div class="table-responsive">
             <table class="table">
@@ -25,6 +38,7 @@
                     <th jhiSortBy="createdDate"><span>部署日期</span> <span class="fa fa-sort"></span></th>
                     <th jhiSortBy="status"><span>运行状态</span> <span class="fa fa-sort"></span></th>
                     <th>AI模型能力开放API接口</th>
+                    <th jhiSortBy="displayOrder" width="100px"><span>显示控制</span> <span class="fa fa-sort"></span></th>
                     <th width="100px">操作</th>
                 </tr>
                 </thead>
@@ -38,6 +52,7 @@
                         <td>{{ability.createdDate | date:'yyyy-MM-dd'}}</td>
                         <td>{{ability.status}}</td>
                         <td>{{genAbilityUrl(ability)}}</td>
+                        <td width="100px">{{ability.displayOrder}}</td>
                         <td width="100px">
                             <a (click)="viewAbility(ability)" matTooltip="查看模型实例">
                                 <span class="fa fa-eye" style="color: #673ab7"></span>

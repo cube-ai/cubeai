@@ -47,8 +47,7 @@ export class SolutionComponent implements OnInit, OnDestroy {
     isViewing = false;
     isOwner = false;
     isReviewer = false;
-    canEditBaseInfo = false;
-    canAddDocument = false;
+    canPublish = false;
     canUnpublish = false;
     requestReason: string;
     reviewComment: string;
@@ -105,7 +104,7 @@ export class SolutionComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        if (this.canEditBaseInfo) {
+        if (this.isEditing) {
             this.solutionService.updateBaseinfo({
                 id: this.solution.id,
                 company: this.solution.company,
@@ -192,6 +191,7 @@ export class SolutionComponent implements OnInit, OnDestroy {
                     this.abilityService.query({
                         isPublic: true,
                         solutionUuid: this.solutionUuid,
+                        status: '运行',
                     }).subscribe(
                         (res1) => {
                             if (res1 && res1.body.length > 0) {
@@ -229,8 +229,7 @@ export class SolutionComponent implements OnInit, OnDestroy {
     }
 
     updateRenderParameters() {
-        this.canEditBaseInfo = this.isEditing && this.solution.active && (this.solution.publishStatus === '下架') && (this.solution.publishRequest === '无申请');
-        this.canAddDocument = this.isEditing && this.solution.active && (this.solution.publishRequest === '无申请');
+        this.canPublish = this.isEditing && this.solution.active && (this.solution.publishStatus === '下架') && (this.solution.publishRequest === '无申请');
         this.canUnpublish = this.isEditing && this.solution.active && (this.solution.publishStatus === '上架') && (this.solution.publishRequest === '无申请');
     }
 
@@ -401,13 +400,20 @@ export class SolutionComponent implements OnInit, OnDestroy {
 
     copyDockerUrl(dockerUrl: string) {
         const oInput = document.createElement('input');
-        oInput.value = 'docker pull ' + dockerUrl;
+        oInput.value = 'docker run ' + dockerUrl;
         document.body.appendChild(oInput);
         oInput.select();
         document.execCommand('Copy'); // 执行浏览器复制命令
         oInput.className = 'oInput';
         oInput.style.display = 'none';
         this.snackBarService.info('拉取docker镜像命令已复制到剪贴板...');
+        this.solutionService.updateDownloadCount({
+            id: this.solution.id,
+        }).subscribe(
+            (res) => {
+                this.solution = res.body;
+            }
+        );
     }
 
     enterEditDescription() {

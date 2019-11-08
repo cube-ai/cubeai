@@ -5,6 +5,14 @@
     height: -webkit-fill-available;
     width: -webkit-fill-available;
 }
+
+.bkgd{
+    background: url('./images/grid.png');
+    /*height: 100%;*/
+    /*width: 100%;*/
+    height: -webkit-fill-available;
+    width: -webkit-fill-available;
+}
 /*.canvas-outer-container {position:absolute; z-index: 5;width:100%}*/
 
 .left-wrapper {

@@ -20,7 +20,7 @@
                         <a (click)="viewSolution(ability.solutionUuid)" matTooltip="查看模型">{{ability.solutionName}}</a>
                     </mat-card-title>
                     <mat-card-subtitle>
-                        <span>{{ability.solutionAuthor}}</span>
+                        <span>{{ability.solutionCompany || ability.solutionAuthor}}</span>
                         <div class="pull-right">
                             <span>{{ability.callCount}}</span>
                         </div>

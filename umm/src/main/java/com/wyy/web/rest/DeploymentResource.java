@@ -1,9 +1,12 @@
 package com.wyy.web.rest;
 
+import com.alibaba.fastjson.JSONObject;
 import com.codahale.metrics.annotation.Timed;
 import com.wyy.domain.Deployment;
 
+import com.wyy.domain.Solution;
 import com.wyy.repository.DeploymentRepository;
+import com.wyy.repository.SolutionRepository;
 import com.wyy.web.rest.errors.BadRequestAlertException;
 import com.wyy.web.rest.util.HeaderUtil;
 import com.wyy.web.rest.util.JwtUtil;
@@ -46,9 +49,11 @@ public class DeploymentResource {
     private static final String ENTITY_NAME = "deployment";
 
     private final DeploymentRepository deploymentRepository;
+    private final SolutionRepository solutionRepository;
 
-    public DeploymentResource(DeploymentRepository deploymentRepository) {
+    public DeploymentResource(DeploymentRepository deploymentRepository, SolutionRepository solutionRepository) {
         this.deploymentRepository = deploymentRepository;
+        this.solutionRepository = solutionRepository;
     }
 
     /**
@@ -101,6 +106,52 @@ public class DeploymentResource {
         Deployment result = deploymentRepository.save(deployment);
         return ResponseEntity.ok()
             .body(result);
+    }
+
+    /**
+     * PUT  /deployments/subjects : 更新deployment对象中的subject和displayOrder等诸字段
+     * @param jsonObject the JSONObject with subjects to be updated
+     * @return the ResponseEntity with status 200 (OK) and with body the updated deployment or status 400 (Bad Request)
+     */
+    @PutMapping("/deployments/subjects")
+    @Timed
+    @Secured({"ROLE_OPERATOR"})  // subject字段只能由能力开放平台管理员更新
+    public ResponseEntity<Deployment> updateDeploymentSubjects(@Valid @RequestBody JSONObject jsonObject) {
+        log.debug("REST request to update Deployment subjects: {}", jsonObject);
+
+        Deployment deployment = deploymentRepository.findOne(jsonObject.getLong("id"));
+        deployment.setSubject1(jsonObject.getString("subject1"));
+        deployment.setSubject2(jsonObject.getString("subject2"));
+        deployment.setSubject3(jsonObject.getString("subject3"));
+        deployment.setDisplayOrder(jsonObject.getLong("displayOrder"));
+
+        deployment.setModifiedDate(Instant.now());
+        Deployment result = deploymentRepository.save(deployment);
+
+        return ResponseEntity.ok().body(result);
+    }
+
+    /**
+     * PUT  /deployments/solution_info : 更新deployment对象中的与solution对象相关的字段
+     * @return the ResponseEntity with status 200 (OK)
+     */
+    @PutMapping("/deployments/solution_info")
+    @Timed
+    public ResponseEntity<Deployment> updateDeploymentSolutionInfo(@Valid @RequestBody JSONObject jsonObject) {
+        log.debug("REST request to update Deployment solution infomation: {}", jsonObject);
+
+        Deployment deployment = deploymentRepository.findOne(jsonObject.getLong("id"));
+        Solution solution = solutionRepository.findAllByUuid(deployment.getSolutionUuid()).get(0);
+
+        deployment.setSolutionName(solution.getName());
+        deployment.setSolutionAuthor(solution.getAuthorName());
+        deployment.setSolutionCompany(solution.getCompany());
+        deployment.setPictureUrl(solution.getPictureUrl());
+        deployment.setModelType(solution.getModelType());
+        deployment.setToolkitType(solution.getToolkitType());
+        deployment.setModifiedDate(Instant.now());
+        Deployment result = deploymentRepository.save(deployment);
+        return ResponseEntity.ok().body(result);
     }
 
     /**
@@ -160,7 +211,9 @@ public class DeploymentResource {
                 if (null != filter) {
                     predicates2.add(criteriaBuilder.like(root.get("solutionName"), "%"+filter+"%"));
                     predicates2.add(criteriaBuilder.like(root.get("solutionAuthor"), "%"+filter+"%"));
+                    predicates2.add(criteriaBuilder.like(root.get("solutionCompany"), "%"+filter+"%"));
                     predicates2.add(criteriaBuilder.like(root.get("deployer"), "%"+filter+"%"));
+                    predicates2.add(criteriaBuilder.like(root.get("status"), "%"+filter+"%"));
                 }
 
                 Predicate predicate1 = criteriaBuilder.and(predicates1.toArray(new Predicate[predicates1.size()]));
@@ -189,18 +242,45 @@ public class DeploymentResource {
     @Timed
     @Secured({"ROLE_OPERATOR"})  // 专门为ROLE_OPERATOR设置的查询所有部署实例的查询接口
     public ResponseEntity<List<Deployment>> getAllDeploymentsByOperator(@RequestParam(value = "filter", required = false) String filter,
+                                                                        @RequestParam(value = "status", required = false) String status,
                                                                         Pageable pageable) {
 
         log.debug("REST request to get all Deployments");
 
         Page<Deployment> page;
 
-        if (null != filter) {
-            page =  this.deploymentRepository.findAllBySolutionNameLikeAndSolutionAuthorLikeAndDeployerLike(filter, filter, filter, pageable);
-        } else {
-            page =  this.deploymentRepository.findAll(pageable);
-        }
+        Specification specification = new Specification<Deployment>() {
 
+            @Override
+            public Predicate toPredicate(Root<Deployment> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
+
+                List<Predicate> predicates1 = new ArrayList<>();
+                List<Predicate> predicates2 = new ArrayList<>();
+
+                if (null != status) {
+                    predicates1.add(criteriaBuilder.equal(root.get("status"), status));
+                }
+
+                if (null != filter) {
+                    predicates2.add(criteriaBuilder.like(root.get("solutionName"), "%"+filter+"%"));
+                    predicates2.add(criteriaBuilder.like(root.get("solutionAuthor"), "%"+filter+"%"));
+                    predicates2.add(criteriaBuilder.like(root.get("solutionCompany"), "%"+filter+"%"));
+                    predicates2.add(criteriaBuilder.like(root.get("deployer"), "%"+filter+"%"));
+                    predicates2.add(criteriaBuilder.like(root.get("status"), "%"+filter+"%"));
+                }
+
+                Predicate predicate1 = criteriaBuilder.and(predicates1.toArray(new Predicate[predicates1.size()]));
+                Predicate predicate2 = criteriaBuilder.or(predicates2.toArray(new Predicate[predicates2.size()]));
+
+                if (predicates2.size() > 0) {
+                    return criteriaBuilder.and(predicate1, predicate2);
+                } else {
+                    return predicate1;
+                }
+            }
+        };
+
+        page =  this.deploymentRepository.findAll(specification, pageable);
 
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/deployments/all");
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);

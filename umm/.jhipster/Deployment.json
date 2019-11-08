@@ -23,6 +23,10 @@
             "fieldType": "String"
         },
         {
+            "fieldName": "solutionCompany",
+            "fieldType": "String"
+        },
+        {
             "fieldName": "k8sPort",
             "fieldType": "Integer"
         },
@@ -69,6 +73,22 @@
                 "maxlength"
             ],
             "fieldValidateRulesMaxlength": 512
+        },
+        {
+            "fieldName": "subject1",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "subject2",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "subject3",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "displayOrder",
+            "fieldType": "Long"
         }
     ],
     "changelogDate": "20190506111337",

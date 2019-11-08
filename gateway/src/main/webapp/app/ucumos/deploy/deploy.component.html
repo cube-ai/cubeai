@@ -11,14 +11,14 @@
 
 <mat-card>
     <label>&nbsp;&nbsp;&nbsp;部署至：&nbsp;&nbsp;&nbsp;&nbsp;</label>
-    <mat-radio-group [(ngModel)]="deployTo" [disabled]="deployStarted">
+    <mat-radio-group [(ngModel)]="deployTo" [disabled]="deployStarted || isComposite">
         <mat-radio-button value="local" color="primary">本地</mat-radio-button>
         &nbsp;&nbsp;
         <mat-radio-button value="ucumos" color="primary">CubeAI能力开放平台</mat-radio-button>
     </mat-radio-group>
 </mat-card>
 
-<mat-card *ngIf="openMode === 'deploy' && deployTo === 'local'">
+<mat-card *ngIf="openMode === 'deploy' && deployTo === 'local' && !isComposite">
     <div>请在本地安装有docker环境的系统中运行如下命令：</div>
     <br>
     <span>

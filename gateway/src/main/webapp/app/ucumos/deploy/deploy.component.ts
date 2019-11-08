@@ -29,7 +29,7 @@ export class DeployComponent implements OnInit, OnDestroy {
     deployTo = 'local';
     deployMode = 'private';
     deployStarted = false;
-
+    isComposite = false;
     progressDeploy = 0;
     detailDeploy = '';
     statusDeploy = '';
@@ -86,17 +86,21 @@ export class DeployComponent implements OnInit, OnDestroy {
                     if (res.body && res.body.length > 0) {
                         this.solution = res.body[0];
                         this.taskUuid = uuid().replace(/-/g, '').toLowerCase();
-
-                        this.artifactService.query({
-                            solutionUuid: this.solution.uuid,
-                            type: 'DOCKER镜像',
-                        }).subscribe(
-                            (res1) => {
-                                if (res1 && res1.body.length > 0) {
-                                    this.dockerImgUrl = res1.body[0].url;
+                        if (this.solution.toolkitType === '模型组合') {
+                            this.isComposite = true;
+                            this.deployTo = 'ucumos';
+                        } else {
+                            this.artifactService.query({
+                                solutionUuid: this.solution.uuid,
+                                type: 'DOCKER镜像',
+                            }).subscribe(
+                                (res1) => {
+                                    if (res1 && res1.body.length > 0) {
+                                        this.dockerImgUrl = res1.body[0].url;
+                                    }
                                 }
-                            }
-                        );
+                            );
+                        }
                     } else {
                         this.snackBarService.error('未找到模型！');
                     }
@@ -126,6 +130,9 @@ export class DeployComponent implements OnInit, OnDestroy {
     }
 
     genLocalDeployCmd(): string {
+        if (this.dockerImgUrl === '模型组合') {
+            return ' ';
+        }
         return 'docker run ' + this.dockerImgUrl;
     }
 
@@ -149,12 +156,13 @@ export class DeployComponent implements OnInit, OnDestroy {
         } else if (this.deployMode === 'private') {
             this.abilityService.query({
                 isPublic: false,
+                status: '运行',
                 deployer: this.currentUser.login,
             }).subscribe(
                 (res) => {
                     if (res && res.body.length > 0) {
-                        if (res.body.length > 4) {
-                            this.snackBarService.info('你部署的私有能力实例数已达到上限（5个），不能再部署新的实例！');
+                        if (res.body.length > 4 && !this.currentUser.authorities.includes('ROLE_MANAGER')) {  // 允许ROLE_MANAGER部署大于5个私有能力
+                            this.snackBarService.info('你部署的私有能力数已达到上限（5个），不能再部署新的实例！可向平台管理员申请停止已部署私有能力～');
                         } else {
                             const abilities = res.body.filter((ability) => (ability.solutionUuid === this.solution.uuid));
                             if (abilities.length > 0) {
@@ -241,7 +249,7 @@ export class DeployComponent implements OnInit, OnDestroy {
     }
 
     canDeployToPublic() {
-        return this.currentUser.authorities.includes('ROLE_OPERATOR');
+        return this.currentUser.authorities.includes('ROLE_OPERATOR') && (this.solution && this.solution.publishStatus === '上架');
     }
 
 }

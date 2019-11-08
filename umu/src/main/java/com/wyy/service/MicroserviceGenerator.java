@@ -72,13 +72,14 @@ public class MicroserviceGenerator {
                 FileUtil.copyFile(resource, new File(outputFolder, resource.getFilename()));
             }
             JSONArray requirementsJSONArray = metadata.getJSONObject("runtime").getJSONObject("dependencies").getJSONObject("pip").getJSONArray("requirements");
+            String pythonVersion = metadata.getJSONObject("runtime").getString("version");
 
             if (!PythonUtil.generateRequirementTxt(outputFolder, requirementsJSONArray)) {
                 this.saveTaskStepProgress(solution.getUuid(), "创建微服务", "失败", 15,
                     "生成requirement文件失败。");
                 return false;
             }
-            PythonUtil.generateDockerfile(outputFolder, requirementsJSONArray);
+            PythonUtil.generateDockerfile(outputFolder, requirementsJSONArray, pythonVersion);
 
             File modelFolder = new File(outputFolder, "model");
             modelFolder.mkdir();

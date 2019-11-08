@@ -1,0 +1,10 @@
+version: '2'
+services:
+    umo-app:
+        image: umo
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod,swagger
+            - SPRING_CLOUD_CONSUL_HOST=consul
+            - SPRING_CLOUD_CONSUL_PORT=8500
+            - SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka
+            - SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=zookeeper

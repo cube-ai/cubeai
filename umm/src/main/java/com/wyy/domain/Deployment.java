@@ -41,6 +41,9 @@ public class Deployment implements Serializable {
     @Column(name = "solution_author")
     private String solutionAuthor;
 
+    @Column(name = "solution_company")
+    private String solutionCompany;
+
     @Column(name = "k_8_s_port")
     private Integer k8sPort;
 
@@ -72,6 +75,18 @@ public class Deployment implements Serializable {
     @Size(max = 512)
     @Column(name = "demo_url", length = 512)
     private String demoUrl;
+
+    @Column(name = "subject_1")
+    private String subject1;
+
+    @Column(name = "subject_2")
+    private String subject2;
+
+    @Column(name = "subject_3")
+    private String subject3;
+
+    @Column(name = "display_order")
+    private Long displayOrder;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -145,6 +160,19 @@ public class Deployment implements Serializable {
 
     public void setSolutionAuthor(String solutionAuthor) {
         this.solutionAuthor = solutionAuthor;
+    }
+
+    public String getSolutionCompany() {
+        return solutionCompany;
+    }
+
+    public Deployment solutionCompany(String solutionCompany) {
+        this.solutionCompany = solutionCompany;
+        return this;
+    }
+
+    public void setSolutionCompany(String solutionCompany) {
+        this.solutionCompany = solutionCompany;
     }
 
     public Integer getk8sPort() {
@@ -276,6 +304,58 @@ public class Deployment implements Serializable {
     public void setDemoUrl(String demoUrl) {
         this.demoUrl = demoUrl;
     }
+
+    public String getSubject1() {
+        return subject1;
+    }
+
+    public Deployment subject1(String subject1) {
+        this.subject1 = subject1;
+        return this;
+    }
+
+    public void setSubject1(String subject1) {
+        this.subject1 = subject1;
+    }
+
+    public String getSubject2() {
+        return subject2;
+    }
+
+    public Deployment subject2(String subject2) {
+        this.subject2 = subject2;
+        return this;
+    }
+
+    public void setSubject2(String subject2) {
+        this.subject2 = subject2;
+    }
+
+    public String getSubject3() {
+        return subject3;
+    }
+
+    public Deployment subject3(String subject3) {
+        this.subject3 = subject3;
+        return this;
+    }
+
+    public void setSubject3(String subject3) {
+        this.subject3 = subject3;
+    }
+
+    public Long getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public Deployment displayOrder(Long displayOrder) {
+        this.displayOrder = displayOrder;
+        return this;
+    }
+
+    public void setDisplayOrder(Long displayOrder) {
+        this.displayOrder = displayOrder;
+    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
@@ -307,6 +387,7 @@ public class Deployment implements Serializable {
             ", solutionUuid='" + getSolutionUuid() + "'" +
             ", solutionName='" + getSolutionName() + "'" +
             ", solutionAuthor='" + getSolutionAuthor() + "'" +
+            ", solutionCompany='" + getSolutionCompany() + "'" +
             ", k8sPort=" + getk8sPort() +
             ", isPublic='" + isIsPublic() + "'" +
             ", status='" + getStatus() + "'" +
@@ -317,6 +398,10 @@ public class Deployment implements Serializable {
             ", toolkitType='" + getToolkitType() + "'" +
             ", callCount=" + getCallCount() +
             ", demoUrl='" + getDemoUrl() + "'" +
+            ", subject1='" + getSubject1() + "'" +
+            ", subject2='" + getSubject2() + "'" +
+            ", subject3='" + getSubject3() + "'" +
+            ", displayOrder=" + getDisplayOrder() +
             "}";
     }
 }

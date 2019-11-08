@@ -25,8 +25,7 @@ export class AbilityComponent implements OnInit, OnDestroy {
     requestBody: string;
     responseBody: string;
     sending = false;
-    exampleModelMethod: string;
-    exampleRequestBody: string;
+    examples: any[];
 
     constructor(
         private globalService: GlobalService,
@@ -48,6 +47,21 @@ export class AbilityComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
+        // 同步更新能力的solution信息
+        this.abilityService.updateSolutionInfo({
+            id: this.ability.id,
+        }).subscribe(() => {
+            if (this.isEditing) {
+                this.abilityService.updateSubjects({
+                    id: this.ability.id,
+                    subject1: this.ability.subject1,
+                    subject2: this.ability.subject2,
+                    subject3: this.ability.subject3,
+                    displayOrder: this.ability.displayOrder,
+                }).subscribe();
+            }
+        });
+
         this.subscription.unsubscribe();
     }
 
@@ -86,7 +100,17 @@ export class AbilityComponent implements OnInit, OnDestroy {
     }
 
     genAbilityUrl(): string {
-        return 'POST ' + location.protocol + '//' + location.host + '/ability/model/' + this.ability.uuid + '/{模型方法}';
+        let methods = '';
+        if (this.examples && this.examples.length > 0) {
+            methods = ': ';
+            for (let i = 0; i < this.examples.length; i++) {
+                methods += this.examples[i]['model-method'];
+                if (i < this.examples.length - 1) {
+                    methods += ' | ';
+                }
+            }
+        }
+        return 'POST ' + location.protocol + '//' + location.host + '/ability/model/' + this.ability.uuid + '/{模型方法' + methods + '}';
     }
 
     genAbilityUrlPrefix(): string {
@@ -103,9 +127,7 @@ export class AbilityComponent implements OnInit, OnDestroy {
                     const url = res.body[0].url;
                     this.downloadService.getFileText(url).subscribe(
                         (res1) => {
-                            const example = JSON.parse(res1.body['text'])['examples'][0];
-                            this.exampleModelMethod = example['model-method'];
-                            this.exampleRequestBody = JSON.stringify(example['body'], null, 4);
+                            this.examples = JSON.parse(res1.body['text'])['examples'];
                         }
                     );
                 }
@@ -114,9 +136,11 @@ export class AbilityComponent implements OnInit, OnDestroy {
     }
 
     genTestRequest() {
-        if (this.exampleModelMethod && this.exampleRequestBody) {
-            this.modelMethod = this.exampleModelMethod;
-            this.requestBody = this.exampleRequestBody;
+        if (this.examples) {
+            const index = Math.floor(Math.random() * this.examples.length);
+            const example = this.examples[index]; // 从所有例子中随机取一个
+            this.modelMethod = example['model-method'];
+            this.requestBody = JSON.stringify(example['body'], null, 4);
         } else {
             this.snackBarService.error('无可用测试数据！');
         }
