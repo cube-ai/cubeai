@@ -14,6 +14,7 @@ import {Router} from '@angular/router';
 })
 export class AllAbilityComponent implements OnInit {
     filter = '';
+    searchStatus = '运行';
     abilities: Ability[] = [];
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -47,6 +48,9 @@ export class AllAbilityComponent implements OnInit {
         const queryOptions = {};
         if (this.filter) {
             queryOptions['filter'] = this.filter;
+        }
+        if (this.searchStatus && this.searchStatus !== 'all') {
+            queryOptions['status'] = this.searchStatus;
         }
         queryOptions['page'] = this.page - 1;
         queryOptions['size'] = this.itemsPerPage;

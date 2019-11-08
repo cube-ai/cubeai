@@ -30,18 +30,14 @@
 
 <mat-card class="search-condition-card">
     <div>
-        <span >检索条件：</span>
-        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <span >检索条件：  </span>
         <mat-form-field >
             <input matInput type="text" placeholder="名称" [(ngModel)]="searchName" (blur)="refresh()">
         </mat-form-field>
         <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
         <mat-form-field >
             <input matInput type="text" placeholder="关键字" [(ngModel)]="searchTag" (blur)="refresh()">
         </mat-form-field>
-        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
         <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
         <mat-form-field >
             <mat-select placeholder="模型类别" [(ngModel)]="searchModelType" (selectionChange)="refresh()">
@@ -59,7 +55,6 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
-        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
         <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
         <mat-form-field >
             <mat-select placeholder="模型工具" [(ngModel)]="searchToolkitType" (selectionChange)="refresh()">
@@ -85,9 +80,7 @@
         </mat-form-field>
     </div>
     <div>
-        <span >模型排序：</span>
-        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <span >模型排序：  </span>
         <mat-form-field >
             <mat-select placeholder="排序字段" [(ngModel)]="predicate" (selectionChange)="refresh()">
                 <mat-option value="id">
@@ -122,7 +115,6 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
-        <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
         <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
         <mat-radio-group [(ngModel)]="reverse" (change)="refresh()">
             <mat-radio-button [value]="true" color="primary">升序</mat-radio-button>

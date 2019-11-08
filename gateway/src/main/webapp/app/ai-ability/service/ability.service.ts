@@ -30,6 +30,14 @@ export class AbilityService {
         return this.http.put<Ability>(this.resourceUrl, body, { observe: 'response' });
     }
 
+    updateSubjects(body: any): Observable<HttpResponse<Ability>> {
+        return this.http.put<Ability>(this.resourceUrl + '/subjects', body, { observe: 'response' });
+    }
+
+    updateSolutionInfo(body: any): Observable<HttpResponse<Ability>> {
+        return this.http.put<Ability>(this.resourceUrl + '/solution_info', body, { observe: 'response' });
+    }
+
     stop(body: any): Observable<HttpResponse<Ability>> {
         return this.http.put<Ability>(this.resourceUrlLcm + '/stop', body, { observe: 'response' });
     }

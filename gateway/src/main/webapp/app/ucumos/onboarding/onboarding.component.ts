@@ -76,7 +76,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
         this.userLogin = this.principal.getCurrentAccount().login;
         this.taskUuid = uuid().replace(/-/g, '').toLowerCase();
         this.uploader = new FileUploader({
-            url: SERVER_API_URL + 'umu/api/modelfile/' + this.taskUuid,
+            url: SERVER_API_URL + 'zuul/umu/api/modelfile/' + this.taskUuid,
             method: 'POST',
             itemAlias: this.userLogin,
             queueLimit: 1,
@@ -97,8 +97,8 @@ export class OnboardingComponent implements OnInit, OnDestroy {
             }
         };
 
-        if (fileItem.file.size > 300 * 1024 * 1024) {
-            this.snackBarService.error('上传模型压缩包文件不能大于300MB！');
+        if (fileItem.file.size > 500 * 1024 * 1024) {
+            this.snackBarService.error('上传模型压缩包文件不能大于500MB！');
             fileItem.remove();
             return;
         }

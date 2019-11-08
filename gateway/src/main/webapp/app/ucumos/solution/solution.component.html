@@ -11,7 +11,7 @@
     </span>
 
     <div class="btn-toolbar float-right" role="toolbar" id="divDesktop">
-        <button mat-raised-button color="primary" (click)="requestPublish()" *ngIf="canEditBaseInfo" [disabled]="sendingAction || !solution.version
+        <button mat-raised-button color="primary" (click)="requestPublish()" *ngIf="canPublish" [disabled]="sendingAction || !solution.version
                 || !solution.modelType || !solution.toolkitType || !solution.summary || !solution.tag1 || editingDescription || !description.content || !solution.pictureUrl || !requestReason">
             <span class="fa fa-send">&nbsp;&nbsp;申请上架</span>
         </button>
@@ -27,7 +27,7 @@
         </button>
 
         &nbsp;&nbsp;
-        <button mat-icon-button (click)="deleteSolution()" matTooltip="删除模型" *ngIf="canEditBaseInfo">
+        <button mat-icon-button (click)="deleteSolution()" matTooltip="删除模型" *ngIf="canPublish">
             <mat-icon color="warn">delete_sweep</mat-icon>
         </button>
         <button mat-icon-button (click)="restoreSolution()" matTooltip="找回模型" *ngIf="!solution.active">
@@ -47,7 +47,7 @@
         </button>
 
         &nbsp;&nbsp;&nbsp;&nbsp;
-        <button mat-icon-button (click)="deploySolution()" matTooltip="部署模型" *ngIf="solution.active && solution.publishStatus === '上架' && solution.tag1 !== '网络AI'">
+        <button mat-icon-button (click)="deploySolution()" matTooltip="部署模型" *ngIf="solution.active && ((solution.publishStatus === '上架') || (isReviewer && solution.publishRequest === '申请上架'))  && solution.tag1 !== '网络AI'">
             <mat-icon color="primary">cloud_upload</mat-icon>
         </button>
 
@@ -66,7 +66,7 @@
 </mat-card>
 
 <mat-menu #mobileMenu="matMenu" [overlapTrigger]="false">
-    <button mat-menu-item (click)="requestPublish()" *ngIf="canEditBaseInfo" [disabled]="sendingAction || !solution.version
+    <button mat-menu-item (click)="requestPublish()" *ngIf="canPublish" [disabled]="sendingAction || !solution.version
                 || !solution.modelType || !solution.toolkitType || !solution.summary || !solution.tag1 || editingDescription || !description.content || !solution.pictureUrl || !requestReason">
         <span class="fa fa-send">&nbsp;&nbsp;申请上架</span>
     </button>
@@ -79,7 +79,7 @@
     <button mat-menu-item (click)="approvePublish(false)" [disabled]="!reviewComment || sendingAction" *ngIf="isReviewingPublish || isReviewingUnpublish">
         <span>&nbsp;&nbsp;</span><span class="fa fa-ban">&nbsp;&nbsp;拒绝</span>
     </button>
-    <button mat-menu-item (click)="deleteSolution()" *ngIf="canEditBaseInfo">
+    <button mat-menu-item (click)="deleteSolution()" *ngIf="canPublish">
         <span>&nbsp;&nbsp;</span><span class="fa fa-remove">&nbsp;&nbsp;删除模型</span>
     </button>
     <button mat-menu-item (click)="restoreSolution()" *ngIf="solution && !solution.active">
@@ -129,12 +129,12 @@
                             &nbsp;&nbsp;&nbsp;&nbsp;
                             <mat-form-field>
                                 <input matInput [(ngModel)]="solution.version" type="text" placeholder="版本号" maxlength=30
-                                       [required]="canEditBaseInfo" [disabled]="!canEditBaseInfo">
+                                       [required]="isEditing" [disabled]="!isEditing">
                             </mat-form-field>
                             &nbsp;&nbsp;&nbsp;&nbsp;
                             <mat-form-field>
                                 <mat-select [(ngModel)]="solution.modelType" placeholder="模型类别"
-                                            [required]="canEditBaseInfo" [disabled]="!canEditBaseInfo">
+                                            [required]="isEditing" [disabled]="!isEditing">
                                     <mat-option value="预测">
                                         预测
                                     </mat-option>
@@ -152,18 +152,24 @@
                             &nbsp;&nbsp;&nbsp;&nbsp;
                             <mat-form-field>
                                 <mat-select [(ngModel)]="solution.toolkitType" placeholder="模型工具"
-                                            [required]="canEditBaseInfo" [disabled]="!canEditBaseInfo">
+                                            [required]="isEditing" [disabled]="!isEditing">
                                     <mat-option value="TensorFlow">
                                         TensorFlow
                                     </mat-option>
                                     <mat-option value="Keras">
                                         Keras
                                     </mat-option>
-                                    <mat-option value="H2O">
-                                        H2O
-                                    </mat-option>
                                     <mat-option value="Scikit-Learn">
                                         Scikit-Learn
+                                    </mat-option>
+                                    <mat-option value="PyTorch">
+                                        PyTorch
+                                    </mat-option>
+                                    <mat-option value="Python">
+                                        Python
+                                    </mat-option>
+                                    <mat-option value="C/C++">
+                                        C/C++
                                     </mat-option>
                                     <mat-option value="模型组合">
                                         模型组合
@@ -182,7 +188,7 @@
                             &nbsp;&nbsp;&nbsp;&nbsp;
                             <mat-form-field>
                                 <input matInput [(ngModel)]="solution.company" type="text" placeholder="单位" maxlength=20
-                                       [disabled]="!canEditBaseInfo">
+                                       [disabled]="!isEditing">
                             </mat-form-field>
                             &nbsp;&nbsp;&nbsp;&nbsp;
                             <mat-form-field>
@@ -194,41 +200,39 @@
                             </mat-form-field>
                         </div>
 
-                        <div *ngIf="canEditBaseInfo || solution.tag1">
+                        <div *ngIf="isEditing || solution.tag1">
                             <mat-form-field>
-                                <input matInput [(ngModel)]="solution.tag1" type="text" placeholder="关键词" maxlength=20 [required]="canEditBaseInfo" [disabled]="!canEditBaseInfo">
+                                <input matInput [(ngModel)]="solution.tag1" type="text" placeholder="关键词" maxlength=20 [required]="isEditing" [disabled]="!isEditing">
                             </mat-form-field>
                             &nbsp;&nbsp;&nbsp;&nbsp;
-                            <mat-form-field *ngIf="solution.tag1 && (canEditBaseInfo || solution.tag2)">
-                                <input matInput [(ngModel)]="solution.tag2" type="text" placeholder="关键词" maxlength=20 [disabled]="!canEditBaseInfo">
+                            <mat-form-field *ngIf="solution.tag1 && (isEditing || solution.tag2)">
+                                <input matInput [(ngModel)]="solution.tag2" type="text" placeholder="关键词" maxlength=20 [disabled]="!isEditing">
                             </mat-form-field>
                             &nbsp;&nbsp;&nbsp;&nbsp;
-                            <mat-form-field *ngIf="solution.tag2 && (canEditBaseInfo || solution.tag3)">
-                                <input matInput [(ngModel)]="solution.tag3" type="text" placeholder="关键词" maxlength=20 [disabled]="!canEditBaseInfo">
+                            <mat-form-field *ngIf="solution.tag2 && (isEditing || solution.tag3)">
+                                <input matInput [(ngModel)]="solution.tag3" type="text" placeholder="关键词" maxlength=20 [disabled]="!isEditing">
                             </mat-form-field>
                         </div>
 
                         <div>
                             <mat-form-field style="width: 95%">
                                 <input matInput [(ngModel)]="solution.summary" type="text" maxlength=250 placeholder="摘要"
-                                       [required]="canEditBaseInfo" [disabled]="!canEditBaseInfo">
+                                       [required]="isEditing" [disabled]="!isEditing">
                             </mat-form-field>
                         </div>
                     </div>
 
                     <div class="col-md-4">
                         <mat-card style="width: 200px; height: 200px">
-                            <a (click)="changeSolutionPicture()" *ngIf="canEditBaseInfo">
+                            <a (click)="changeSolutionPicture()" *ngIf="isEditing">
                                 <img matCardImage src="{{solution.pictureUrl}}" *ngIf="solution.pictureUrl" matTooltip="点击更改模型图标">
                                 <span *ngIf="!solution.pictureUrl" style="line-height: 150px">点击添加模型头像</span>
                             </a>
-                            <img matCardImage src="{{solution.pictureUrl}}" alt="blank"  *ngIf="!canEditBaseInfo">
+                            <img matCardImage src="{{solution.pictureUrl}}" alt="blank"  *ngIf="!isEditing && !openAbilityUrl">
+                            <a (click)="jumpToAbility()" *ngIf="!isEditing && openAbilityUrl">
+                                <img matCardImage src="{{solution.pictureUrl}}" alt="blank" matTooltip="点击查看开放部署实例">
+                            </a>
                         </mat-card>
-                        <br>
-                        <div *ngIf="openAbilityUrl">
-                            &nbsp;&nbsp;&nbsp;&nbsp;
-                            <button (click)="jumpToAbility()">查看开放部署实例</button>
-                        </div>
                     </div>
                 </div>
 
@@ -241,7 +245,7 @@
                         <input matInput [ngModel]="solution.publishRequest" type="text" placeholder="上架/下架申请" disabled>
                     </mat-form-field>
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <mat-form-field *ngIf="canEditBaseInfo" style="width: 400px">
+                    <mat-form-field *ngIf="canPublish" style="width: 400px">
                         <input matInput [(ngModel)]="requestReason" type="text" placeholder="申请上架理由" required>
                     </mat-form-field>
                     <mat-form-field *ngIf="canUnpublish" style="width: 400px">
@@ -259,17 +263,17 @@
                 <br>
                 <div style="font-size: larger">
                     <span>模型概述</span>
-                    <span style="color: red" *ngIf="canEditBaseInfo && !description.content">&nbsp;*</span>
+                    <span style="color: red" *ngIf="isEditing && !description.content">&nbsp;*</span>
                     <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                    <a (click)="enterEditDescription()" matTooltip="编辑" *ngIf="canEditBaseInfo && !editingDescription">
+                    <a (click)="enterEditDescription()" matTooltip="编辑" *ngIf="isEditing && !editingDescription">
                         <span class="fa fa-edit" style="color: #673ab7"></span>
                     </a>
-                    <a (click)="saveDescription()" matTooltip="保存" *ngIf="canEditBaseInfo && editingDescription">
+                    <a (click)="saveDescription()" matTooltip="保存" *ngIf="isEditing && editingDescription">
                         <span class="fa fa-save" style="color: #673ab7"></span>
                     </a>
                 </div>
                 <br>
-                <div *ngIf="canEditBaseInfo && editingDescription">
+                <div *ngIf="isEditing && editingDescription">
                     <ueditor [(ngModel)]="description.content"
                              [config]="{ wordCount: true }"
                              [loadingTip]="'加载中……'"
@@ -278,7 +282,7 @@
                              (ngModelChange)="_change($event)">
                     </ueditor>
                 </div>
-                <div *ngIf="!canEditBaseInfo || !editingDescription">
+                <div *ngIf="!isEditing || !editingDescription">
                     <div [innerHTML]="description.content | html">
                     </div>
                 </div>
@@ -293,7 +297,7 @@
             </div>
         </mat-tab>
 
-        <mat-tab label="接口定义">
+        <mat-tab label="接口">
             <div style="margin: 20px">
                 <h5>Protobuf格式的模型接口定义如下：</h5><br>
                 <pre>{{protobufText}}</pre>
@@ -335,7 +339,7 @@
                                     </span>
                                 </span>
                                 <span *ngIf="artifact.type === 'DOCKER镜像'">
-                                    <a (click)="copyDockerUrl(artifact.url)" matTooltip="docker pull {{artifact.url}}">
+                                    <a (click)="copyDockerUrl(artifact.url)" matTooltip="docker run {{artifact.url}}">
                                         <span class="fa fa-paste" style="color: #673ab7"></span>
                                     </a>
                                 </span>
@@ -347,10 +351,10 @@
             </div>
         </mat-tab>
 
-        <mat-tab label="文档/附件">
-            <div style="margin: 20px" *ngIf="canAddDocument">
+        <mat-tab label="附件">
+            <div style="margin: 20px" *ngIf="isEditing">
                 <div>
-                    <span style="font-weight: bold">上传文档/附件 &nbsp;&nbsp;</span>
+                    <span style="font-weight: bold">上传附件 &nbsp;&nbsp;</span>
                     <input type="file" ng2FileSelect [uploader]="uploader"
                            accept=".pdf, .doc, .docx, .ppt, .pptx, .xls, .xlsx, .jpg, .jpeg, .png, .zip, .rar, .txt" />
                     <span class="float-right">已选择 {{ uploader?.queue?.length }} 个文件</span>
@@ -396,7 +400,7 @@
             </div>
 
             <div style="margin: 20px">
-                <span style="font-weight: bold" *ngIf="canAddDocument">模型文档/附件</span>
+                <span style="font-weight: bold" *ngIf="isEditing">模型文档/附件</span>
                 <div *ngIf="!documents || documents.length < 1">
                     无
                 </div>
@@ -422,7 +426,7 @@
                                 <a href="{{document.url}}" download matTooltip="下载文档">
                                     <span class="fa fa-download" style="color: #673ab7"></span>
                                 </a>
-                                <span *ngIf="canAddDocument">
+                                <span *ngIf="isEditing">
                                     &nbsp;&nbsp;
                                     <a (click)="deleteDocument(document)" matTooltip="删除文档">
                                         <span class="fa fa-trash" style="color: orangered"></span>
@@ -648,3 +652,4 @@
     </div>
     <br><br>
 </mat-card>
+

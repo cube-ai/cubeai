@@ -1,6 +1,7 @@
 package com.wyy.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.wyy.domain.Solution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,12 @@ public class AbilityResource {
         List<Deployment> deploymentList = this.ummClient.getDeployment(deploymentUuid);
         if(deploymentList.isEmpty()) {
             return ResponseEntity.status(404).body("Cannot find deployment: " + deploymentUuid);
+        }
+        List<Solution> solutions = ummClient.getSolutionsByUuid(deploymentList.get(0).getSolutionUuid());
+        if (!solutions.isEmpty()) {
+            if (solutions.get(0).getToolkitType().equals("模型组合")) {
+                return abilityService.callComposer(solutions.get(0).getUuid(), modelMethod, requestBody, requestHeader);
+            }
         }
         Integer k8sPort = deploymentList.get(0).getk8sPort();
         if(k8sPort == null) {

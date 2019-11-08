@@ -7,6 +7,7 @@ entity Deployment {
     solutionUuid String,
     solutionName String,
     solutionAuthor String,
+    solutionCompany String,
     k8sPort Integer,
     isPublic Boolean,
     status String,
@@ -17,4 +18,8 @@ entity Deployment {
     toolkitType String,
     callCount Long,
     demoUrl String maxlength(512),
+    subject1 String,
+    subject2 String,
+    subject3 String,
+    displayOrder Long,
 }

@@ -42,6 +42,10 @@ import {
     DeployService,
     AbilityService,
     AddSolutionComponent,
+    OchestratorService,
+    CompositeSolutionService,
+    OchestratorEditeLinkComponent,
+    OchestratorEditeNodeComponent
 } from './';
 
 @NgModule({
@@ -82,13 +86,17 @@ import {
         ApproveHistoryComponent,
         ShareSolutionComponent,
         PackagingComponent,
-        AddSolutionComponent
+        AddSolutionComponent,
+        OchestratorEditeLinkComponent,
+        OchestratorEditeNodeComponent
     ],
     entryComponents: [
         PictureSelectComponent,
         ApproveHistoryComponent,
         ShareSolutionComponent,
-        AddSolutionComponent
+        AddSolutionComponent,
+        OchestratorEditeLinkComponent,
+        OchestratorEditeNodeComponent
     ],
     providers: [
         SolutionService,
@@ -106,6 +114,8 @@ import {
         CommentService,
         DeployService,
         AbilityService,
+        OchestratorService,
+        CompositeSolutionService
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 

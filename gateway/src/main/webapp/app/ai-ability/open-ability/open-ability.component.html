@@ -15,6 +15,9 @@
 
 <mat-card>
     <mat-button-toggle-group #group="matButtonToggleGroup" [(ngModel)]="predicate" (change)="refresh()" style="height: 36px">
+        <mat-button-toggle value="displayOrder" align="center">
+            默认
+        </mat-button-toggle>
         <mat-button-toggle value="id" align="center">
             最新
         </mat-button-toggle>
@@ -30,7 +33,7 @@
                         <a (click)="viewSolution(ability.solutionUuid)" matTooltip="查看模型">{{ability.solutionName}}</a>
                     </mat-card-title>
                     <mat-card-subtitle>
-                        <span>{{ability.solutionAuthor}}</span>
+                        <span>{{ability.solutionCompany || ability.solutionAuthor}}</span>
                         <div class="pull-right">
                             <span>{{ability.callCount}}</span>
                         </div>

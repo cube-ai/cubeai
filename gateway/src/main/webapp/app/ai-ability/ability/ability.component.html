@@ -17,10 +17,28 @@
 <mat-card *ngIf="ability">
     <p>模型名称： {{ability.solutionName}}</p>
     <p>模型作者： {{ability.solutionAuthor}}</p>
+    <p *ngIf="ability.solutionCompany">作者单位： {{ability.solutionCompany}}</p>
     <p>部署日期： {{ability.createdDate | date:'yyyy-MM-dd HH:mm'}}</p>
     <p>部 署 人： {{ability.deployer}}</p>
     <p>运行状态： {{ability.status}}</p>
     <p>调用次数： {{ability.callCount}}</p>
+    <div *ngIf="isEditing">
+        <mat-form-field>
+            <input matInput [(ngModel)]="ability.subject1" type="text" placeholder="主题1" maxlength=20>
+        </mat-form-field>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <mat-form-field>
+            <input matInput [(ngModel)]="ability.subject2" type="text" placeholder="主题2" maxlength=20>
+        </mat-form-field>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <mat-form-field>
+            <input matInput [(ngModel)]="ability.subject3" type="text" placeholder="主题3" maxlength=20>
+        </mat-form-field>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <mat-form-field>
+            <input matInput [(ngModel)]="ability.displayOrder" type="number" placeholder="显示控制">
+        </mat-form-field>
+    </div>
 </mat-card>
 <mat-card *ngIf="ability && ability.status === '运行'">
     <p>API接口：  {{genAbilityUrl()}}</p>

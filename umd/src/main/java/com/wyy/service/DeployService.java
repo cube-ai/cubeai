@@ -24,6 +24,9 @@ public class DeployService {
     @Value("${kubernetes.api.token}")
     private String k8sApiToken = "";
 
+    @Value("${kubernetes.api.ipIpTunnelCidr}")
+    private String ipIpTunnelCidr = "";
+
     public DeployService(UmmClient ummClient,
                          UaaClient uaaClient,
                          MessageService messageService) {
@@ -73,6 +76,12 @@ public class DeployService {
             this.saveTaskProgress(task, "失败", 100, "准备Kubernetes环境失败。", Instant.now());
             return false;
         }
+        // 暂不执行NetworkPolicy
+        //if (!kubernetesClient.createNetworkPolicy(this.ipIpTunnelCidr)) {
+        //    this.saveTaskStepProgress(task.getUuid(), "失败", 100, "创建Kubernetes网络策略失败。");
+        //    this.saveTaskProgress(task, "失败", 100, "准备Kubernetes环境失败。", Instant.now());
+        //    return false;
+        //}
         this.saveTaskProgress(task, "正在执行", 30, "准备Kubernetes环境成功...", null);
 
         if (!this.createDeployment(task, kubernetesClient)) {
@@ -114,7 +123,7 @@ public class DeployService {
             return false;
         }
         // 30分钟内，每秒查询1次部署状态，连续30秒无法查询到状态报错。
-        for (int i = 0, errCnt = 0; i < 1800; i++) {
+        for (int i = 0, errCnt = 0, okCnt = 0; i < 1800 || okCnt > 0; i++) {
             try {
                 V1Deployment deploymentStatus = kubernetesClient.readDeploymentStatus(task.getUuid());
                 errCnt = 0;
@@ -122,7 +131,14 @@ public class DeployService {
                 Integer ready = deploymentStatus.getStatus().getReadyReplicas();
                 Integer replicas = deploymentStatus.getStatus().getReplicas();
                 if(available != null && ready != null && available.equals(replicas) && ready.equals(replicas)) {
-                    return true;
+                    // 需维持成功状态连续15秒。
+                    if (++ okCnt == 15) {
+                        return true;
+                    }
+                } else if (okCnt > 0) {
+                    this.saveTaskStepProgress(task.getUuid(), "失败", 100,
+                        "模型程序运行出错。");
+                    return false;
                 }
             } catch (Exception e) {
                 if(++ errCnt == 30) {
@@ -175,6 +191,9 @@ public class DeployService {
         deployment.setSolutionUuid(task.getTargetUuid());
         deployment.setSolutionName(task.getTaskName());
         deployment.setSolutionAuthor(solution.getAuthorName());
+        deployment.setSolutionCompany(solution.getCompany());
+        deployment.setModelType(solution.getModelType());
+        deployment.setToolkitType(solution.getToolkitType());
         deployment.setPictureUrl(solution.getPictureUrl());
         deployment.setk8sPort(serviceStatus.getSpec().getPorts().get(0).getNodePort());
         deployment.setIsPublic(isPublic);

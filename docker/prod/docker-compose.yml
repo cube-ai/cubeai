@@ -96,12 +96,57 @@ services:
             - SPRING_CLOUD_CONSUL_PORT=8500
             - JHIPSTER_SLEEP=140
 
+    umo-app:
+        image: umo
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod,swagger
+            - SPRING_CLOUD_CONSUL_HOST=consul
+            - SPRING_CLOUD_CONSUL_PORT=8500
+            - JHIPSTER_SLEEP=160
+            - SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka
+            - SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=zookeeper
+
+    ucomposer-app:
+        image: ucomposer
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod,swagger
+            - SPRING_CLOUD_CONSUL_HOST=consul
+            - SPRING_CLOUD_CONSUL_PORT=8500
+            - JHIPSTER_SLEEP=180
+
     gateway-app:
         image: gateway
         environment:
             - SPRING_PROFILES_ACTIVE=prod,swagger
             - SPRING_CLOUD_CONSUL_HOST=consul
             - SPRING_CLOUD_CONSUL_PORT=8500
-            - JHIPSTER_SLEEP=160
+            - JHIPSTER_SLEEP=200
         ports:
             - 8080:8080
+
+    uapp-mysql:
+        image: mysql:5.7.20
+        volumes:
+            - ~/database/ucumos/uapp/mysql/:/var/lib/mysql/
+        environment:
+            - MYSQL_USER=root
+            - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+            - MYSQL_DATABASE=uapp
+        command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8 --explicit_defaults_for_timestamp
+
+    uapp-app:
+        image: uapp
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod
+            - SPRING_CLOUD_CONSUL_HOST=consul
+            - SPRING_CLOUD_CONSUL_PORT=8500
+            - SPRING_DATASOURCE_URL=jdbc:mysql://uapp-mysql:3306/uapp?useUnicode=true&characterEncoding=utf8&useSSL=false
+            - JHIPSTER_SLEEP=220
+
+    udemo-app:
+        image: udemo
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod
+            - SPRING_CLOUD_CONSUL_HOST=consul
+            - SPRING_CLOUD_CONSUL_PORT=8500
+            - JHIPSTER_SLEEP=240

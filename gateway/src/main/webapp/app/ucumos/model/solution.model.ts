@@ -14,7 +14,7 @@ export class Solution {
     public subject1?: string;
     public subject2?: string;
     public subject3?: string;
-    public displayOrder?: string;
+    public displayOrder?: number;
     public pictureUrl?: string;
     public active?: boolean;
     public modelType?: string;

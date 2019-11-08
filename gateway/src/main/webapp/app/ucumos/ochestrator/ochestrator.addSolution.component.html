@@ -12,15 +12,33 @@
                     <mat-form-field style="width: 100%">
                         <input matInput formControlName="solution" type="text" placeholder="解决方案名称" maxlength="50">
                         <mat-error *ngIf="(solution.dirty || solution.touched) && solution.hasError('required')">
-                            必须输入解决方案！
+                            必须输入解决方案名称！
                         </mat-error>
                         <mat-error *ngIf="(solution.dirty || solution.touched) && solution.hasError('maxlength')">
-                            解决方案不能超过50个字符！
+                            解决方案名称不能超过50个字符！
                         </mat-error>
                         <mat-error *ngIf="(solution.dirty || solution.touched) && solution.hasError('pattern')">
-                            解决方案只能包含字母、数字或者Email地址！
+                            解决方案名称只能包含字母、数字或者Email地址！
                         </mat-error>
                     </mat-form-field>
+                <mat-form-field style="width: 100%">
+                    <input matInput formControlName="version" type="text" placeholder="版本" maxlength="50">
+                    <mat-error *ngIf="(version.dirty || version.touched) && version.hasError('maxlength')">
+                        版本不能超过50个字符！
+                    </mat-error>
+                    <mat-error *ngIf="(version.dirty || version.touched) && version.hasError('pattern')">
+                        版本只能包含字母、数字或者Email地址！
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field style="width: 100%">
+                    <input matInput formControlName="description" type="text" placeholder="描述" maxlength="50">
+                    <mat-error *ngIf="(description.dirty || description.touched) && description.hasError('maxlength')">
+                        描述不能超过50个字符！
+                    </mat-error>
+                    <mat-error *ngIf="(description.dirty || description.touched) && description.hasError('pattern')">
+                        描述只能包含字母、数字或者Email地址！
+                    </mat-error>
+                </mat-form-field>
             </div>
         </mat-card>
     </div>

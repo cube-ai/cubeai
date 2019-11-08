@@ -42,6 +42,10 @@
                 <constraints nullable="true" />
             </column>
 
+            <column name="solution_company" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
             <column name="k_8_s_port" type="integer">
                 <constraints nullable="true" />
             </column>
@@ -79,6 +83,22 @@
             </column>
 
             <column name="demo_url" type="varchar(512)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="subject_1" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="subject_2" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="subject_3" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="display_order" type="bigint">
                 <constraints nullable="true" />
             </column>
 

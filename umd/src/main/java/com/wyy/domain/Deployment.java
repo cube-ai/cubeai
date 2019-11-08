@@ -12,6 +12,7 @@ public class Deployment {
     private String solutionUuid;
     private String solutionName;
     private String solutionAuthor;
+    private String solutionCompany;
     private Integer k8sPort;
     private Boolean isPublic;
     private String status;
@@ -22,6 +23,10 @@ public class Deployment {
     private String toolkitType;
     private Long callCount;
     private String demoUrl;
+    private String subject1;
+    private String subject2;
+    private String subject3;
+    private Long displayOrder;
 
     public Long getId() {
         return id;
@@ -94,6 +99,19 @@ public class Deployment {
 
     public void setSolutionAuthor(String solutionAuthor) {
         this.solutionAuthor = solutionAuthor;
+    }
+
+    public String getSolutionCompany() {
+        return solutionCompany;
+    }
+
+    public Deployment solutionCompany(String solutionCompany) {
+        this.solutionCompany = solutionCompany;
+        return this;
+    }
+
+    public void setSolutionCompany(String solutionCompany) {
+        this.solutionCompany = solutionCompany;
     }
 
     public Integer getk8sPort() {
@@ -220,6 +238,55 @@ public class Deployment {
     public void setDemoUrl(String demoUrl) {
         this.demoUrl = demoUrl;
     }
+
+    public String getSubject1() {
+        return subject1;
+    }
+
+    public Deployment subject1(String subject1) {
+        this.subject1 = subject1;
+        return this;
+    }
+
+    public void setSubject1(String subject1) {
+        this.subject1 = subject1;
+    }
+
+    public String getSubject2() {
+        return subject2;
+    }
+
+    public Deployment subject2(String subject2) {
+        this.subject2 = subject2;
+        return this;
+    }
+
+    public void setSubject2(String subject2) {
+        this.subject2 = subject2;
+    }
+
+    public String getSubject3() {
+        return subject3;
+    }
+
+    public Deployment subject3(String subject3) {
+        this.subject3 = subject3;
+        return this;
+    }
+
+    public void setSubject3(String subject3) {
+        this.subject3 = subject3;
+    }
+
+    public Long getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public Deployment displayOrder(Long displayOrder) {
+        this.displayOrder = displayOrder;
+        return this;
+    }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
@@ -251,6 +318,7 @@ public class Deployment {
             ", solutionUuid='" + getSolutionUuid() + "'" +
             ", solutionName='" + getSolutionName() + "'" +
             ", solutionAuthor='" + getSolutionAuthor() + "'" +
+            ", solutionCompany='" + getSolutionCompany() + "'" +
             ", k8sPort=" + getk8sPort() +
             ", isPublic='" + isIsPublic() + "'" +
             ", status='" + getStatus() + "'" +
@@ -261,6 +329,10 @@ public class Deployment {
             ", toolkitType='" + getToolkitType() + "'" +
             ", callCount=" + getCallCount() +
             ", demoUrl='" + getDemoUrl() + "'" +
+            ", subject1='" + getSubject1() + "'" +
+            ", subject2='" + getSubject2() + "'" +
+            ", subject3='" + getSubject3() + "'" +
+            ", displayOrder=" + getDisplayOrder() +
             "}";
     }
 }

@@ -1,0 +1,9 @@
+version: '2'
+services:
+    uapp-app:
+        image: uapp
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod
+            - SPRING_CLOUD_CONSUL_HOST=consul
+            - SPRING_CLOUD_CONSUL_PORT=8500
+            - SPRING_DATASOURCE_URL=jdbc:mysql://uapp-mysql:3306/uapp?useUnicode=true&characterEncoding=utf8&useSSL=false
