@@ -1,4 +1,4 @@
-# [![](./cubeai-logo.jpg)](https://cubeai.dimpt.com)
+# [![](https://code.ihub.org.cn/projects/348/repository/revisions/master/entry/https://code.ihub.org.cn/projects/348/repository/revisions/master/entry/cubeai-logo.jpg)](https://cubeai.dimpt.com)
 
 版权所有 © 2019 中国联通网络技术研究院
 
