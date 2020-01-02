@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wyy.config.ConfigurationProperties;
 import com.wyy.domain.*;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -138,8 +137,16 @@ public class ComposerService {
     private String parseRequestBody(String requestBody, String solutionName, MultiValueMap<String,String> requestHeader) throws Exception {
         JSONObject jsonObject = new JSONObject(requestBody);
         Object value = jsonObject.get("value");
+        if (value == null) {
+            Iterator keys = jsonObject.keys();
+            while (keys.hasNext()){
+                String key = (String) keys.next();
+                value = jsonObject.get(key);
+                break;
+            }
+        }
 
-        Solution solution = this.getSolutionByName(solutionName);
+        Solution solution = this.getBaseSolutionByName(solutionName);
         if (solution == null) {
             throw new Exception("Solution is null for name " + solutionName);
         }
@@ -147,6 +154,7 @@ public class ComposerService {
         if (example == null) {
             throw new Exception("Example is null for solution " + solution.getUuid());
         }
+
         return this.getUpdatedBody(example, value);
     }
     private ResponseEntity<String> callNode(Node node, Blueprint blueprint, String operation, String requestBody, MultiValueMap<String,String> requestHeader) throws Exception {
@@ -169,7 +177,6 @@ public class ComposerService {
         return new ResponseEntity<>(res, HttpStatus.OK).getBody();
     }
     public ResponseEntity<String> orchestrate(String solutionUuid, String modelMethod, String requestBody, MultiValueMap<String,String> requestHeader) throws Exception {
-        System.out.println(Thread.currentThread().getStackTrace());
         String blueprintJson = readArtifactBlueprint(solutionUuid);
         if (StringUtils.isEmpty(blueprintJson)) {
             logger.error("notify: Empty blueprint JSON");
@@ -239,14 +246,16 @@ public class ComposerService {
 
     private String constructURL(Node n, String modelMethod) throws Exception {
         String finalUrl;
-        Solution solution = this.getSolutionByName(n.getContainerName());
+        Solution solution = this.getBaseSolutionByName(n.getContainerName());
         if (solution == null) {
             throw new Exception("No solution for node container:" + n.getContainerName());
         }
-        List<Deployment> deployments = this.ummClient.getDeploymentsBySolutionUuid(solution.getUuid(), Boolean.FALSE, "运行");
-        if (deployments.isEmpty()){
+        List<Deployment> deployments1 = this.ummClient.getDeploymentsBySolutionUuid(solution.getUuid(), Boolean.FALSE, "运行");
+        List<Deployment> deployments2 = this.ummClient.getDeploymentsBySolutionUuid(solution.getUuid(), Boolean.TRUE, "运行");
+        if (deployments1.isEmpty() && deployments2.isEmpty()){
             throw new Exception("No deployment for solution:" + solution.getUuid());
         }
+        List<Deployment> deployments = deployments1.size()>0 ? deployments1 : deployments2;
         Deployment deployment = deployments.get(0);
         Integer k8sPort = deployment.getk8sPort();
 
@@ -257,9 +266,10 @@ public class ComposerService {
         return finalUrl;
     }
 
-    private Solution getSolutionByName(String name){
+    private Solution getBaseSolutionByName(String name){
         String status = "上架";
-        List<Solution> solutions = this.ummClient.getSolutionsByName(name, status);
+        String subject3 = "base";
+        List<Solution> solutions = this.ummClient.getSolutionsByNameSubject3(name, status, subject3);
         if (solutions.isEmpty()){
             return null;
         }else {

@@ -36,11 +36,15 @@ export class CompositeSolutionService {
         return this.http.put<any>(this.resourceUrl + '/cdumps', body, { observe: 'response' });
     }
 
-    saveCompositeSolution(body: any): Observable<HttpResponse<any>> {
+    saveCompositeSolutionCdump(body: any): Observable<HttpResponse<any>> {
         return this.http.post<any>(this.resourceUrl + '/cdumps', body, { observe: 'response' });
     }
 
     validateCompositeSolution(body: any): Observable<HttpResponse<any>> {
         return this.http.post<any>(this.resourceUrl + '/bluePrint', body, { observe: 'response' });
+    }
+
+    updateCompositeSolution(body: any): Observable<HttpResponse<any>> {
+        return this.http.put<any>(this.resourceUrl, body, { observe: 'response' });
     }
 }

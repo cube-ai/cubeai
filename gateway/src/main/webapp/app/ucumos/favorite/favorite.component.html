@@ -11,7 +11,7 @@
 <mat-card>
     <div class="row" *ngIf="solutionFavorites">
         <div *ngFor="let solutionFavorite of solutionFavorites; trackBy: trackIdentity">
-            <mat-card style="font-size: 14px; margin: 10px; width: 240px" class="pull-right">
+            <mat-card style="font-size: 14px; margin: 10px; width: 240px; background-color: #fafafa" class="pull-right">
                 <a (click)="viewSolution(solutionFavorite.solutionUuid)">
                     <div>
                         <span style="font-size: 18px">

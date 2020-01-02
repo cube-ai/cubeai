@@ -25,6 +25,7 @@ export * from './personal/personal.route';
 export * from './ochestrator/ochestrator.component';
 export * from './ochestrator/ochestrator.route';
 export * from './ochestrator/ochestrator.addSolution.component';
+export * from './ochestrator/ochestrator.updateSolution.component';
 export * from './ochestrator/ochestrator.editeLink.component';
 export * from './ochestrator/ochestrator.editeNode.component';
 export * from './onboarding/onboarding.component';

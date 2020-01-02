@@ -148,7 +148,7 @@ public class CompositeSolutionService {
      */
     public String saveCompositeSolutionCdump(Solution solution) throws Exception{
 
-        logger.debug( " updateCompositeSolution() Begin ");
+        logger.debug( " saveCompositeSolutionCdump() Begin ");
 
         String path = DEUtil.getCdumpPath(solution.getAuthorLogin(), configurationProperties.getToscaOutputFolder());
 
@@ -162,7 +162,8 @@ public class CompositeSolutionService {
             if (null == cdump) {
                 logger.debug("Error : Cdump file {} not found for Solution ID :   {} ", cdumpFileName, solution.getUuid());
             } else {
-                // 1 Update the cdump file with mtime
+                // 1 Update the cdump file with mtime, solution name
+                cdump.setCname(solution.getName());
                 cdump.setMtime(cur.toString());
                 cdump.setValidSolution(false);
                 cdump.setVersion(solution.getVersion());
@@ -185,7 +186,7 @@ public class CompositeSolutionService {
             logger.error("Error : Exception in updateCompositeSolution() : ",e);
             throw new Exception("  Exception in updateCompositeSolution() , 222, Failed to update the cdump:" + e);
         }
-        logger.debug( " updateCompositeSolution() End ");
+        logger.debug( " saveCompositeSolutionCdump() End ");
 
         return "{\"solutionId\": \"" + solution.getUuid() + "\", \"version\" : \"" + solution.getVersion() + "\" }";
     }
@@ -322,6 +323,7 @@ public class CompositeSolutionService {
                 }
                 deleteMemberCompositeSolutionMaps(solutionId);
                 ummClient.deleteSolution(solutions.get(0).getId());
+                this.deleteCdumpFile(solutions.get(0).getAuthorLogin(), solutionId);
                 result = true;
 
             } else {
@@ -1713,5 +1715,35 @@ public class CompositeSolutionService {
             throw new Exception("Exception in updateCompositeSolution(), 333, Failed to drop CompositeSolution Member");
         }
 
+    }
+
+    public String updateCompositeSolution(Solution solution) throws Exception {
+        String response;
+        try {
+            if (solution.getUuid() == null){
+                logger.error("Error :  Exception in updateCompositeSolution() Failed to update the Solution for uuid is null");
+                throw new Exception("  Exception in updateCompositeSolution , 223,Failed to update the Solution for uuid is null");
+            }
+
+            List<Solution> olds = ummClient.getSolutionsByUuid(solution.getUuid());
+            if (olds.size() == 0) {
+                logger.error("Error :  Exception in updateCompositeSolution() Failed to update the Solution for uuid is wrong");
+                throw new Exception("  Exception in updateCompositeSolution , 224,Failed to update the Solution for uuid is wrong");
+            }
+            Solution old = olds.get(0);
+            old.setName(solution.getName());
+            old.setVersion(solution.getVersion());
+            old.setSummary(solution.getSummary());
+            ummClient.updateSolutionName(old);
+            ummClient.updateSolutionBaseinfo(old);
+
+            response = "{\"uuid\":\"" + solution.getUuid() + "\",\"success\":\"true\",\"errorMessage\":\"\"}";
+            logger.info("*********response: {}", response);
+
+        } catch (Exception e) {
+            logger.error("Error :  Exception in updateCompositeSolution() Failed to update the Solution ",e);
+            throw new Exception("  Exception in updateCompositeSolution , 222,Failed to update the Solution");
+        }
+        return response;
     }
 }

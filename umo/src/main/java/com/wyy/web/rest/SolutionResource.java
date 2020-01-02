@@ -483,8 +483,8 @@ public class SolutionResource {
         }
 	}
 
-	@ApiOperation(value = "Validate Composite Solution")
-	@RequestMapping(value = "/validateCompositeSolution", method = RequestMethod.POST)
+	@ApiOperation(value = "Validate Composite Solution and generate bluePrint")
+	@RequestMapping(value = "/compositeSolutions/bluePrint", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<String> validateCompositeSolution(@RequestBody CompositeSolution solution) {
 		logger.debug("validateCompositeSolution() : Begin ");
@@ -576,6 +576,28 @@ public class SolutionResource {
         }else {
             return ResponseEntity.badRequest().body(result);
         }
+    }
+
+    @ApiOperation(value = "Update Composite Solution")
+    @PutMapping (value = "/compositeSolutions")
+    @ResponseBody
+    public ResponseEntity<String> updateCompositeSolution(@RequestBody CompositeSolution solution) {
+        logger.debug(" updateCompositeSolution(): Begin ");
+        String result = "";
+        boolean success = false;
+        try {
+            result = compositeSolutionService.updateCompositeSolution(solution);
+            success = true;
+        } catch (Exception e) {
+            logger.error(" Exception in updateCompositeSolution() ", e);
+        }
+        logger.debug(" updateCompositeSolution(): End ");
+        if (success){
+            return ResponseEntity.ok().body(result);
+        }else {
+            return ResponseEntity.badRequest().body(result);
+        }
+
     }
 }
 

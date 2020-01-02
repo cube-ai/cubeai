@@ -72,5 +72,10 @@ public interface UmmClient {
     @RequestMapping(value ="/api/solutions/{id}", method = RequestMethod.DELETE)
     ResponseEntity<Void> deleteSolution(@PathVariable(value = "id") Long id);
 
+    @RequestMapping(value ="/api/solutions/name", method = RequestMethod.PUT)
+    ResponseEntity<Void> updateSolutionName(@RequestBody Solution solution);
+
+    @RequestMapping(value ="/api/solutions/baseinfo", method = RequestMethod.PUT)
+    ResponseEntity<Void> updateSolutionBaseinfo(@RequestBody Solution solution);
 
 }

@@ -82,13 +82,30 @@ AI能力开放示范平台。为Kubernetes中已部署的部分典型AI开放能
 
 ### CubeAI应用支撑组件
 
+- nginx
+
+Web反向代理服务器，主要用于在生产环境中向互联网用户提供HTTPS服务。开发环境中不需要。
+
+- Docker打包服务器
+
+用于在模型导入过程中根据Dockerfile文件生成docker镜像。任选一台Linux服务器，安装docker驱动，并开放2375端口，然后执行以下命令拉取需要的docker基础镜像即可。
+
+        docker pull unicom.gq:8801/ubuntu/python:3.0.3
+        docker tag unicom.gq:8801/ubuntu/python:3.0.3 ubuntu/python:3.0.3
+        docker pull unicom.gq:8801/ubuntu/python3.6:0.0.9
+        docker tag unicom.gq:8801/ubuntu/python3.6:0.0.9 ubuntu/python3.6:0.0.9
+
 - Nexus
 
 提供用于存储AI模型相关构件和文档的文件服务器，以及用于存贮AI模型docker镜像的docker仓库。
 
+请参考Nexus官方文档进行安装和配置。Nexus服务器需要配置为通过HTTPS协议进行访问。
+
 - Kubernates
 
 AI模型部署目标平台，以docker容器形式为AI能力开放提供微服务化容器编排和调度平台。
+
+请参考Kubernates官方文档进行安装和配置。
 
 ## 开发环境
 

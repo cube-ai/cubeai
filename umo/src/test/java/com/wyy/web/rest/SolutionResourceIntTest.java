@@ -494,7 +494,7 @@ public class SolutionResourceIntTest {
         solution.setName("start-end");
         solution.setUuid(SOLUTIONUUID_BLUE);
 
-        restSolutionMockMvc.perform(post("/api/validateCompositeSolution")
+        restSolutionMockMvc.perform(post("/api/compositeSolutions/bluePrint")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(solution)))
             .andExpect(status().is2xxSuccessful());

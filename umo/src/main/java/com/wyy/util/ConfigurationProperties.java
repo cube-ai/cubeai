@@ -20,78 +20,55 @@
 
 package com.wyy.util;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
-
 @Component
-@PropertySource("classpath:application.properties")
 public class ConfigurationProperties {
 
-	@Value("${tosca.outputfolder}")
-	private String toscaOutputFolder;
+	private String toscaOutputFolder = "tosca";
 
-    @Value("${compositionSolutionErrorCode}")
-    private String compositionSolutionErrorCode;
+    private String compositionSolutionErrorCode = "203";
 
-    @Value("${compositionSolutionErrorDesc}")
-    private String compositionSolutionErrorDesc;
+    private String compositionSolutionErrorDesc = "Failed to save composite solution";
 
-    @Value("模型组合")
-    private String toolKit;
+    private String toolKit = "模型组合";
 
-
-    @Value("蓝图文件")
-    private String blueprintArtifactType;
+    private String blueprintArtifactType = "蓝图文件";
 
     public String getCdumpArtifactType() {
         return cdumpArtifactType;
     }
 
-    @Value("CDUMP文件")
-    private String cdumpArtifactType;
+    private String cdumpArtifactType = "CDUMP文件";
 
 
     public String getToscaInputArtifactType() {
         return toscaInputArtifactType;
     }
 
-    @Value("TOSCA生成器输入文件")
-    private String toscaInputArtifactType;
+    private String toscaInputArtifactType = "TOSCA生成器输入文件";
 
-    @Value("PROTOBUF文件")
-    private String protoArtifactType;
+    private String protoArtifactType = "PROTOBUF文件";
 
-    @Value("${gdmType}")
-    private String gdmType;
+    private String gdmType = "DataMapper";
 
-    @Value("${databrokerType}")
-    private String databrokerType;
+    private String databrokerType = "DataBroker";
 
-    @Value("${defaultCollatorType}")
-    private String defaultCollatorType;
+    private String defaultCollatorType = "Array-based";
 
-    @Value("${defaultSplitterType}")
-    private String defaultSplitterType;
+    private String defaultSplitterType = "Copy-based";
 
-    @Value("${splitterType}")
-    private String splitterType;
+    private String splitterType = "Splitter";
 
-    @Value("${collatorType}")
-    private String collatorType;
+    private String collatorType = "Collator";
 
-    @Value("模型镜像")
-    private String modelImageArtifactType;
+    private String modelImageArtifactType = "模型镜像";
 
-    @Value("${matchingInputPortType}")
-    private String matchingInputPortType;
+    private String matchingInputPortType = "input";
 
-    @Value("${matchingOutputPortType}")
-    private String matchingOutputPortType;
+    private String matchingOutputPortType = "output";
 
-    @Value("${privateCacheRemovalTime}")
-    private int privateCacheRemovalTime;
+    private int privateCacheRemovalTime = 10;
 
     public String getProtoArtifactType() {
         return protoArtifactType;

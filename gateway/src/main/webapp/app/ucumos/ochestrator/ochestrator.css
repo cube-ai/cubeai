@@ -129,3 +129,8 @@ circle.end {
     stroke-width: 2px;
     fill: none;
 }
+
+.attribute {
+    cursor: pointer;
+    border-radius: 5px;
+}

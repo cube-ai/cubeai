@@ -29,8 +29,9 @@ public interface UmmClient {
     List<Solution> getSolutionsByUuid(@RequestParam(value = "uuid") String uuid);
 
     @RequestMapping(value ="/api/solutions", method = RequestMethod.GET)
-    List<Solution> getSolutionsByName(@RequestParam(value = "name") String name,
-                                      @RequestParam(value = "publishStatus") String publishStatus);
+    List<Solution> getSolutionsByNameSubject3(@RequestParam(value = "name") String name,
+                                              @RequestParam(value = "publishStatus") String publishStatus,
+                                              @RequestParam(value = "subject3") String subject3);
 
 
     @RequestMapping(value ="/api/documents", method = RequestMethod.GET)

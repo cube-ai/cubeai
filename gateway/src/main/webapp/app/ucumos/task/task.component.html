@@ -30,7 +30,7 @@
     </mat-form-field>
 
     <div *ngIf="tasks">
-        <mat-card *ngFor="let task of tasks; trackBy: trackIdentity" style="font-size: 14px; margin: 10px 0">
+        <mat-card *ngFor="let task of tasks; trackBy: trackIdentity" style="font-size: 14px; margin: 20px 0; background-color: #fafafa">
             <a (click)="viewTaskDetails(task)">
                 <div class="row">
                     <div class="col-md-3">

@@ -42,6 +42,7 @@ import {
     DeployService,
     AbilityService,
     AddSolutionComponent,
+    UpdateSolutionComponent,
     OchestratorService,
     CompositeSolutionService,
     OchestratorEditeLinkComponent,
@@ -87,6 +88,7 @@ import {
         ShareSolutionComponent,
         PackagingComponent,
         AddSolutionComponent,
+        UpdateSolutionComponent,
         OchestratorEditeLinkComponent,
         OchestratorEditeNodeComponent
     ],
@@ -95,6 +97,7 @@ import {
         ApproveHistoryComponent,
         ShareSolutionComponent,
         AddSolutionComponent,
+        UpdateSolutionComponent,
         OchestratorEditeLinkComponent,
         OchestratorEditeNodeComponent
     ],

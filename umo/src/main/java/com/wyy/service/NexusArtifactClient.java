@@ -27,9 +27,6 @@ import org.apache.maven.wagon.providers.http.LightweightHttpsWagon;
 import org.apache.maven.wagon.repository.Repository;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
-// import javax.annotation.PostConstruct;
-
 @Service
 public class NexusArtifactClient {
 
@@ -41,15 +38,6 @@ public class NexusArtifactClient {
 
     @Value("${nexus.maven.password}")
     private String password;
-
-// 不再使用这种方式，而是从Consul配置中心获取
-//    @PostConstruct
-//    private void init() {
-//        this.setUrl("https://unicom.gq:8001/repository/ucumos");
-//        this.setUserName("unicom");
-//        this.setPassword("2673ig67Dc");
-//    }
-//
 
     public String getUrl() {
         return this.url;
