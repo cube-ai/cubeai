@@ -116,7 +116,17 @@ export class SolutionComponent implements OnInit, OnDestroy {
                 tag3: this.solution.tag3,
                 modelType: this.solution.modelType,
                 toolkitType: this.solution.toolkitType,
-            }).subscribe();
+            }).subscribe(() => {
+                if (this.isReviewer) {
+                    this.solutionService.updateSubjects({
+                        id: this.solution.id,
+                        subject1: this.solution.subject1,
+                        subject2: this.solution.subject2,
+                        subject3: this.solution.subject3,
+                        displayOrder: this.solution.displayOrder,
+                    }).subscribe();
+                }
+            });
 
             if (this.editingDescription) {
                 this.descriptionService.updateContent({
@@ -124,9 +134,7 @@ export class SolutionComponent implements OnInit, OnDestroy {
                     content: this.description.content,
                 }).subscribe();
             }
-        }
-
-        if (this.isReviewer) {
+        } else if (this.isReviewer) {
             this.solutionService.updateSubjects({
                 id: this.solution.id,
                 subject1: this.solution.subject1,

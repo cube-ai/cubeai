@@ -14,3 +14,4 @@
 2. 在集成开发环境（例如Intellij IDEA）中分别打开uaa, gateway, umm, umu, umo, umd, ability等微服务工程，编译并运行。参见各工程目录下的README文件。
 
 
+>注意：在部署之前， dev/central-server-cnfig目录下的 application.yml文件中的相关配置项需要根据自身的网络进行修改。

@@ -17,9 +17,9 @@
                         <mat-error *ngIf="(solution.dirty || solution.touched) && solution.hasError('maxlength')">
                             解决方案名称不能超过50个字符！
                         </mat-error>
-                        <mat-error *ngIf="(solution.dirty || solution.touched) && solution.hasError('pattern')">
-                            解决方案名称只能包含字母、数字或者Email地址！
-                        </mat-error>
+                        <!--<mat-error *ngIf="(solution.dirty || solution.touched) && solution.hasError('pattern')">-->
+                            <!--解决方案名称只能包含字母、数字或者Email地址！-->
+                        <!--</mat-error>-->
                     </mat-form-field>
                 <mat-form-field style="width: 100%">
                     <input matInput formControlName="version" type="text" placeholder="版本" maxlength="50">

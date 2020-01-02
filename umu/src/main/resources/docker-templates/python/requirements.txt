@@ -1,4 +1,1 @@
-flask
-h5py
-scipy
-gunicorn
+cubeai_model_runner==0.2.5

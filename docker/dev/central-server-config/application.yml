@@ -4,7 +4,7 @@ configserver:
 
 spring:
     mail:
-        host: smtp.mail.com
+        host: smtp.mail.com  # 修改为自己的邮件服务器地址
         port: 25
         username: myname
         password: mypassword
@@ -23,19 +23,20 @@ jhipster:
 
 nexus:
     maven:
-        url: https://localhost:8888/repository/ucumos
+        url: https://localhost:8888/repository/ucumos  # 修改为自己的Nexus服务器地址
         username: username
         password: password
     docker:
-        host: localhost
+        host: localhost  # 修改为自己的Docker打包服务器地址
         port: 2375
         registryUsername: username
         registryPassword: password
-        imagetagPrefix: localhost:8888
+        imagetagPrefix: localhost:8888  # 修改为自己的Docker服务器地址和端口号
 
 kubernetes:
     ability:
-        internalIP: localhost
+        internalIP: localhost  # 修改为自己的kubernetes内部访问地址
     api:
-        url: https://localhost:55555
+        ipIpTunnelCidr: 172.16.132.192/32
+        url: https://localhost:55555  # 修改为自己的kubernetes内部访问地址和端口号
         token: my-token

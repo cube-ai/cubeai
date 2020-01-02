@@ -19,7 +19,7 @@
     </mat-button-toggle-group>
     <br>
     <div *ngIf="publishRequests">
-        <mat-card *ngFor="let publishRequest of publishRequests; trackBy: trackIdentity" style="font-size: 14px; margin: 10px 0">
+        <mat-card *ngFor="let publishRequest of publishRequests; trackBy: trackIdentity" style="font-size: 14px; margin: 20px 0; background-color: #fafafa">
             <a (click)="treatRequest(publishRequest)">
                 <div class="row">
                     <div class="col-md-3">

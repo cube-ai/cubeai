@@ -82,3 +82,5 @@
         docker-compose -f uaa.yml down
         docker-compose -f udemo.yml up -d 
  
+ 
+ >注意：在部署之前， prod/central-server-cnfig目录下的 application.yml文件中的相关配置项需要根据自身的网络进行修改。

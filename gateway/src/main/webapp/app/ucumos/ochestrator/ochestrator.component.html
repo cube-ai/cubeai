@@ -1,7 +1,7 @@
 <mat-card class="page-title">
     <span>模型编排</span>
     <div class="btn-toolbar float-right" role="toolbar">
-        <button mat-icon-button (click)="validate()" matTooltip="validate">
+        <button mat-icon-button (click)="validate()" matTooltip="校验">
             <mat-icon color="primary">check_circle_outline</mat-icon>
         </button>
     </div>
@@ -18,16 +18,24 @@
         <mat-grid-tile colspan = "2" rowspan = "1" style="background: #bfbfbf">
             <span class="headline">解决方案</span>
         </mat-grid-tile>
-        <mat-grid-tile colspan = "8" rowspan = "1" style="background: #dfdfdf">
+        <mat-grid-tile colspan = "6" rowspan = "1" style="background: #dfdfdf">
             <div style="height: -webkit-fill-available; width: -webkit-fill-available;">
                 <mat-chip-list>
-                    <mat-chip (click)="addTab(true)">新建方案</mat-chip>
-                    <mat-chip (click)="clearCompositeSolution()" [disabled]="currentSolution === null">清空方案</mat-chip>
-                    <mat-chip (click)="closeCompositeSolution()" [disabled]="currentSolution === null">关闭方案</mat-chip>
+                    <mat-chip class="attribute" color="primary" [selected]="newCompositionButton"  (click)="addTab(true)">新建方案</mat-chip>
+                    <mat-chip class="attribute" color="warn" [selected]="clearCompositeSolutionButton" (click)="clearCompositeSolution()" [disabled]="currentSolution === null">清空方案</mat-chip>
+                    <mat-chip class="attribute" color="accent" [selected]="closeCompositeSolutionButton" (click)="closeCompositeSolution()" [disabled]="currentSolution === null">关闭方案</mat-chip>
                 </mat-chip-list>
             </div>
+        </mat-grid-tile>
+        <mat-grid-tile colspan = "1" rowspan = "1" style="background: #dfdfdf">
+            <button mat-icon-button color="warn" (click)="removePath()" matTooltip="删除模型" [disabled]="!pathClicked">
+                <mat-icon>delete_sweep</mat-icon>
+            </button>
+        </mat-grid-tile>
+        <mat-grid-tile colspan = "1" rowspan = "1" style="background: #dfdfdf">
 
         </mat-grid-tile>
+
         <mat-grid-tile colspan = "2" rowspan = "1" style="background: #dfdfdf">
             <input name="search" type="text" class="form-control" placeholder="搜索"  style="width:200px" [formControl]="serchControl">
             <i class="fa fa-fw fa-search" aria-hidden="true"></i>
@@ -54,9 +62,6 @@
                                         </svg>
                                     </div>
                                     <div style="height: 40px; border-top: solid 1px #e7e7e7; text-align: center; line-height: 40px; position: absolute;bottom: 2px; width: 100%">
-                                        <a class="btn btn-link" href="#"><i class="fa fa-play-circle-o" aria-hidden="true"></i>&nbsp;运行</a>
-                                        <a class="btn btn-link" href="#"><i class="fa fa-cloud-upload" aria-hidden="true"></i>&nbsp;部署</a>
-                                        <a class="btn btn-link" href="#"><i class="fa fa-share-alt" aria-hidden="true"></i>&nbsp;分享</a>
                                     </div>
                                 </div>
                         </mat-tab>
@@ -73,25 +78,26 @@
                         <ul *ngIf="currentNode">
                             <br>
                             <li>
-                                <label>模型名字:  {{currentNode.text}}</label>
+                                <label>模型名称:  {{currentNode.name}}</label>
                             </li>
-                            <li><label>模型类型:  {{currentNode.type}}</label>
+                            <li>
+                                <label>模型类别:  {{currentNode.modelType}}</label>
                             </li>
-                            <!--<li>-->
-                                <!--<label>节点版本:</label>-->
-                            <!--</li>-->
-                            <!--<li>-->
-                                <!--<label>工具类型：toolkitType</label>-->
-                            <!--</li>-->
-                            <!--<li>-->
-                                <!--<label>节点作者:authorName</label>-->
-                            <!--</li>-->
-                            <!--<li>-->
-                                <!--<label>节点公司:company</label>-->
-                            <!--</li>-->
-                            <!--<li>-->
-                                <!--<label>详细信息：链接</label>-->
-                            <!--</li>-->
+                            <li>
+                                <label>模型工具:  {{currentNode.toolkitType}}</label>
+                            </li>
+                            <li>
+                                <label>模型版本:  {{currentNode.version}}</label>
+                            </li>
+                            <li>
+                                <label>模型作者:  {{currentNode.authorName}}</label>
+                            </li>
+                            <li>
+                                <label>模型单位:  {{currentNode.company}}</label>
+                            </li>
+                            <li>
+                                <a  (click)="viewSolution(currentNode)"><label class="attribute">浏览更多信息...</label></a>
+                            </li>
                         </ul>
                     </mat-tab>
                     <mat-tab label="配置">配置</mat-tab>
@@ -102,6 +108,7 @@
             <div style="height: -webkit-fill-available; width: -webkit-fill-available;" id="left-wrapper">
                 <ul class="sidebar-nav">
                     <li *ngFor="let cat of filteredItems | async">
+                        <a class="open">
                         <a class="open">
                             <i class="fa fa-folder-o" (click)="cat.expanded = !cat.expanded" expand [class]="cat.expanded ? 'fa fa-folder-open' : 'fa fa-folder'"></i>
                             <span>{{cat.name}}</span>

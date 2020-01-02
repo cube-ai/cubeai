@@ -20,6 +20,8 @@ import {Solution} from '../model/solution.model';
 import {HttpResponse} from '@angular/common/http';
 import {OchestratorEditeLinkComponent} from './ochestrator.editeLink.component';
 import {Router} from '@angular/router';
+import {DocumentService, DownloadService} from '../../ucumos';
+import {UpdateSolutionComponent} from './ochestrator.updateSolution.component';
 
 class MySolution {
     uuid: any;
@@ -27,7 +29,6 @@ class MySolution {
     version: any;
     description: any;
     workflow: any;
-    // expand = true;
     activeLine = null;
     activeLineGroup = null;
     points = [];
@@ -50,6 +51,11 @@ class MySolution {
 })
 export class OchestratorComponent implements OnInit {
 
+    newCompositionButton = false;
+    clearCompositeSolutionButton = false;
+    closeCompositeSolutionButton = false;
+    pathClicked = false;
+    pathClickedObject: MyPath;
     currentUser: User;
     userLogin: string;
 
@@ -67,16 +73,12 @@ export class OchestratorComponent implements OnInit {
     solutions: MySolution[];
     rawSolutions: Solution[];
     currentSolution: MySolution;
-
-    // map from solution uuid to its nodes
+    // map from node id to its nodes
     inputPortsMap: any;
     outputPortsMap: any;
-    // map from node id to its nodes
-    inputNodesMap: any;
-    outputNodesMap: any;
 
     matchingModels: any = [];
-
+    defaultTab = false;
     currentNode = {
         name: '',
         authorName: '',
@@ -88,7 +90,7 @@ export class OchestratorComponent implements OnInit {
         id: '',
         uuid: ''
     };
-
+    modelMethodMap: any;
     constructor(
         private principal: Principal,
         private confirmService: ConfirmService,
@@ -97,6 +99,8 @@ export class OchestratorComponent implements OnInit {
         private dialog: MatDialog,
         private router: Router,
         private ochestratorService: OchestratorService,
+        private documentService: DocumentService,
+        private downloadService: DownloadService,
         private compositeSolutionService: CompositeSolutionService
     ) {
         this.filteredItems = this.serchControl.valueChanges
@@ -107,7 +111,6 @@ export class OchestratorComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.currentUser = this.principal.getCurrentAccount() ? this.principal.getCurrentAccount() : null;
         this.cats = ['1', '2', '3'];
         this.expanded = false;
         this.currentUser = this.principal.getCurrentAccount();
@@ -124,11 +127,8 @@ export class OchestratorComponent implements OnInit {
 
         this.inputPortsMap = new Map();
         this.outputPortsMap = new Map();
-
-        this.inputNodesMap = new Map();
-        this.outputNodesMap = new Map();
         this.matchingModels = [];
-        // this.ports = [];
+        this.modelMethodMap = new Map();
         this.loadUnPublishedCompositeSolutions();
     }
 
@@ -158,6 +158,8 @@ export class OchestratorComponent implements OnInit {
         const queryOptions = {
             active: true,
             publishStatus: '上架',
+            subject3: 'base',
+            size: 999999,
         };
         this.solutionService.query(queryOptions).subscribe((res) => {
             this.rawSolutions = res.body;
@@ -166,6 +168,7 @@ export class OchestratorComponent implements OnInit {
            }
 
            res.body.forEach((s) => {
+               this.setSolutionModelMethod(s.uuid);
                this._fillCategories(s);
            });
         });
@@ -175,6 +178,8 @@ export class OchestratorComponent implements OnInit {
             active: true,
             publishStatus: '下架',
             toolkitType: '模型组合',
+            size: 999999,
+            authorLogin: this.currentUser.login,
         };
         this.solutionService.query(queryOptions).subscribe((res) => {
             this.tabs = [];
@@ -182,10 +187,14 @@ export class OchestratorComponent implements OnInit {
                 this._fillCompositeSolution(s);
             });
             this.loadPublishedSolutions();
+            if (res.body.length === 0) {
+                this.defaultTab = true;
+                this.addDefaultTab();
+            }
         });
     }
     private _fillCompositeSolution(s: Solution): void {
-        if (s.toolkitType === '模型组合' && s.authorLogin === this.currentUser.login) {
+        if (s.toolkitType === '模型组合') {
             const sub: MySolution = new MySolution();
             sub.uuid = s.uuid;
             sub.name = s.name;
@@ -245,35 +254,34 @@ export class OchestratorComponent implements OnInit {
     }
     private _fillCategories(s: Solution): void {
 
-        if (s.authorLogin === this.currentUser.login) {
-            this.categoryNames.forEach((c) => {
-                const node: any = {};
-                node.name = s.name;
-                node.id = 'id' + s.uuid;
-                node.nodeSolutionId = s.uuid;
-                node.type = s.modelType != null ? s.modelType : '其他';
-                switch (s.modelType) {
-                    case '分类':
-                        if (c.name === '分类') {
-                            c.nodes.push(node);
-                        }
-                        break;
-                    case '预测':
-                        if (c.name === '预测') {
-                            c.nodes.push(node);
-                        }
-                        break;
-                    case '回归':
-                        if (c.name === '回归') {
-                            c.nodes.push(node);
-                        }
-                        break;
-                    default:
-                        if (c.name === '其他') {
-                            c.nodes.push(node);
-                        }
-                }});
-        }
+        this.categoryNames.forEach((c) => {
+            const node: any = {};
+            node.name = s.name;
+            node.id = 'id' + s.uuid;
+            node.nodeSolutionId = s.uuid;
+            node.type = s.modelType != null ? s.modelType : '其他';
+            switch (s.modelType) {
+                case '分类':
+                    if (c.name === '分类') {
+                        c.nodes.push(node);
+                    }
+                    break;
+                case '预测':
+                    if (c.name === '预测') {
+                        c.nodes.push(node);
+                    }
+                    break;
+                case '回归':
+                    if (c.name === '回归') {
+                        c.nodes.push(node);
+                    }
+                    break;
+                default:
+                    if (c.name === '其他') {
+                        c.nodes.push(node);
+                    }
+            }});
+
     }
     private _filterStates(value: string): any[] {
         const filterValue = value.toLowerCase();
@@ -300,6 +308,40 @@ export class OchestratorComponent implements OnInit {
         });
         return result;
     }
+    addDefaultTab() {
+        const sname = '......';
+        const sol: any = {};
+        sol.name = sname;
+        sol.authorLogin = this.currentUser.login;
+        sol.version = '1';
+        sol.summary = '1';
+        this.compositeSolutionService.createCompositeSolution(sol).subscribe((res) => {
+            sol.uuid = res.body.uuid;
+            console.log(res);
+            this.addDefaultSolution(sol);
+        });
+    }
+    addDefaultSolution(s: any) {
+        this.tabs.push(s.name);
+        this.currentSolution = new MySolution();
+        this.currentSolution.name = s.name;
+        this.currentSolution.uuid = s.uuid;
+        this.currentSolution.version = s.version;
+        this.currentSolution.description = s.description;
+        this.currentSolution.activeLineGroup = null;
+        this.currentSolution.activeLine = null;
+        this.currentSolution.points = [];
+        this.currentSolution.translate = null;
+        this.currentSolution.drawLine = false;
+        this.currentSolution.dx = 0;
+        this.currentSolution.dy = 0;
+        this.currentSolution.dragElem = null;
+        this.currentSolution.nodes = [];
+        this.currentSolution.paths = [];
+        this.currentSolution.curPath = new MyPath();
+        this.solutions.push(this.currentSolution);
+        this.selected.setValue(this.tabs.length - 1);
+    }
     addTab(selectAfterAdding: boolean) {
         const dialogRef = this.dialog.open(AddSolutionComponent, {
             width: '450px',
@@ -313,6 +355,9 @@ export class OchestratorComponent implements OnInit {
             }
             this.addSolution(s, selectAfterAdding);
         });
+        this.newCompositionButton = true;
+        this.clearCompositeSolutionButton = false;
+        this.closeCompositeSolutionButton = false;
     }
     addSolution(s: any, selectAfterAdding: boolean) {
         this.tabs.push(s.name);
@@ -339,6 +384,13 @@ export class OchestratorComponent implements OnInit {
         if (selectAfterAdding) {
             this.selected.setValue(this.tabs.length - 1);
         }
+        this.currentNode.name = '';
+        this.currentNode.modelType = '';
+        this.currentNode.version = '';
+        this.currentNode.authorName = '';
+        this.currentNode.toolkitType = '';
+        this.currentNode.company = '';
+        this.currentNode.uuid = '';
     }
 
     removeTab(index: number) {
@@ -411,8 +463,11 @@ export class OchestratorComponent implements OnInit {
             .attr('input', (path) => path.input)
             .attr('end', (path) => path.end)
             .attr('cursor', 'pointer')
-            .on('dblclick', (path) => { this.removePath(path); });
-            // .on('click', (path) => { this.editeLink(path); });
+            // .on('dblclick', (path) => { this.removePath(path); });
+            .on('click', (path) => {
+                this.pathClicked = true;
+                this.pathClickedObject = path;
+            });
 
         selectAll('g.path').append('text').attr('id', (d: any) => {
             return 'pathText' + d.id;
@@ -471,12 +526,37 @@ export class OchestratorComponent implements OnInit {
     }
 
     save() {
+        if (this.defaultTab || this.currentSolution.name === '......') {
+            const dialogRef = this.dialog.open(UpdateSolutionComponent, {
+                width: '450px',
+                data: {
+                    fromUserLogin: this.currentUser.login,
+                    uuid: this.currentSolution.uuid,
+                },
+            });
+            dialogRef.afterClosed().subscribe((s) => {
+                if (!s) {
+                    return;
+                }
+                this.tabs = [];
+                this.tabs.push(s.name);
+                this.currentSolution.name = s.name;
+                this.updateSolutionCdump();
+            });
+            this.defaultTab = false;
+        }else {
+            this.updateSolutionCdump();
+        }
+    }
+    updateSolutionCdump() {
         const body: Solution = new Solution();
         body.uuid = this.currentSolution.uuid;
         body.authorLogin = this.currentUser.login;
-        this.compositeSolutionService.saveCompositeSolution(body).subscribe((res) => {
-            console.log(res);
-                this.snackBarService.success('保存方案成功!');
+        body.name = this.currentSolution.name;
+        body.version = this.currentSolution.version;
+        this.compositeSolutionService.saveCompositeSolutionCdump(body).subscribe((res) => {
+                console.log(res);
+                this.snackBarService.success('保存组合方案成功!');
             },
             (error) => {
                 this.snackBarService.error('保存组合方案失败!' + error);
@@ -490,10 +570,10 @@ export class OchestratorComponent implements OnInit {
         body.version = this.currentSolution.version;
         this.compositeSolutionService.validateCompositeSolution(body).subscribe((res) => {
                 console.log(res);
-                this.snackBarService.success('validate方案成功!');
+                this.snackBarService.success('校验方案成功!');
             },
             (error) => {
-                this.snackBarService.error('validate组合方案失败!' + error);
+                this.snackBarService.error('校验组合方案失败!' + error);
             });
     }
     // newSolution(ar) {
@@ -630,7 +710,11 @@ export class OchestratorComponent implements OnInit {
                 this.currentSolution.activeLine.attr('input', (path) => path.input);
                 this.currentSolution.activeLine.attr('end', (path) => path.end);
                 this.currentSolution.activeLine.attr('cursor', 'pointer');
-                this.currentSolution.activeLine.on('dblclick', (path) => { this.removePath(path); });
+                // this.currentSolution.activeLine.on('dblclick', (path) => { this.removePath(path); });
+                this.currentSolution.activeLine.on('click', (path) => {
+                    this.pathClicked = true;
+                    this.pathClickedObject = path;
+                });
                 // this.currentSolution.activeLine.on('click', (path) => { this.editeLink(path); });
                 this._addLink();
             }
@@ -683,19 +767,26 @@ export class OchestratorComponent implements OnInit {
         this.currentSolution.translate = null;
     }
 
-    removePath(path: MyPath) {
-        this.ochestratorService.deleteLink(this.currentSolution.uuid, this.currentUser.login, path.id).subscribe(( res) => {
-            const index = this.currentSolution.paths.findIndex((e) => {
-                // return e.from === path.from && e.to === path.to;
-                return e.id === path.id;
-            });
-            this.currentSolution.paths.splice(index, 1);
-            select('#' + path.id).remove();
-            this.snackBarService.success('删除链路成功');
-        },
-            (err) => {
-                this.snackBarService.error('删除链路失败');
-            });
+    removePath() {
+
+        this.confirmService.ask('确定要删除链路?').then((confirm) => {
+            if (confirm) {
+                this.ochestratorService.deleteLink(this.currentSolution.uuid, this.currentUser.login, this.pathClickedObject.id).subscribe((res) => {
+                        const index = this.currentSolution.paths.findIndex((e) => {
+                            // return e.from === path.from && e.to === path.to;
+                            return e.id === this.pathClickedObject.id;
+                        });
+                        this.currentSolution.paths.splice(index, 1);
+                        select('#' + this.pathClickedObject.id).remove();
+                        this.snackBarService.success('删除链路成功');
+                },
+                    (err) => {
+                    this.snackBarService.error('删除链路失败');
+                    }
+                );
+            }
+        });
+        this.pathClicked = false;
     }
 
     getTranslate(transform) {
@@ -839,8 +930,8 @@ export class OchestratorComponent implements OnInit {
         svg.selectAll('g').data(this.currentSolution.nodes).exit().remove();
         let i = 0;
         nodes.forEach((node: MyNode) => {
-            let inputPorts = this.inputPortsMap.get(node.nodeSolutionId);
-            let outputPorts = this.outputPortsMap.get(node.nodeSolutionId);
+            let inputPorts = this.inputPortsMap.get(node.id);
+            let outputPorts = this.outputPortsMap.get(node.id);
             // if ports is null, then get port from server side
             if ( inputPorts == null && outputPorts == null) {
                 const body: any = {};
@@ -900,11 +991,11 @@ export class OchestratorComponent implements OnInit {
                         'extras': []
                     };
                     inputPorts = this._buildInputPorts(node.id, node.type, requirementJson, def.extras);
-                    this.inputPortsMap.set(node.nodeSolutionId, inputPorts);
-                    this.inputNodesMap.set(node.id, inputPorts);
+                    // this.inputPortsMap.set(node.nodeSolutionId, inputPorts);
+                    this.inputPortsMap.set(node.id, inputPorts);
                     outputPorts = this._buildOutputPorts(node.id, node.type, capabilityJson, def.extras);
-                    this.outputPortsMap.set(node.nodeSolutionId, outputPorts);
-                    this.outputNodesMap.set(node.id, outputPorts);
+                    // this.outputPortsMap.set(node.nodeSolutionId, outputPorts);
+                    this.outputPortsMap.set(node.id, outputPorts);
                     if ( node.inputCircles.length === 0 ) {
                         inputPorts.forEach((port) => {
                             node.inputCircles.push(port);
@@ -1213,8 +1304,8 @@ export class OchestratorComponent implements OnInit {
             };
             this.addNodeToRemote(node, requirementJson, capabilityJson).subscribe((res) => {
                 const svg = select('svg');
-                let inputPorts = this.inputPortsMap.get(node.nodeSolutionId);
-                let outputPorts = this.outputPortsMap.get(node.nodeSolutionId);
+                let inputPorts = this.inputPortsMap.get(node.id);
+                let outputPorts = this.outputPortsMap.get(node.id);
                 if ( inputPorts == null || outputPorts == null) {
                     requirementJson.forEach((req) => {
                         req.capability.name = this.removeMsgNames(req.capability.name);
@@ -1225,11 +1316,11 @@ export class OchestratorComponent implements OnInit {
                         cap.type = this.is_wildcard_type(cap.target.name) ? null : JSON.stringify(cap.target.name);
                     });
                     inputPorts = this._buildInputPorts(node.id, node.type, def.requirements, def.extras);
-                    this.inputPortsMap.set(node.nodeSolutionId, inputPorts);
-                    this.inputNodesMap.set(node.id, inputPorts);
+                    // this.inputPortsMap.set(node.nodeSolutionId, inputPorts);
+                    this.inputPortsMap.set(node.id, inputPorts);
                     outputPorts = this._buildOutputPorts(node.id, node.type, def.capabilities, def.extras);
-                    this.outputPortsMap.set(node.nodeSolutionId, outputPorts);
-                    this.outputNodesMap.set(node.id, outputPorts);
+                    // this.outputPortsMap.set(node.nodeSolutionId, outputPorts);
+                    this.outputPortsMap.set(node.id, outputPorts);
                 }
                 if ( node.inputCircles.length === 0 ) {
                     inputPorts.forEach((port) => {
@@ -1361,12 +1452,22 @@ export class OchestratorComponent implements OnInit {
                     this.currentSolution.paths = [];
                     this.currentSolution.nodes = [];
                     this.clearCanvas();
+                    this.currentNode.name = '';
+                    this.currentNode.modelType = '';
+                    this.currentNode.version = '';
+                    this.currentNode.authorName = '';
+                    this.currentNode.toolkitType = '';
+                    this.currentNode.company = '';
+                    this.currentNode.uuid = '';
                 },
                     () => {
                         this.snackBarService.error('清空组合方案失败!');
                     });
             }
         });
+        this.newCompositionButton = false;
+        this.clearCompositeSolutionButton = true;
+        this.closeCompositeSolutionButton = false;
     }
     closeCompositeSolution() {
         this.confirmService.ask('确定要关闭该组合方案？').then((confirm) => {
@@ -1376,12 +1477,22 @@ export class OchestratorComponent implements OnInit {
                         const index =  this.selected.value;
                         this.tabs.splice(index, 1);
                         this.solutions.splice(index, 1);
+                        this.currentNode.name = '';
+                        this.currentNode.modelType = '';
+                        this.currentNode.version = '';
+                        this.currentNode.authorName = '';
+                        this.currentNode.toolkitType = '';
+                        this.currentNode.company = '';
+                        this.currentNode.uuid = '';
                     },
                     () => {
                         this.snackBarService.error('关闭组合方案失败!');
                     });
             }
         });
+        this.newCompositionButton = false;
+        this.clearCompositeSolutionButton = false;
+        this.closeCompositeSolutionButton = true;
     }
     // editeNode(node) {
     //     const dialogRef = this.dialog.open(OchestratorEditeNodeComponent, {
@@ -1398,9 +1509,18 @@ export class OchestratorComponent implements OnInit {
     //     });
     // }
 
+    getNodeSolutionIdByNodeId(nodeId: string): string {
+        let sid = null;
+        this.currentSolution.nodes.forEach((node: MyNode) => {
+            if (node.id === nodeId) {
+                sid = node.nodeSolutionId;
+            }
+        });
+        return sid;
+    }
     addLinkToRemote(path: MyPath): Observable<HttpResponse<any>> {
-        const from = this.inputNodesMap.get(path.from);
-        const to = this.outputNodesMap.get(path.to);
+        const from = this.inputPortsMap.get(path.from);
+        const to = this.outputPortsMap.get(path.to);
         const data: any = {};
         data.userId = this.currentUser.login;
         data.solutionId = this.currentSolution.uuid;
@@ -1412,11 +1532,25 @@ export class OchestratorComponent implements OnInit {
         data.targetNodeId = path.to;
         if (from) {
             data.sourceNodeRequirement = from[0].portName;
+            const ssId = this.getNodeSolutionIdByNodeId(path.from);
+            if (ssId != null) {
+                const method = this.modelMethodMap.get(ssId);
+                if (method != null) {
+                    data.sourceNodeRequirement = method;
+                }
+            }
         }else {
             data.sourceNodeRequirement = '';
         }
         if (to) {
             data.targetNodeCapabilityName = to[0].portName;
+            const tsId = this.getNodeSolutionIdByNodeId(path.to);
+            if (tsId != null) {
+                const method = this.modelMethodMap.get(tsId);
+                if (method != null) {
+                    data.targetNodeCapabilityName = method;
+                }
+            }
         }else {
             data.targetNodeCapabilityName = '';
         }
@@ -1424,8 +1558,28 @@ export class OchestratorComponent implements OnInit {
         data.output = path.output;
         data.end = path.end;
         data.start = path.start;
+        data.linkId = path.id;
         return this.ochestratorService.createLink(data);
 
+    }
+    setSolutionModelMethod(solutionId) {
+        if (this.modelMethodMap.get(solutionId) == null) {
+            this.documentService.query({
+                solutionUuid: solutionId,
+                name: 'api-example.txt',
+            }).subscribe(
+                (res) => {
+                    if (res && res.body.length > 0) {
+                        const url = res.body[0].url;
+                        this.downloadService.getFileText(url).subscribe(
+                            (res1) => {
+                                this.modelMethodMap.set(solutionId, JSON.parse(res1.body['text'])['examples'][0]['model-method']);
+                            }
+                        );
+                    }
+                }
+            );
+        }
     }
 
     editeLink(path) {

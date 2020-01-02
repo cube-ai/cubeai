@@ -191,7 +191,7 @@ public class SolutionService {
                                    String targetNodeId, String sourceNodeRequirement, String targetNodeCapabilityName, Cdump cdump,
                                    String input, String output, String start, String end) {
         this.updateDataBrokerTypeNodesProtoUri(cdump.getNodes(), sourceNodeId, targetNodeId);
-
+        logger.debug("updateLinkDetails begin");
         Relations relationObj = this.createRelationsObj(linkName, linkId, sourceNodeName, sourceNodeId, targetNodeName,
             targetNodeId, sourceNodeRequirement, targetNodeCapabilityName, input, output, start, end);
 
@@ -202,6 +202,7 @@ public class SolutionService {
         } else {
             cdump.getRelations().add(relationObj);
         }
+        logger.debug("updateLinkDetails end");
     }
     /**
      * This method used for to add the Link between two models
@@ -220,7 +221,6 @@ public class SolutionService {
             logger.debug(" addLink() solutionId is null, return false ");
             return addedLink;
         }
-        Gson gson = new Gson();
         String nodeToUpdate;
         List<Nodes> nodesList;
         try {
@@ -232,6 +232,7 @@ public class SolutionService {
             Cdump cdump = mapper.readValue(new File(path.concat(cdumpFileName)), Cdump.class);
             nodesList = cdump.getNodes();
             if (nodesList == null || nodesList.isEmpty()){
+                logger.debug(" addLink() nodes in cdump is null, return false ");
                 return addedLink;
             }
             // update relations list, if link is created between 2 models
@@ -273,6 +274,7 @@ public class SolutionService {
                 }
             }
             try {
+                Gson gson = new Gson();
                 String jsonInString = gson.toJson(cdump);
                 DEUtil.writeDataToFile(path, cdumpFileName, jsonInString);
             } catch (JsonIOException e) {
@@ -426,7 +428,7 @@ public class SolutionService {
     public String readCompositeSolutionGraph(String login, String solutionId) throws Exception{
 
         logger.debug(" readCompositeSolutionGraph()  : Begin ");
-        String result;
+        String result = null;
         ByteArrayOutputStream byteArrayOutputStream = null;
         try {
             List<Solution> solutions = ummClient.getSolutionsByUuid(solutionId);
@@ -437,10 +439,11 @@ public class SolutionService {
             String nexusURI = getArtifactNexusUrl(solutionId, configurationProperties.getCdumpArtifactType());
             if (null != nexusURI && !"".equals(nexusURI)) {
                 byteArrayOutputStream = nexusArtifactClient.getArtifact(nexusURI);
-                result = byteArrayOutputStream.toString();
-                logger.info(" Response in String Format :  {} ", result );
-
-                this.updateCdumpByPayload(result, login, solutionId);
+                if (byteArrayOutputStream != null){
+                    result = byteArrayOutputStream.toString();
+                    logger.info(" Response in String Format :  {} ", result );
+                    this.updateCdumpByPayload(result, login, solutionId);
+                }
 
             } else {
                 result = "{\"error\": \"CDUMP TgifArtifact Not Found for this solution\"}";
@@ -1003,7 +1006,6 @@ public class SolutionService {
         String cdumpFileName;
         String sourceNodeId;
         String targetNodeId;
-        boolean deletedLink = false;
 
         mapper.setSerializationInclusion(Include.NON_NULL);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -1017,16 +1019,17 @@ public class SolutionService {
                 Cdump cdump = mapper.readValue(file, Cdump.class);
                 List<Relations> relationsList = cdump.getRelations();
                 if (null == relationsList || relationsList.isEmpty()) {
-                    deletedLink = false;
+                    logger.debug("relationsList is empty");
+                    return true;
                 } else {
                     Iterator<Relations> relationsItr = relationsList.iterator();
+                    nodesList = cdump.getNodes();
                     // Identify link to delete + Data mapper node to delete it's properties field
                     while (relationsItr.hasNext()) {
                         Relations relation = relationsItr.next();
                         if (relation.getLinkId().equals(linkId)) {
                             sourceNodeId = relation.getSourceNodeId();
                             targetNodeId = relation.getTargetNodeId();
-                            nodesList = cdump.getNodes();
                             // delete properties field from DM
                             for (Nodes node : nodesList) {
                                 // For all NodeTypes input is SourceNodeId which is same as nodeId in Nodes
@@ -1035,7 +1038,6 @@ public class SolutionService {
                                 deletePropertiesFromDataMapperTargetNode(targetNodeId, node, linkId, relationsList);
                             }
                             // delete link details form relations list
-                            deletedLink = true;
                             relationsItr.remove();
                             break;
                         }
@@ -1049,7 +1051,7 @@ public class SolutionService {
             logger.error(" Exception in deleteLink() in SolutionService", e);
         }
         logger.debug(" deleteLink() in SolutionService End ");
-        return deletedLink;
+        return true;
     }
     private void splitterLink(String linkId, List<Relations> relationsList, Nodes node) {
         logger.debug( "splitterLink() : Begin  ");
@@ -1245,6 +1247,7 @@ public class SolutionService {
     private List<MatchingModel> getMatchingModels(String portType, List<MessageargumentList> inMsgArgList, Map<KeyVO,
         List<ModelDetailVO>> modelCache) throws IOException{
         logger.debug(" getMatchingModels() Begin ");
+        logger.debug("inMsgArgList {}", new Gson().toJson(inMsgArgList) );
         List<MatchingModel> matchingModels = new ArrayList<>();
         if(null != inMsgArgList && !inMsgArgList.isEmpty()) {
             //Construct KeyVO
