@@ -1,0 +1,57 @@
+version: '2'
+services:
+    zookeeper:
+        image: wurstmeister/zookeeper:3.4.6
+        ports:
+          - 2181:2181
+    kafka:
+        image: wurstmeister/kafka:1.0.0
+        environment:
+            KAFKA_ADVERTISED_HOST_NAME: localhost
+            KAFKA_ADVERTISED_PORT: 9092
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+            KAFKA_CREATE_TOPICS: "topic-jhipster:1:1"
+        ports:
+            - 9092:9092
+
+    consul:
+        image: consul:0.9.3
+        ports:
+            - 8300:8300
+            - 8500:8500
+            - 8600:8600
+        command: consul agent -dev -ui -client 0.0.0.0
+
+    consul-config-loader:
+        image: jhipster/consul-config-loader:v0.2.2
+        volumes:
+            - ./central-server-config:/config
+        environment:
+            - INIT_SLEEP_SECONDS=5
+            - CONSUL_URL=consul
+            - CONSUL_PORT=8500
+
+    uaa-mysql:
+        image: mysql:5.7.20
+        volumes:
+            - ~/database/ucumos/uaa/mysql/:/var/lib/mysql/
+        environment:
+            - MYSQL_USER=root
+            - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+            - MYSQL_DATABASE=uaa
+        ports:
+            - 3306:3306
+        command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8 --explicit_defaults_for_timestamp
+
+    umm-mysql:
+        image: mysql:5.7.20
+        volumes:
+            - ~/database/ucumos/umm/mysql/:/var/lib/mysql/
+        environment:
+            - MYSQL_USER=root
+            - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+            - MYSQL_DATABASE=umm
+        ports:
+            - 3307:3306
+        command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8 --explicit_defaults_for_timestamp
+

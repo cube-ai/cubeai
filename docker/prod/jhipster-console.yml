@@ -1,8 +1,0 @@
-version: '2'
-services:
-    jhipster-console:
-        image: jhipster/jhipster-console:v3.0.1
-        environment:
-            - ELASTICSEARCH_URL=http://jhipster-elasticsearch:9200
-        ports:
-            - 5601:5601

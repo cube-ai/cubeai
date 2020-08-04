@@ -65,7 +65,7 @@ public class DeployService {
         this.messageService.sendMessage(task.getUserLogin(),
             "模型 " + task.getTaskName() + " 部署" + msgSubject,
             "你的模型 " + task.getTaskName() + " 部署" + msgContent + "！\n\n请点击下方[目标页面]按钮查看任务详情。",
-            "/ucumos/deploy/view/" + taskUuid,
+            "/pmodelhub/#/deploy/view/" + taskUuid,
             false);
     }
 
@@ -190,10 +190,7 @@ public class DeployService {
         deployment.setDeployer(task.getUserLogin());
         deployment.setSolutionUuid(task.getTargetUuid());
         deployment.setSolutionName(task.getTaskName());
-        deployment.setSolutionAuthor(solution.getAuthorName());
-        deployment.setSolutionCompany(solution.getCompany());
-        deployment.setModelType(solution.getModelType());
-        deployment.setToolkitType(solution.getToolkitType());
+        deployment.setSolutionAuthor(solution.getAuthorLogin());
         deployment.setPictureUrl(solution.getPictureUrl());
         deployment.setk8sPort(serviceStatus.getSpec().getPorts().get(0).getNodePort());
         deployment.setIsPublic(isPublic);
@@ -231,7 +228,6 @@ public class DeployService {
         } catch (Exception e) {
             log.info("saveTaskStepProgress fail");
         }
-
     }
 
 }

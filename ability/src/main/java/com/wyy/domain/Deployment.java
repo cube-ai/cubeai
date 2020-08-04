@@ -14,12 +14,17 @@ public class Deployment {
     private String solutionAuthor;
     private Integer k8sPort;
     private Boolean isPublic;
+    private String status;
     private Instant createdDate;
     private Instant modifiedDate;
     private String pictureUrl;
-    private String modelType;
-    private String toolkitType;
+    private Long starCount;
     private Long callCount;
+    private String demoUrl;
+    private String subject1;
+    private String subject2;
+    private String subject3;
+    private Long displayOrder;
 
     public Long getId() {
         return id;
@@ -120,6 +125,19 @@ public class Deployment {
         this.isPublic = isPublic;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public Deployment status(String status) {
+        this.status = status;
+        return this;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public Instant getCreatedDate() {
         return createdDate;
     }
@@ -154,31 +172,19 @@ public class Deployment {
         this.pictureUrl = pictureUrl;
     }
 
-    public String getModelType() {
-        return modelType;
+    public Long getStarCount() {
+        return starCount;
     }
 
-    public Deployment modelType(String modelType) {
-        this.modelType = modelType;
+    public Deployment starCount(Long starCount) {
+        this.starCount = starCount;
         return this;
     }
 
-    public void setModelType(String modelType) {
-        this.modelType = modelType;
+    public void setStarCount(Long starCount) {
+        this.starCount = starCount;
     }
 
-    public String getToolkitType() {
-        return toolkitType;
-    }
-
-    public Deployment toolkitType(String toolkitType) {
-        this.toolkitType = toolkitType;
-        return this;
-    }
-
-    public void setToolkitType(String toolkitType) {
-        this.toolkitType = toolkitType;
-    }
 
     public Long getCallCount() {
         return callCount;
@@ -191,6 +197,67 @@ public class Deployment {
 
     public void setCallCount(Long callCount) {
         this.callCount = callCount;
+    }
+
+    public String getDemoUrl() {
+        return demoUrl;
+    }
+
+    public Deployment demoUrl(String demoUrl) {
+        this.demoUrl = demoUrl;
+        return this;
+    }
+
+    public void setDemoUrl(String demoUrl) {
+        this.demoUrl = demoUrl;
+    }
+
+    public String getSubject1() {
+        return subject1;
+    }
+
+    public Deployment subject1(String subject1) {
+        this.subject1 = subject1;
+        return this;
+    }
+
+    public void setSubject1(String subject1) {
+        this.subject1 = subject1;
+    }
+
+    public String getSubject2() {
+        return subject2;
+    }
+
+    public Deployment subject2(String subject2) {
+        this.subject2 = subject2;
+        return this;
+    }
+
+    public void setSubject2(String subject2) {
+        this.subject2 = subject2;
+    }
+
+    public String getSubject3() {
+        return subject3;
+    }
+
+    public Deployment subject3(String subject3) {
+        this.subject3 = subject3;
+        return this;
+    }
+
+    public void setSubject3(String subject3) {
+        this.subject3 = subject3;
+    }
+
+    public Long getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public Deployment displayOrder(Long displayOrder) {
+        this.displayOrder = displayOrder;
+        return this;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
@@ -226,12 +293,17 @@ public class Deployment {
             ", solutionAuthor='" + getSolutionAuthor() + "'" +
             ", k8sPort=" + getk8sPort() +
             ", isPublic='" + isIsPublic() + "'" +
+            ", status='" + getStatus() + "'" +
             ", createdDate='" + getCreatedDate() + "'" +
             ", modifiedDate='" + getModifiedDate() + "'" +
             ", pictureUrl='" + getPictureUrl() + "'" +
-            ", modelType='" + getModelType() + "'" +
-            ", toolkitType='" + getToolkitType() + "'" +
+            ", starCount=" + getStarCount() +
             ", callCount=" + getCallCount() +
+            ", demoUrl='" + getDemoUrl() + "'" +
+            ", subject1='" + getSubject1() + "'" +
+            ", subject2='" + getSubject2() + "'" +
+            ", subject3='" + getSubject3() + "'" +
+            ", displayOrder=" + getDisplayOrder() +
             "}";
     }
 }

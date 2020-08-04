@@ -1,0 +1,106 @@
+<mat-card class="page-title" *ngIf="application">
+    <div class="btn-toolbar float-left" role="toolbar">
+        <button mat-icon-button (click)="globalService.toggleSideNav()">
+            <mat-icon color="primary">menu</mat-icon>
+        </button>
+    </div>
+    <span>应用</span>
+    <div class="btn-toolbar float-right" role="toolbar">
+        <button mat-icon-button color="primary" (click)="saveApplication()" matTooltip="提交" *ngIf="mode !== 'view'"
+                [disabled]="!application.name || !application.url || !application.subject1">
+            <mat-icon *ngIf="mode !== 'view'">save</mat-icon>
+        </button>
+        &nbsp;&nbsp;
+        <button mat-icon-button (click)="goBack()" matTooltip="返回">
+            <mat-icon color="primary">arrow_back</mat-icon>
+        </button>
+    </div>
+</mat-card>
+
+<mat-card *ngIf="application" style="margin-bottom: 50px">
+    <mat-card>
+        <div *ngIf="mode !== 'view'">
+            <mat-form-field style="font-size:24px; width: 100%">
+                <input matInput type="text" placeholder="应用名称" [(ngModel)]="application.name" required>
+            </mat-form-field>
+        </div>
+        <h4 *ngIf="mode === 'view'">
+            {{application.name}}
+        </h4>
+    </mat-card>
+    <mat-card>
+        <div>
+            <mat-form-field style="width: 100%">
+                <textarea matInput style="height: 50px" [(ngModel)]="application.summary" placeholder="应用简介"[disabled]="mode === 'view'" maxlength="256">
+                </textarea>
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field style="width: 100%">
+                <input matInput type="text" placeholder="URL" [(ngModel)]="application.url" maxlength="512" [disabled]="mode === 'view'" required>
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field style="width: 100%">
+                <input matInput type="text" placeholder="主题1" [(ngModel)]="application.subject1" [disabled]="mode === 'view'" required>
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field style="width: 100%">
+                <input matInput type="text" placeholder="主题2" [(ngModel)]="application.subject2" [disabled]="mode === 'view'">
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field style="width: 100%">
+                <input matInput type="text" placeholder="主题3" [(ngModel)]="application.subject3" [disabled]="mode === 'view'">
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field style="width: 100%">
+                <input matInput type="text" placeholder="角色要求（多个角色以逗号分开，不要带空格）" [(ngModel)]="application.needRoles" [disabled]="mode === 'view'">
+            </mat-form-field>
+        </div>
+        <mat-card style="margin: 20px 0">
+            <p>头像</p>
+            <div *ngIf="mode !== 'view'">
+                <input type="file" ng2FileSelect [uploader]="fileSelector" accept=".jpg, .jpeg, .png, .gif" />
+                <span>（建议尺寸：300x300px，小于100KB）</span>
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;或者：<button (click)="getRandomPicture()">生成随机图像</button></span>
+                <br><br>
+            </div>
+            <img src="{{application.pictureUrl}}">
+        </mat-card>
+        <div>
+            <mat-form-field style="width: 100%">
+                <input matInput type="text" placeholder="贡献者" [(ngModel)]="application.owner" [disabled]="mode === 'view'">
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field style="width: 100%">
+                <input matInput type="number" placeholder="显示控制" [(ngModel)]="application.displayOrder" [disabled]="mode === 'view'">
+            </mat-form-field>
+        </div>
+        <div *ngIf="mode !== 'view'" align="center">
+            <button mat-icon-button color="primary" (click)="saveApplication()" matTooltip="提交"
+                    [disabled]="!application.name || !application.url || !application.subject1">
+                <mat-icon *ngIf="mode !== 'view'">save</mat-icon>
+                提交
+            </button>
+        </div>
+    </mat-card>
+    <mat-card *ngIf="mode !== 'create'">
+        <p>
+            创建人： {{application.createdBy}}
+        </p>
+        <p>
+            创建于： {{application.createdDate | date: 'yyyy-MM-dd HH:mm'}}
+        </p>
+        <p>
+            修改人： {{application.modifiedBy}}
+        </p>
+        <p>
+            修改于： {{application.modifiedDate | date: 'yyyy-MM-dd HH:mm'}}
+        </p>
+    </mat-card>
+
+</mat-card>

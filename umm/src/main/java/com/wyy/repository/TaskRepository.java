@@ -19,6 +19,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     Page<Task> findAllByUuid(String uuid, Pageable pageable);
     Page<Task> findAllByUserLogin(String userLogin, Pageable pageable);
+    Page<Task> findAllByTaskStatus(String taskStatus, Pageable pageable);
     Page<Task> findAllByUserLoginAndTaskStatus(String userLogin, String taskStatus, Pageable pageable);
 
 }

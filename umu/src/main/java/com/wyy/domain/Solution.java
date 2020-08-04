@@ -11,7 +11,6 @@ public class Solution {
     private String authorLogin;
     private String authorName;
     private String company;
-    private String coAuthors;
     private String name;
     private String version;
     private String summary;
@@ -26,17 +25,13 @@ public class Solution {
     private Boolean active;
     private String modelType;
     private String toolkitType;
-    private String validationStatus;
-    private String publishStatus;
-    private String publishRequest;
     private Instant createdDate;
     private Instant modifiedDate;
     private Long viewCount;
     private Long downloadCount;
     private Instant lastDownload;
     private Long commentCount;
-    private Long ratingCount;
-    private Double ratingAverage;
+    private Long starCount;
 
     public Long getId() {
         return id;
@@ -76,14 +71,6 @@ public class Solution {
 
     public void setCompany(String company) {
         this.company = company;
-    }
-
-    public String getCoAuthors() {
-        return coAuthors;
-    }
-
-    public void setCoAuthors(String coAuthors) {
-        this.coAuthors = coAuthors;
     }
 
     public String getName() {
@@ -198,30 +185,6 @@ public class Solution {
         this.toolkitType = toolkitType;
     }
 
-    public String getValidationStatus() {
-        return validationStatus;
-    }
-
-    public void setValidationStatus(String validationStatus) {
-        this.validationStatus = validationStatus;
-    }
-
-    public String getPublishStatus() {
-        return publishStatus;
-    }
-
-    public void setPublishStatus(String publishStatus) {
-        this.publishStatus = publishStatus;
-    }
-
-    public String getPublishRequest() {
-        return publishRequest;
-    }
-
-    public void setPublishRequest(String publishRequest) {
-        this.publishRequest = publishRequest;
-    }
-
     public Instant getCreatedDate() {
         return createdDate;
     }
@@ -270,20 +233,12 @@ public class Solution {
         this.commentCount = commentCount;
     }
 
-    public Long getRatingCount() {
-        return ratingCount;
+    public Long getStarCount() {
+        return starCount;
     }
 
-    public void setRatingCount(Long ratingCount) {
-        this.ratingCount = ratingCount;
-    }
-
-    public Double getRatingAverage() {
-        return ratingAverage;
-    }
-
-    public void setRatingAverage(Double ratingAverage) {
-        this.ratingAverage = ratingAverage;
+    public void setStarCount(Long starCount) {
+        this.starCount = starCount;
     }
 
     @Override
@@ -314,7 +269,6 @@ public class Solution {
             ", authorLogin='" + getAuthorLogin() + "'" +
             ", authorName='" + getAuthorName() + "'" +
             ", company='" + getCompany() + "'" +
-            ", coAuthors='" + getCoAuthors() + "'" +
             ", name='" + getName() + "'" +
             ", version='" + getVersion() + "'" +
             ", summary='" + getSummary() + "'" +
@@ -329,17 +283,13 @@ public class Solution {
             ", active='" + isActive() + "'" +
             ", modelType='" + getModelType() + "'" +
             ", toolkitType='" + getToolkitType() + "'" +
-            ", validationStatus='" + getValidationStatus() + "'" +
-            ", publishStatus='" + getPublishStatus() + "'" +
-            ", publishRequest='" + getPublishRequest() + "'" +
             ", createdDate='" + getCreatedDate() + "'" +
             ", modifiedDate='" + getModifiedDate() + "'" +
             ", viewCount=" + getViewCount() +
             ", downloadCount=" + getDownloadCount() +
             ", lastDownload='" + getLastDownload() + "'" +
             ", commentCount=" + getCommentCount() +
-            ", ratingCount=" + getRatingCount() +
-            ", ratingAverage=" + getRatingAverage() +
+            ", starCount=" + getStarCount() +
             "}";
     }
 

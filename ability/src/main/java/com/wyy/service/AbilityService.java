@@ -16,9 +16,7 @@ import java.nio.charset.Charset;
 @Service
 public class AbilityService {
     private static final Logger log = LoggerFactory.getLogger(AbilityService.class);
-    private final UComposerClient uComposerClient;
-    public AbilityService(UComposerClient uComposerClient) {
-        this.uComposerClient = uComposerClient;
+    public AbilityService() {
     }
 
     public ResponseEntity<String> apiGateway(String url, String requestBody, MultiValueMap<String,String> requestHeader) {
@@ -35,7 +33,4 @@ public class AbilityService {
         }
     }
 
-    public ResponseEntity<String> callComposer(String solutionUuid, String modelMethod, String requestBody, MultiValueMap<String, String> requestHeader) {
-        return uComposerClient.callModelMethod(solutionUuid, modelMethod, requestBody, requestHeader);
-    }
 }

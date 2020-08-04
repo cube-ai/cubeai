@@ -22,10 +22,7 @@
     "buildTool": "maven",
     "enableSocialSignIn": false,
     "enableSwaggerCodegen": false,
-    "clientFramework": "angularX",
-    "useSass": false,
-    "clientPackageManager": "yarn",
-    "applicationType": "gateway",
+    "applicationType": "microservice",
     "testFrameworks": [],
     "jhiPrefix": "jhi",
     "enableTranslation": false

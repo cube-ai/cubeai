@@ -5,10 +5,8 @@ import com.wyy.domain.Attachment;
 
 import com.wyy.repository.AttachmentRepository;
 import com.wyy.service.NexusArtifactClient;
-import com.wyy.web.rest.errors.BadRequestAlertException;
 import com.wyy.web.rest.util.FileUtil;
 import com.wyy.web.rest.util.HeaderUtil;
-import com.wyy.web.rest.util.JwtUtil;
 import com.wyy.web.rest.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
@@ -27,13 +25,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 
 /**
  * REST controller for managing Attachment.
@@ -54,25 +50,6 @@ public class AttachmentResource {
         this.nexusArtifactClient = nexusArtifactClient;
     }
 
-    /**
-     * POST  /attachments : Create a new attachment.
-     *
-     * @param attachment the attachment to create
-     * @return the ResponseEntity with status 201 (Created) and with body the new attachment, or with status 401 Unauthorized
-     */
-    @PostMapping("/attachments")
-    @Timed
-    @Secured({"ROLE_CONTENT"})
-    public ResponseEntity<Attachment> createAttachment(HttpServletRequest httpServletRequest,
-                                                       @Valid @RequestBody Attachment attachment) {
-        log.debug("REST request to save Attachment : {}", attachment);
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        attachment.setAuthorLogin(userLogin);
-        attachment.setCreatedDate(Instant.now());
-        attachment.setModifiedDate(Instant.now());
-        Attachment result = attachmentRepository.save(attachment);
-        return ResponseEntity.status(201).body(result);
-    }
 
     /**
      * GET  /attachments : get all the attachments.
@@ -91,25 +68,6 @@ public class AttachmentResource {
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }
 
-    /**
-     * GET  /attachments/:id : get the "id" attachment.
-     *
-     * @param id the id of the attachment to retrieve
-     * @return the ResponseEntity with status 200 (OK) and with body the attachment, or with status 404 (Not Found)
-     */
-    @GetMapping("/attachments/{id}")
-    @Timed
-    @Secured({"ROLE_CONTENT"})
-    public ResponseEntity<Attachment> getAttachment(@PathVariable Long id) {
-        log.debug("REST request to get Attachment : {}", id);
-        Attachment attachment = attachmentRepository.findOne(id);
-
-        if (attachment != null) {
-            this.nexusArtifactClient.deleteArtifact(attachment.getUrl());
-        }
-
-        return ResponseUtil.wrapOrNotFound(Optional.ofNullable(attachment));
-    }
 
     /**
      * DELETE  /attachments/:id : delete the "id" attachment.
@@ -120,10 +78,20 @@ public class AttachmentResource {
     @DeleteMapping("/attachments/{id}")
     @Timed
     @Secured({"ROLE_CONTENT"})
-    public ResponseEntity<Void> deleteAttachment(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteAttachment(HttpServletRequest request, @PathVariable Long id) {
         log.debug("REST request to delete Attachment : {}", id);
-        attachmentRepository.delete(id);
-        return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+
+        Attachment attachment = attachmentRepository.findOne(id);
+        String userLogin = request.getRemoteUser();
+        Boolean isAdmin = request.isUserInRole("ROLE_ADMIN");
+
+        if (userLogin.equals(attachment.getAuthorLogin()) || isAdmin) {
+            this.nexusArtifactClient.deleteArtifact(attachment.getUrl());
+            attachmentRepository.delete(id);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(403).build(); // 403 Forbidden
+        }
     }
 
     @RequestMapping(value = "/attachments/upload", method = RequestMethod.POST, consumes = "multipart/form-data")
@@ -180,7 +148,7 @@ public class AttachmentResource {
         FileUtil.deleteDirectory(userHome + "/tempfile/attachment/" + uuid);
 
         Attachment attachment = new Attachment();
-        attachment.setAuthorLogin(JwtUtil.getUserLogin(request));
+        attachment.setAuthorLogin(request.getRemoteUser());
         attachment.setName(fileName);
         attachment.setFileSize(size);
         attachment.setUrl(longUrl);

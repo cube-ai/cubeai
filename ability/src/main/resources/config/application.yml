@@ -23,6 +23,10 @@
 #                    thread:
 #                        timeoutInMilliseconds: 10000
 # See https://github.com/spring-cloud/spring-cloud-netflix/issues/1330
+ribbon:
+  ReadTimeout: 60000
+  ConnectTimeout: 60000
+
 feign:
     hystrix:
         enabled: true
@@ -34,7 +38,7 @@ hystrix:
             execution:
                 isolation:
                     thread:
-                        timeoutInMilliseconds: 10000
+                        timeoutInMilliseconds: 120000
 
 management:
     security:
@@ -61,8 +65,6 @@ spring:
     mvc:
         favicon:
             enabled: false
-    thymeleaf:
-        mode: XHTML
 security:
     basic:
         enabled: false

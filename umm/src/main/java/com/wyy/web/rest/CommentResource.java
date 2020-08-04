@@ -3,7 +3,6 @@ package com.wyy.web.rest;
 import com.codahale.metrics.annotation.Timed;
 import com.wyy.domain.Comment;
 import com.wyy.repository.CommentRepository;
-import com.wyy.web.rest.util.JwtUtil;
 import com.wyy.web.rest.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
@@ -37,15 +36,19 @@ public class CommentResource {
     /**
      * POST  /comments : Create a new comment.
      * @param comment the comment to create
-     * @return the ResponseEntity with status 201 (Created) or with status 401 Unauthorized
+     * @return the ResponseEntity with status 201 (Created) or with status 403
      */
     @PostMapping("/comments")
     @Timed
-    public ResponseEntity<Void> createComment(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> createComment(HttpServletRequest request,
                                               @Valid @RequestBody Comment comment) {
         log.debug("REST request to save Comment : {}", comment);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
+        if (null == userLogin) {
+            return ResponseEntity.status(403).build();
+        }
+
         comment.setUserLogin(userLogin);
         comment.setCreatedDate(Instant.now());
         comment.setModifiedDate(Instant.now());
@@ -61,8 +64,8 @@ public class CommentResource {
     @GetMapping("/comments")
     @Timed
     public  ResponseEntity<List<Comment>> getAllComments(@RequestParam(value = "solutionUuid") String solutionUuid,
-                                                               @RequestParam(value = "parentUuid") String parentUuid,
-                                                               Pageable pageable) {
+                                                         @RequestParam(value = "parentUuid") String parentUuid,
+                                                         Pageable pageable) {
         log.debug("REST request to get all comments");
         Page<Comment> page = commentRepository.findAllBySolutionUuidAndParentUuid(solutionUuid, parentUuid, pageable);
 
@@ -90,14 +93,14 @@ public class CommentResource {
      */
     @DeleteMapping("/comments/{id}")
     @Timed
-    public ResponseEntity<Void> deleteComment(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> deleteComment(HttpServletRequest request,
                                               @PathVariable Long id) {
         log.debug("REST request to delete Comment : {}", id);
 
         Comment comment = commentRepository.findOne(id);
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        String userRoles = JwtUtil.getUserRoles(httpServletRequest);
-        if (null == userLogin || userRoles == null || !(userLogin.equals(comment.getUserLogin()) || userRoles.contains("ROLE_MANAGER"))) {
+        String userLogin = request.getRemoteUser();
+        Boolean hasRole = request.isUserInRole("ROLE_MANAGER");
+        if (null == userLogin || !(userLogin.equals(comment.getUserLogin()) || hasRole)) {
             // 只能由申请者自己或者ROLE_MANAGER删除
             return ResponseEntity.status(403).build(); // 403 Forbidden
         }

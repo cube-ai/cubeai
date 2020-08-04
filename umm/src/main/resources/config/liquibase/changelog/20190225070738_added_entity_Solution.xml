@@ -38,10 +38,6 @@
                 <constraints nullable="true" />
             </column>
 
-            <column name="co_authors" type="varchar(512)">
-                <constraints nullable="true" />
-            </column>
-
             <column name="name" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
@@ -82,7 +78,7 @@
                 <constraints nullable="true" />
             </column>
 
-            <column name="picture_url" type="varchar(512)">
+            <column name="picture_url" type="clob">
                 <constraints nullable="true" />
             </column>
 
@@ -98,23 +94,7 @@
                 <constraints nullable="true" />
             </column>
 
-            <column name="validation_status" type="varchar(255)">
-                <constraints nullable="true" />
-            </column>
-
-            <column name="publish_status" type="varchar(255)">
-                <constraints nullable="true" />
-            </column>
-
-            <column name="publish_request" type="varchar(255)">
-                <constraints nullable="true" />
-            </column>
-
-            <column name="created_date" type="timestamp">
-                <constraints nullable="true" />
-            </column>
-
-            <column name="modified_date" type="timestamp">
+            <column name="star_count" type="bigint">
                 <constraints nullable="true" />
             </column>
 
@@ -126,19 +106,15 @@
                 <constraints nullable="true" />
             </column>
 
-            <column name="last_download" type="timestamp">
-                <constraints nullable="true" />
-            </column>
-
             <column name="comment_count" type="bigint">
                 <constraints nullable="true" />
             </column>
 
-            <column name="rating_count" type="bigint">
+            <column name="created_date" type="timestamp">
                 <constraints nullable="true" />
             </column>
 
-            <column name="rating_average" type="double">
+            <column name="modified_date" type="timestamp">
                 <constraints nullable="true" />
             </column>
 
@@ -146,15 +122,7 @@
         </createTable>
         <dropDefaultValue tableName="solution" columnName="created_date" columnDataType="datetime"/>
         <dropDefaultValue tableName="solution" columnName="modified_date" columnDataType="datetime"/>
-        <dropDefaultValue tableName="solution" columnName="last_download" columnDataType="datetime"/>
-
-        <!-- Huolongshe: 为uuid字段建索引，使用Jhipster导入模型后手工添加-->
-        <createIndex indexName="idx_solution_uuid"
-                     tableName="solution"
-                     unique="true">
-            <column name="uuid" type="varchar(255)"/>
-        </createIndex>
-
+        
     </changeSet>
     <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here, do not remove-->
 </databaseChangeLog>

@@ -1,9 +1,0 @@
-version: '2'
-services:
-    jhipster-curator:
-        image: jhipster/jhipster-curator:v3.0.1
-        environment:
-            - ES_HOST=jhipster-elasticsearch
-            - UNIT_COUNT=7
-            - UNIT=days
-

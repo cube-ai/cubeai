@@ -86,17 +86,22 @@ public class MailService {
     }
 
     @Async
-    public void sendActivationEmail(User user) {
+    public void sendActivationEmail(User user, String activateUrlPrefix) {
         // sendEmailFromTemplate(user, "activationEmail", "email.activation.title");
 
         String subject = "CubeAI注册帐号激活";
-        String content = "你好！\n\n" +
-            "    你正在进行注册帐号激活，激活密钥：" + user.getActivationKey() + "。\n"
-            + "    请妥善保管，切勿向他人泄露！\n\n"
-            + "谢谢！\n\n"
-            + "CubeAI ★ 智立方\n\n"
-            + "(本邮件为系统后台发送，请勿回复！)";
-        sendEmail(user.getEmail(), subject, content, false, false);
+        String content = "" +
+            "<html>" +
+            "<p>你好！</p>" +
+            "<p>你正在进行注册帐号激活，请点击以下链接或者将其复制到浏览器地址栏打开网页来进行激活：</p>" +
+            "<a href=\"" + activateUrlPrefix + user.getActivationKey() + "\"" + ">" + activateUrlPrefix + user.getActivationKey() + "</a>" +
+            "<p>请妥善保管，切勿向他人泄露！</p>" +
+            "<p>谢谢！</p>" +
+            "<p>CubeAI ★ 智立方</p>" +
+            "<p>(本邮件为系统后台发送，请勿回复！)</p>" +
+            "</html>";
+
+        sendEmail(user.getEmail(), subject, content, false, true);
     }
 
     @Async
@@ -106,17 +111,22 @@ public class MailService {
     }
 
     @Async
-    public void sendPasswordResetMail(User user) {
+    public void sendPasswordResetMail(User user, String resetUrlPrefix) {
         log.debug("Sending password reset email to '{}'", user.getEmail());
         // sendEmailFromTemplate(user, "passwordResetEmail", "email.reset.title");
 
         String subject = "CubeAI密码重置";
-        String content = "你好！\n\n" +
-            "    你正在进行密码重置，重置密钥：" + user.getResetKey() + "。\n"
-            + "    请妥善保管，切勿向他人泄露！\n\n"
-            + "谢谢！\n\n"
-            + "CubeAI ★ 智立方\n\n"
-            + "(本邮件为系统后台发送，请勿回复！)";
-        sendEmail(user.getEmail(), subject, content, false, false);
+        String content = "" +
+            "<html>" +
+            "<p>你好！</p>" +
+            "<p>你正在进行密码重置，请点击以下链接或者将其复制到浏览器地址栏打开网页来重置密码：</p>" +
+            "<a href=\"" + resetUrlPrefix + user.getResetKey() + "\"" + ">" + resetUrlPrefix + user.getResetKey() + "</a>" +
+            "<p>请妥善保管，切勿向他人泄露！</p>" +
+            "<p>谢谢！</p>" +
+            "<p>CubeAI ★ 智立方</p>" +
+            "<p>(本邮件为系统后台发送，请勿回复！)</p>" +
+            "</html>";
+
+        sendEmail(user.getEmail(), subject, content, false, true);
     }
 }

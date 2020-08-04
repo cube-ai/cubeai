@@ -1,11 +1,7 @@
 package com.wyy.service;
 
 import com.wyy.client.AuthorizedFeignClient;
-import com.wyy.domain.Solution;
-import com.wyy.domain.Task;
-import com.wyy.domain.TaskStep;
-import com.wyy.domain.Artifact;
-import com.wyy.domain.Deployment;
+import com.wyy.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,8 +32,14 @@ public interface UmmClient {
     ResponseEntity<Void> createDeployment(@RequestBody Deployment deployment);
 
     @RequestMapping(value ="/api/deployments", method = RequestMethod.PUT)
-    ResponseEntity<Deployment> updateDeployment(@RequestBody Deployment deployment);
+    ResponseEntity<Void> updateDeployment(@RequestBody Deployment deployment);
 
     @RequestMapping(value ="/api/deployments", method = RequestMethod.GET)
     List<Deployment> getDeployment(@RequestParam(value = "uuid") String uuid);
+
+    @RequestMapping(value ="/api/deployments", method = RequestMethod.GET)
+    List<Deployment> getDeployments(@RequestParam(value = "solutionUuid") String solutionUuid,
+                                    @RequestParam(value = "isPublic") Boolean isPublic,
+                                    @RequestParam(value = "status") String status);
+
 }

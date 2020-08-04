@@ -1,0 +1,17 @@
+<mat-card style="margin: 20px">
+    <div class="row">
+        <div *ngFor="let application of applications">
+            <a (click)="gotoUrl(application.url)" *ngIf="application.pictureUrl && hasAnyRole(application.needRoles)">
+                <mat-card class="pull-right" style="max-width: 300px; max-height: 380px; margin: 20px">
+                    <div style="width: 100%; height: 80px; text-align: center; font-size: 24px; font-weight: bold">
+                        {{application.name}}
+                    </div>
+                    <div>
+                        <img mat-card-image src="{{application.pictureUrl}}">
+                    </div>
+                </mat-card>
+            </a>
+        </div>
+    </div>
+</mat-card>
+

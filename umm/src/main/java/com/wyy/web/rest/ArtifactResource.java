@@ -5,8 +5,6 @@ import com.wyy.domain.Artifact;
 import com.wyy.domain.Solution;
 import com.wyy.repository.ArtifactRepository;
 import com.wyy.repository.SolutionRepository;
-import com.wyy.web.rest.util.JwtUtil;
-import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +14,6 @@ import javax.validation.Valid;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * REST controller for managing Artifact.
@@ -41,13 +38,13 @@ public class ArtifactResource {
      */
     @PostMapping("/artifacts")
     @Timed
-    public ResponseEntity<Void> createArtifact(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> createArtifact(HttpServletRequest request,
                                                @Valid @RequestBody Artifact artifact) throws URISyntaxException {
         log.debug("REST request to save Artifact : {}", artifact);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
         Solution solution = solutionRepository.findAllByUuid(artifact.getSolutionUuid()).get(0);
-        if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || userLogin.equals("system"))) {
+        if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || userLogin.equals("internal"))) {
             // createArtifact只能由umu微服务中的异步任务OnBoardingServie调用，或者solution的作者调用
             return ResponseEntity.status(403).build();
         }
@@ -79,35 +76,23 @@ public class ArtifactResource {
     }
 
     /**
-     * GET  /artifacts/:id : get the "id" artifact.
-     * @param id the id of the artifact to retrieve
-     * @return the ResponseEntity with status 200 (OK) and with body the artifact, or with status 404 (Not Found)
-     */
-    @GetMapping("/artifacts/{id}")
-    @Timed
-    public ResponseEntity<Artifact> getArtifact(@PathVariable Long id) {
-        log.debug("REST request to get Artifact : {}", id);
-        Artifact artifact = artifactRepository.findOne(id);
-        return ResponseUtil.wrapOrNotFound(Optional.ofNullable(artifact));
-    }
-
-    /**
      * DELETE  /artifacts/:id : delete the "id" artifact.
      * @param id the id of the artifact to delete
      * @return the ResponseEntity with status 200 (OK) or 403 Forbidden
      */
     @DeleteMapping("/artifacts/{id}")
     @Timed
-    public ResponseEntity<Void> deleteArtifact(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> deleteArtifact(HttpServletRequest request,
                                                @PathVariable Long id) {
         log.debug("REST request to delete Artifact : {}", id);
 
         Artifact artifact = artifactRepository.findOne(id);
         Solution solution = solutionRepository.findAllByUuid(artifact.getSolutionUuid()).get(0);
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
+        Boolean hasRole = request.isUserInRole("ROLE_MANAGER");
 
-        if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || userLogin.equals("system"))) {
-            // 只能由作者自己删除，或者由umu微服务中的onboardService异步服务删除
+        if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || userLogin.equals("internal") || hasRole)) {
+            // 只能由作者自己或管理员删除，或者由umu微服务中的onboardService异步服务删除
             return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 

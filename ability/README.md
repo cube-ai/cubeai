@@ -1,15 +1,6 @@
 # ability
 
-CubeAI ★ 智立方 AI能力开放平台
-
-
-CubeAI基于微服务架构进行开发和部署，ability是在其中起重要作用的一个微服务。
-
-ability使用Consul来进行微服务注册和发现，以及集中的配置管理。在ability启动时，它首先尝试与Consul建立连接。如果Consul未就绪，则ability将启动失败。
-
-ability使用uaa来进行用户管理（用户认证、授权、基于角色的访问控制等）。在ability启动时，它会尝试与uaa建立连接。如果uaa未就绪，则用户无法成功登录并执行相应的业务操作。
-
-本微服务初始代码框架使用开源工具Jhipster(http://www.jhipster.tech)生成。
+CubeAI ★ 智立方 AI能力开放网关
 
 ## 基本配置
 
@@ -40,7 +31,7 @@ ability使用uaa来进行用户管理（用户认证、授权、基于角色的�
 
 ## 开发
 
-1. 开发环境中运行ability之前，需要先拉起项目依赖的所有后台docker（参见docker/dev文件夹下的README文档）, 以及uaa和gateway。
+1. 开发环境中运行ability之前，需要先拉起项目依赖的所有后台docker（参见docker/dev文件夹下的README文档）, 以及uaa、gateway、portal等其他微服务。
 
 2. 在命令行使用dev profile运行ability：
 
@@ -52,25 +43,17 @@ ability使用uaa来进行用户管理（用户认证、授权、基于角色的�
 
 ## 部署
 
-- 使用war包
-
-1. 使用prod profile来构建用于生产环境性能优化的war包:
+1. 编译并生成微服务docker镜像：
 
         cd ~/cubeai/ability
-        ./mvnw -Pprod clean package
-
-2. 运行war包:
-
-        java -jar target/*.war
-        
-- Docker方式部署
-
-1. 构建ability docker：
-
-        cd ~/cubeai/ability
+        yarn install
         ./mvnw clean verify -Pprod dockerfile:build -DskipTests
         
-2. 拉起docker
+2. docker-compose部署
 
     参见docker/prod文件夹下面的README文档。
+
+3. k8s部署
+
+    参见docker/k8s文件夹下面的README文档。
 

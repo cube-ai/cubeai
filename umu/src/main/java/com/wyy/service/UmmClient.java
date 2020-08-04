@@ -29,9 +29,6 @@ public interface UmmClient {
     @RequestMapping(value ="/api/solutions", method = RequestMethod.POST)
     ResponseEntity<Void> createSolution(@RequestBody Solution solution);
 
-    @RequestMapping(value ="/api/solutions/picture-url", method = RequestMethod.PUT)
-    ResponseEntity<Solution> updateSolutionPictureUrl(@RequestBody JSONObject jsonObject);
-
     @RequestMapping(value ="/api/solutions/{id}", method = RequestMethod.DELETE)
     ResponseEntity<Void> deleteSolution(@PathVariable(value = "id") Long id);
 

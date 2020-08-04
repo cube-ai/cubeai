@@ -1,0 +1,16 @@
+<jhi-pageheader></jhi-pageheader>
+
+<mat-card style="margin: 20px 20px 50px 20px" *ngIf="apps">
+    <div class="row">
+        <div *ngFor="let app of apps">
+            <a (click)="gotoUrl(app.url)" *ngIf="app.picture && hasAnyRole(app.needRoles)">
+                <mat-card class="pull-right" [style.background-image]="app.picture"
+                          style="width: 300px; height: 300px; margin: 20px; text-align: center; line-height: 270px">
+                    <span style="font-size: 30px; font-weight: bold">
+                        {{app.name}}
+                    </span>
+                </mat-card>
+            </a>
+        </div>
+    </div>
+</mat-card>

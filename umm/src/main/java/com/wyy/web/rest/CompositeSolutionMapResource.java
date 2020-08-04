@@ -9,13 +9,21 @@ import com.wyy.web.rest.util.HeaderUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -85,10 +93,28 @@ public class CompositeSolutionMapResource {
      */
     @GetMapping("/composite-solution-maps")
     @Timed
-    public List<CompositeSolutionMap> getAllCompositeSolutionMaps() {
+    public ResponseEntity<List<CompositeSolutionMap>> getAllCompositeSolutionMaps(
+        @RequestParam(value = "parentUuid", required = false) String parentUuid) {
+
         log.debug("REST request to get all CompositeSolutionMaps");
-        return compositeSolutionMapRepository.findAll();
+        Specification specification = new Specification<CompositeSolutionMap>() {
+            @Override
+            public Predicate toPredicate(Root<CompositeSolutionMap> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
+                List<Predicate> predicates1 = new ArrayList<>();
+                if (null != parentUuid) {
+                    predicates1.add(criteriaBuilder.equal(root.get("parentUuid"), parentUuid));
+                }
+
+
+                Predicate predicate1 = criteriaBuilder.and(predicates1.toArray(new Predicate[predicates1.size()]));
+                return predicate1;
+            }
+        };
+        List list = compositeSolutionMapRepository.findAll(specification);
+        HttpHeaders headers = new HttpHeaders();
+        return new ResponseEntity<>(list, headers, HttpStatus.OK);
         }
+
 
     /**
      * GET  /composite-solution-maps/:id : get the "id" compositeSolutionMap.

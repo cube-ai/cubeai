@@ -3,7 +3,6 @@ package com.wyy.web.rest;
 import com.codahale.metrics.annotation.Timed;
 import com.wyy.domain.Task;
 import com.wyy.repository.TaskRepository;
-import com.wyy.web.rest.util.JwtUtil;
 import com.wyy.web.rest.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
@@ -13,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -41,11 +41,11 @@ public class TaskResource {
      */
     @PostMapping("/tasks")
     @Timed
-    public ResponseEntity<Void> createTask(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> createTask(HttpServletRequest request,
                                            @Valid @RequestBody Task task) {
         log.debug("REST request to save Task : {}", task);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
         if (null == userLogin || !userLogin.equals(task.getUserLogin())) {
             return ResponseEntity.status(403).build();
         }
@@ -61,13 +61,13 @@ public class TaskResource {
      */
     @PutMapping("/tasks")
     @Timed
-    public ResponseEntity<Task> updateTask(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Task> updateTask(HttpServletRequest request,
                                            @Valid @RequestBody Task task) {
         log.debug("REST request to update Task : {}", task);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
         // updateTask只能由umu微服务中的异步任务OnBoardingServie调用，不能由前端用户调用
-        if (null == userLogin || !userLogin.equals("system")) {
+        if (null == userLogin || !userLogin.equals("internal")) {
             return ResponseEntity.status(403).build();
         }
 
@@ -84,20 +84,20 @@ public class TaskResource {
     @GetMapping("/tasks")
     @Timed
     public  ResponseEntity<List<Task>> getTasks(@RequestParam(value = "uuid", required = false) String uuid,
-                                                         @RequestParam(value = "userLogin", required = false) String userLogin,
-                                                         @RequestParam(value = "taskStatus", required = false) String taskStatus,
-                                                         Pageable pageable) {
+                                                @RequestParam(value = "userLogin", required = false) String userLogin,
+                                                @RequestParam(value = "taskStatus", required = false) String taskStatus,
+                                                Pageable pageable) {
         log.debug("REST request to get all tasks");
         Page<Task> page;
 
         if (null != uuid) {
             page = taskRepository.findAllByUuid(uuid, pageable);
+        } else if (null != userLogin && null != taskStatus) {
+            page = taskRepository.findAllByUserLoginAndTaskStatus(userLogin, taskStatus, pageable);
         } else if (null != userLogin) {
-            if (null != taskStatus) {
-                page = taskRepository.findAllByUserLoginAndTaskStatus(userLogin, taskStatus, pageable);
-            } else {
                 page = taskRepository.findAllByUserLogin(userLogin, pageable);
-            }
+        } else if (null != taskStatus) {
+            page = taskRepository.findAllByTaskStatus(taskStatus, pageable);
         } else {
             page = taskRepository.findAll(pageable);
         }
@@ -127,15 +127,9 @@ public class TaskResource {
      */
     @DeleteMapping("/tasks/{id}")
     @Timed
-    public ResponseEntity<Void> deleteTask(HttpServletRequest httpServletRequest,
-                                           @PathVariable Long id) {
+    @Secured({"ROLE_ADMIN"})
+    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         log.debug("REST request to delete Task : {}", id);
-
-        Task task = taskRepository.findOne(id);
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        if (null == userLogin || !userLogin.equals(task.getUserLogin())) {
-            return ResponseEntity.status(403).build(); // 403 Forbidden
-        }
 
         taskRepository.delete(id);
         return ResponseEntity.ok().build();

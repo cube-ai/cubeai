@@ -39,12 +39,7 @@ public class MicroserviceSecurityConfiguration extends ResourceServerConfigurerA
     public void configure(HttpSecurity http) throws Exception {
         http
             .csrf()
-            .ignoringAntMatchers("/h2-console/**")
-            .ignoringAntMatchers("/umu/api/ueditor")
-            .ignoringAntMatchers("/ability/model/**")
-            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-        .and()
-            .addFilterBefore(corsFilter, CsrfFilter.class)
+            .disable()
             .headers()
             .frameOptions()
             .disable()

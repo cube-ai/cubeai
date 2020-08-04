@@ -1,6 +1,0 @@
-version: '2'
-services:
-    jhipster-import-dashboards:
-        image: jhipster/jhipster-import-dashboards:v3.0.1
-        environment:
-            - ELASTICSEARCH_URL=http://jhipster-elasticsearch:9200

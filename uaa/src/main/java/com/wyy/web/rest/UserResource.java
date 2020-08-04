@@ -12,7 +12,6 @@ import com.wyy.web.rest.errors.BadRequestAlertException;
 import com.wyy.web.rest.errors.EmailAlreadyUsedException;
 import com.wyy.web.rest.errors.LoginAlreadyUsedException;
 import com.wyy.web.rest.util.HeaderUtil;
-import com.wyy.web.rest.util.JwtUtil;
 import com.wyy.web.rest.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 
@@ -194,20 +193,21 @@ public class UserResource {
      */
     @GetMapping("/users/{login:" + Constants.LOGIN_REGEX + "}")
     @Timed
-    public ResponseEntity<UserDTO> getUser(HttpServletRequest httpServletRequest,
+    public ResponseEntity<UserDTO> getUser(HttpServletRequest request,
                                            @PathVariable String login) {
         log.debug("REST request to get User : {}", login);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        String userRoles = JwtUtil.getUserRoles(httpServletRequest);
-        if (null == userLogin || !(userLogin.equals(login) || userLogin.equals("system") || (userRoles != null && userRoles.contains("ROLE_ADMIN")))) {
-            // 只能由申请者自己或者ROLE_ADMIN查询用户信息
+        String userLogin = request.getRemoteUser();
+        Boolean isAdmin = request.isUserInRole("ROLE_ADMIN");
+
+        // 只能由申请者自己或者系统内微服务或者ROLE_ADMIN查询用户信息
+        if (userLogin.equals(login) || userLogin.equals("internal") || isAdmin) {
+            return ResponseUtil.wrapOrNotFound(
+                userService.getUserWithAuthoritiesByLogin(login)
+                    .map(UserDTO::new));
+        } else {
             return ResponseEntity.status(403).build(); // 403 Forbidden
         }
-
-        return ResponseUtil.wrapOrNotFound(
-            userService.getUserWithAuthoritiesByLogin(login)
-                .map(UserDTO::new));
     }
 
     /**
@@ -240,6 +240,11 @@ public class UserResource {
         Optional<User> user = this.userRepository.findOneByLogin(login.toLowerCase());
 
         Integer result = user.isPresent() ? 1 : 0;
+
+        // 不允许用下列用户名
+        if (login.startsWith("system") || login.startsWith("internal") || login.startsWith("admin") || login.startsWith("root")) {
+            result = 1;
+        }
 
         return ResponseEntity.ok().body(result);
     }

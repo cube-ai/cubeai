@@ -5,7 +5,6 @@ import com.codahale.metrics.annotation.Timed;
 import com.wyy.domain.Task;
 import com.wyy.service.KafkaProducer;
 import com.wyy.service.UmmClient;
-import com.wyy.web.rest.util.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -41,11 +40,15 @@ public class OnboardingResource {
      */
     @PostMapping("/onboarding/{taskUuid}")
     @Timed
-    public ResponseEntity<Void> onboarding(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> onboarding(HttpServletRequest request,
                                            @PathVariable String taskUuid) {
         log.debug("REST request to onboarding");
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
+
+        if (null == userLogin) {
+            return ResponseEntity.status(403).build();
+        }
 
         String basePath = System.getProperty("user.home") + "/tempfile/ucumosmodels/" + userLogin + "/" + taskUuid;
         File filefolder = new File(basePath);

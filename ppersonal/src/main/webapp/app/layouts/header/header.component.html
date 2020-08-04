@@ -1,0 +1,88 @@
+<mat-toolbar class="header header-color">
+    <a (click)="navigateToHomepage()">
+        <img src="../../../content/images/cube-32.png">
+        <span>&nbsp;&nbsp;CubeAI&nbsp;★&nbsp;智立方</span>
+    </a>
+    <span class="header-spacer"></span>
+
+    <button mat-icon-button (click)="navigateToAppNav()">
+        <span><i class="fa fa-fw fa-cubes"></i></span>
+        <span *ngIf="!isMobile">&nbsp;平台导航</span>
+    </button>
+
+    <span class="header-split" *ngIf="isAdmin() && !isMobile"></span>
+    <span class="header-split" *ngIf="isAdmin() && !isMobile"></span>
+    <button mat-icon-button *ngIf="isAdmin() && !isMobile" (click)="navigateToAdmin()">
+        <span><i class="fa fa-fw fa-gears"></i></span>
+        <span>&nbsp;系统管理</span>
+    </button>
+
+    <span class="header-split" *ngIf="!isMobile"></span>
+    <span class="header-split" *ngIf="!isMobile"></span>
+    <button mat-icon-button (click)="navigateToHelp()" matTooltip="帮助" *ngIf="!isMobile">
+        <mat-icon>help_outline</mat-icon>
+    </button>
+
+    <span class="header-split" *ngIf="isAuthenticated() && !isMobile"></span>
+    <button mat-icon-button (click)="navigateToMessage()" matTooltip="站内消息" *ngIf="isAuthenticated() && !isMobile">
+        <mat-icon matBadge="{{newMsgCount}}" matBadgePosition="above after" matBadgeSize="small">notifications_none</mat-icon>
+    </button>
+
+    <span class="header-split"></span>
+    <div>
+        <button mat-icon-button class="dropdown-toggle" [matMenuTriggerFor]="accountMenu">
+            <mat-icon>account_circle</mat-icon>
+            <span *ngIf="!isAuthenticated() && !isMobile">
+                帐号
+            </span>
+            <span *ngIf="isAuthenticated() && !isMobile">
+                {{principal.getFullName() || principal.getLogin}}
+            </span>
+        </button>
+    </div>
+</mat-toolbar>
+
+<mat-menu #accountMenu="matMenu" [overlapTrigger]="false">
+    <ng-template matMenuContent>
+        <button mat-menu-item (click)="login()" *ngIf="!isAuthenticated()">
+            <span><i class="fa fa-fw fa-sign-in" aria-hidden="true"></i></span>
+            <span>&nbsp;登录</span>
+        </button>
+        <button mat-menu-item (click)="registerUser()" *ngIf="!isAuthenticated()">
+            <span><i class="fa fa-fw fa-user-plus"></i></span>
+            <span>&nbsp;注册</span>
+        </button>
+        <button mat-menu-item (click)="requestResetPassword()" *ngIf="!isAuthenticated()">
+            <span><i class="fa fa-fw fa-key"></i></span>
+            <span>&nbsp;忘记密码</span>
+        </button>
+        <button mat-menu-item (click)="navigateToAdmin()" *ngIf="isAdmin() && isMobile">
+            <span><i class="fa fa-fw fa-gears"></i></span>
+            <span>&nbsp;系统管理</span>
+        </button>
+        <button mat-menu-item (click)="userSettings()" *ngIf="isAuthenticated()">
+            <span><i class="fa fa-fw fa-vcard"></i></span>
+            <span>&nbsp;我的帐号</span>
+        </button>
+        <button mat-menu-item (click)="navigateToPersonaCenter()" *ngIf="isAuthenticated()">
+            <span><i class="fa fa-fw fa-university"></i></span>
+            <span>&nbsp;个人中心</span>
+        </button>
+        <button mat-menu-item (click)="navigateToHelp()" *ngIf="isMobile">
+            <span><i class="fa fa-fw fa-question-circle"></i></span>
+            <span>&nbsp;帮助</span>
+        </button>
+        <button mat-menu-item (click)="logout()" *ngIf="isAuthenticated()">
+            <span><i class="fa fa-fw fa-sign-out"></i></span>
+            <span>&nbsp;退出</span>
+        </button>
+    </ng-template>
+</mat-menu>
+
+<mat-menu #moreApplicationMenu="matMenu" [overlapTrigger]="false">
+    <ng-template matMenuContent>
+        <button  *ngFor="let application of applications" mat-menu-item (click)="navigateToApplication(application)">
+            <span>{{application.name}}</span>
+        </button>
+    </ng-template>
+</mat-menu>

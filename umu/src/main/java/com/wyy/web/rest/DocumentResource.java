@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 
@@ -39,6 +41,12 @@ public class DocumentResource {
     public ResponseEntity<Void> uploadDocument(MultipartHttpServletRequest request,
                                                @PathVariable("solutionUuid") String solutionUuid) {
         log.debug("REST request to upload solution document file");
+
+        String userLogin = request.getRemoteUser();
+        if (null == userLogin) {
+            return ResponseEntity.status(403).build();
+        }
+
         MultipartFile multipartFile = request.getFile("document");
         if (null == multipartFile) {
             return ResponseEntity.badRequest().headers(HeaderUtil.createAlert("No file provided", "file upload")).build();
@@ -104,10 +112,19 @@ public class DocumentResource {
 
     @RequestMapping(value = "/documents/{documentId}", method = RequestMethod.DELETE)
     @Timed
-    public ResponseEntity<Void> deleteDocument(@PathVariable("documentId") Long documentId) {
+    public ResponseEntity<Void> deleteDocument(HttpServletRequest request,
+                                               @PathVariable("documentId") Long documentId) {
         log.debug("REST request to delete a document");
 
+        String userLogin = request.getRemoteUser();
+        Boolean hasRole = request.isUserInRole("ROLE_MANAGER");
+
         Document document = this.ummClient.getDocument(documentId).getBody();
+
+        if (null == userLogin || !(userLogin.equals(document.getAuthorLogin()) || hasRole)) {
+            return ResponseEntity.status(403).build();
+        }
+
         this.nexusArtifactClient.deleteArtifact(document.getUrl());
         this.ummClient.deleteDocument(documentId);
 

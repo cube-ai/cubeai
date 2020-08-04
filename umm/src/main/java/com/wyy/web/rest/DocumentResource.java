@@ -5,7 +5,6 @@ import com.wyy.domain.Document;
 import com.wyy.domain.Solution;
 import com.wyy.repository.DocumentRepository;
 import com.wyy.repository.SolutionRepository;
-import com.wyy.web.rest.util.JwtUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,18 +41,20 @@ public class DocumentResource {
      */
     @PostMapping("/documents")
     @Timed
-    public ResponseEntity<Void> createDocument(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> createDocument(HttpServletRequest request,
                                                @Valid @RequestBody Document document) throws URISyntaxException {
         log.debug("REST request to save Document : {}", document);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
+        Boolean hasRole = request.isUserInRole("ROLE_MANAGER");
 
         List<Solution> solutions = solutionRepository.findAllByUuid(document.getSolutionUuid());
         if (solutions.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
         Solution solution = solutions.get(0);
-        if (null == userLogin || !userLogin.equals(solution.getAuthorLogin())) {
+
+        if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || hasRole)) {
             return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
@@ -89,8 +90,8 @@ public class DocumentResource {
      */
     @GetMapping("/documents/{id}")
     @Timed
-    public ResponseEntity<Document> getDocument(@PathVariable Long id) {
-        log.debug("REST request to get Document : {}", id);
+    public ResponseEntity<Document> getComment(@PathVariable Long id) {
+        log.debug("REST request to get Comment : {}", id);
         Document document = documentRepository.findOne(id);
         return ResponseUtil.wrapOrNotFound(Optional.ofNullable(document));
     }
@@ -102,13 +103,14 @@ public class DocumentResource {
      */
     @DeleteMapping("/documents/{id}")
     @Timed
-    public ResponseEntity<Void> deleteDocument(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> deleteDocument(HttpServletRequest request,
                                                @PathVariable Long id) {
         log.debug("REST request to delete Document : {}", id);
 
         Document document = documentRepository.findOne(id);
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        if (null == userLogin || !userLogin.equals(document.getAuthorLogin())) {
+        String userLogin = request.getRemoteUser();
+        Boolean hasRole = request.isUserInRole("ROLE_MANAGER");
+        if (null == userLogin || !(userLogin.equals(document.getAuthorLogin()) || hasRole)) {
             return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 

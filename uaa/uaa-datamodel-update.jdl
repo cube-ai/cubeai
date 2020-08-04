@@ -1,11 +1,20 @@
 /**
-  * 附件
+  * 应用
   */
-entity Attachment {
-    authorLogin String,
+entity Application {
+    uuid String,
     name String,
+    summary String,
     url String maxlength(512),
-    fileSize Long,
+    pictureUrl TextBlob,
+    subject1 String,
+    subject2 String,
+    subject3 String,
+    owner String,
+    needRoles String,
+    displayOrder Long,
+    createdBy String,
+    modifiedBy String,
     createdDate Instant,
     modifiedDate Instant,
 }

@@ -41,9 +41,6 @@ public class Deployment implements Serializable {
     @Column(name = "solution_author")
     private String solutionAuthor;
 
-    @Column(name = "solution_company")
-    private String solutionCompany;
-
     @Column(name = "k_8_s_port")
     private Integer k8sPort;
 
@@ -59,15 +56,12 @@ public class Deployment implements Serializable {
     @Column(name = "modified_date")
     private Instant modifiedDate;
 
-    @Size(max = 512)
-    @Column(name = "picture_url", length = 512)
+    @Lob
+    @Column(name = "picture_url")
     private String pictureUrl;
 
-    @Column(name = "model_type")
-    private String modelType;
-
-    @Column(name = "toolkit_type")
-    private String toolkitType;
+    @Column(name = "star_count")
+    private Long starCount;
 
     @Column(name = "call_count")
     private Long callCount;
@@ -162,19 +156,6 @@ public class Deployment implements Serializable {
         this.solutionAuthor = solutionAuthor;
     }
 
-    public String getSolutionCompany() {
-        return solutionCompany;
-    }
-
-    public Deployment solutionCompany(String solutionCompany) {
-        this.solutionCompany = solutionCompany;
-        return this;
-    }
-
-    public void setSolutionCompany(String solutionCompany) {
-        this.solutionCompany = solutionCompany;
-    }
-
     public Integer getk8sPort() {
         return k8sPort;
     }
@@ -253,30 +234,17 @@ public class Deployment implements Serializable {
         this.pictureUrl = pictureUrl;
     }
 
-    public String getModelType() {
-        return modelType;
+    public Long getStarCount() {
+        return starCount;
     }
 
-    public Deployment modelType(String modelType) {
-        this.modelType = modelType;
+    public Deployment starCount(Long starCount) {
+        this.starCount = starCount;
         return this;
     }
 
-    public void setModelType(String modelType) {
-        this.modelType = modelType;
-    }
-
-    public String getToolkitType() {
-        return toolkitType;
-    }
-
-    public Deployment toolkitType(String toolkitType) {
-        this.toolkitType = toolkitType;
-        return this;
-    }
-
-    public void setToolkitType(String toolkitType) {
-        this.toolkitType = toolkitType;
+    public void setStarCount(Long starCount) {
+        this.starCount = starCount;
     }
 
     public Long getCallCount() {
@@ -387,15 +355,13 @@ public class Deployment implements Serializable {
             ", solutionUuid='" + getSolutionUuid() + "'" +
             ", solutionName='" + getSolutionName() + "'" +
             ", solutionAuthor='" + getSolutionAuthor() + "'" +
-            ", solutionCompany='" + getSolutionCompany() + "'" +
             ", k8sPort=" + getk8sPort() +
             ", isPublic='" + isIsPublic() + "'" +
             ", status='" + getStatus() + "'" +
             ", createdDate='" + getCreatedDate() + "'" +
             ", modifiedDate='" + getModifiedDate() + "'" +
             ", pictureUrl='" + getPictureUrl() + "'" +
-            ", modelType='" + getModelType() + "'" +
-            ", toolkitType='" + getToolkitType() + "'" +
+            ", starCount=" + getStarCount() +
             ", callCount=" + getCallCount() +
             ", demoUrl='" + getDemoUrl() + "'" +
             ", subject1='" + getSubject1() + "'" +

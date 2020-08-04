@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -33,8 +35,15 @@ public class TaskStepResource {
      */
     @PostMapping("/task-steps")
     @Timed
-    public ResponseEntity<Void> createTaskStep(@Valid @RequestBody TaskStep taskStep) {
+    public ResponseEntity<Void> createTaskStep(HttpServletRequest request,
+                                               @Valid @RequestBody TaskStep taskStep) {
         log.debug("REST request to save TaskStep : {}", taskStep);
+
+        String userLogin = request.getRemoteUser();
+        if (null == userLogin || !userLogin.equals("internal")) {
+            return ResponseEntity.status(403).build();
+        }
+
         taskStepRepository.save(taskStep);
         return ResponseEntity.status(201).build();
     }
@@ -53,16 +62,4 @@ public class TaskStepResource {
         return taskStepRepository.findAllByIdGreaterThanAndTaskUuidAndStepName(id, taskUuid, stepName);
     }
 
-    /**
-     * DELETE  /task-steps/:id : delete the "id" taskStep.
-     * @param id the id of the taskStep to delete
-     * @return the ResponseEntity with status 200 (OK)
-     */
-    @DeleteMapping("/task-steps/{id}")
-    @Timed
-    public ResponseEntity<Void> deleteTaskStep(@PathVariable Long id) {
-        log.debug("REST request to delete TaskStep : {}", id);
-        taskStepRepository.delete(id);
-        return ResponseEntity.ok().build();
-    }
 }

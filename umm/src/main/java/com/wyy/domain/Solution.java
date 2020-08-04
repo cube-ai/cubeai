@@ -1,7 +1,6 @@
 package com.wyy.domain;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -40,10 +39,6 @@ public class Solution implements Serializable {
     @Column(name = "company")
     private String company;
 
-    @Size(max = 512)
-    @Column(name = "co_authors", length = 512)
-    private String coAuthors;
-
     @Column(name = "name")
     private String name;
 
@@ -74,57 +69,21 @@ public class Solution implements Serializable {
     @Column(name = "display_order")
     private Long displayOrder;
 
-    @Size(max = 512)
-    @Column(name = "picture_url", length = 512)
+    @Lob
+    @Column(name = "picture_url")
     private String pictureUrl;
 
     @Column(name = "active")
     private Boolean active;
 
-    /**
-     * 模型类型，直接用中文字符串表示。主要包括：分类, 预测, 回归, 数据源, 数据变换, ...
-     */
-    @ApiModelProperty(value = "模型类型，直接用中文字符串表示。主要包括：分类, 预测, 回归, 数据源, 数据变换, ...")
     @Column(name = "model_type")
     private String modelType;
 
-    /**
-     * 工具箱类型，直接用中文字符串表示。主要包括：
-     * 模型组合（Composite-Solution）, 模型编排（Design-Studio）, H2O, Probe, R, Scikit-Learn, TensorFlow, Training-Client, Data-Broker, ONAP, ...
-     */
-    @ApiModelProperty(value = "工具箱类型，直接用中文字符串表示。主要包括： 模型组合（Composite-Solution）, 模型编排（Design-Studio）, H2O, Probe, R, Scikit-Learn, TensorFlow, Training-Client, Data-Broker, ONAP, ...")
     @Column(name = "toolkit_type")
     private String toolkitType;
 
-    /**
-     * 验证状态，直接用中文字符串表示。主要包括：提交验证，正在验证，验证通过，验证失败，未验证
-     */
-    @ApiModelProperty(value = "验证状态，直接用中文字符串表示。主要包括：提交验证，正在验证，验证通过，验证失败，未验证")
-    @Column(name = "validation_status")
-    private String validationStatus;
-
-    /**
-     * 发布状态，直接用中文字符串表示。包括：下架， 上架
-     */
-    @ApiModelProperty(value = "发布状态，直接用中文字符串表示。包括：下架， 上架")
-    @Column(name = "publish_status")
-    private String publishStatus;
-
-    /**
-     * 上架、下架申请状态，直接用中文字符串表示，包括3种状态：无申请，申请上架, 申请下架
-     * publishRequest为申请上架时，publishStatus必定为下架。
-     * publishRequest为申请下架时，publishStatus必定为上架。
-     * publishRequest为无申请时，publishStatus可为上架或下架。
-     */
-    @ApiModelProperty(value = "上架、下架申请状态，直接用中文字符串表示，包括3种状态：无申请，申请上架, 申请下架 publishRequest为申请上架时，publishStatus必定为下架。 publishRequest为申请下架时，publishStatus必定为上架。 publishRequest为无申请时，publishStatus可为上架或下架。")
-    @Column(name = "publish_request")
-    private String publishRequest;
-
-    @Column(name = "created_date")
-    private Instant createdDate;
-
-    @Column(name = "modified_date")
-    private Instant modifiedDate;
+    @Column(name = "star_count")
+    private Long starCount;
 
     @Column(name = "view_count")
     private Long viewCount;
@@ -132,17 +91,14 @@ public class Solution implements Serializable {
     @Column(name = "download_count")
     private Long downloadCount;
 
-    @Column(name = "last_download")
-    private Instant lastDownload;
-
     @Column(name = "comment_count")
     private Long commentCount;
 
-    @Column(name = "rating_count")
-    private Long ratingCount;
+    @Column(name = "created_date")
+    private Instant createdDate;
 
-    @Column(name = "rating_average")
-    private Double ratingAverage;
+    @Column(name = "modified_date")
+    private Instant modifiedDate;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -203,19 +159,6 @@ public class Solution implements Serializable {
 
     public void setCompany(String company) {
         this.company = company;
-    }
-
-    public String getCoAuthors() {
-        return coAuthors;
-    }
-
-    public Solution coAuthors(String coAuthors) {
-        this.coAuthors = coAuthors;
-        return this;
-    }
-
-    public void setCoAuthors(String coAuthors) {
-        this.coAuthors = coAuthors;
     }
 
     public String getName() {
@@ -400,69 +343,17 @@ public class Solution implements Serializable {
         this.toolkitType = toolkitType;
     }
 
-    public String getValidationStatus() {
-        return validationStatus;
+    public Long getStarCount() {
+        return starCount;
     }
 
-    public Solution validationStatus(String validationStatus) {
-        this.validationStatus = validationStatus;
+    public Solution starCount(Long starCount) {
+        this.starCount = starCount;
         return this;
     }
 
-    public void setValidationStatus(String validationStatus) {
-        this.validationStatus = validationStatus;
-    }
-
-    public String getPublishStatus() {
-        return publishStatus;
-    }
-
-    public Solution publishStatus(String publishStatus) {
-        this.publishStatus = publishStatus;
-        return this;
-    }
-
-    public void setPublishStatus(String publishStatus) {
-        this.publishStatus = publishStatus;
-    }
-
-    public String getPublishRequest() {
-        return publishRequest;
-    }
-
-    public Solution publishRequest(String publishRequest) {
-        this.publishRequest = publishRequest;
-        return this;
-    }
-
-    public void setPublishRequest(String publishRequest) {
-        this.publishRequest = publishRequest;
-    }
-
-    public Instant getCreatedDate() {
-        return createdDate;
-    }
-
-    public Solution createdDate(Instant createdDate) {
-        this.createdDate = createdDate;
-        return this;
-    }
-
-    public void setCreatedDate(Instant createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public Instant getModifiedDate() {
-        return modifiedDate;
-    }
-
-    public Solution modifiedDate(Instant modifiedDate) {
-        this.modifiedDate = modifiedDate;
-        return this;
-    }
-
-    public void setModifiedDate(Instant modifiedDate) {
-        this.modifiedDate = modifiedDate;
+    public void setStarCount(Long starCount) {
+        this.starCount = starCount;
     }
 
     public Long getViewCount() {
@@ -491,19 +382,6 @@ public class Solution implements Serializable {
         this.downloadCount = downloadCount;
     }
 
-    public Instant getLastDownload() {
-        return lastDownload;
-    }
-
-    public Solution lastDownload(Instant lastDownload) {
-        this.lastDownload = lastDownload;
-        return this;
-    }
-
-    public void setLastDownload(Instant lastDownload) {
-        this.lastDownload = lastDownload;
-    }
-
     public Long getCommentCount() {
         return commentCount;
     }
@@ -517,30 +395,30 @@ public class Solution implements Serializable {
         this.commentCount = commentCount;
     }
 
-    public Long getRatingCount() {
-        return ratingCount;
+    public Instant getCreatedDate() {
+        return createdDate;
     }
 
-    public Solution ratingCount(Long ratingCount) {
-        this.ratingCount = ratingCount;
+    public Solution createdDate(Instant createdDate) {
+        this.createdDate = createdDate;
         return this;
     }
 
-    public void setRatingCount(Long ratingCount) {
-        this.ratingCount = ratingCount;
+    public void setCreatedDate(Instant createdDate) {
+        this.createdDate = createdDate;
     }
 
-    public Double getRatingAverage() {
-        return ratingAverage;
+    public Instant getModifiedDate() {
+        return modifiedDate;
     }
 
-    public Solution ratingAverage(Double ratingAverage) {
-        this.ratingAverage = ratingAverage;
+    public Solution modifiedDate(Instant modifiedDate) {
+        this.modifiedDate = modifiedDate;
         return this;
     }
 
-    public void setRatingAverage(Double ratingAverage) {
-        this.ratingAverage = ratingAverage;
+    public void setModifiedDate(Instant modifiedDate) {
+        this.modifiedDate = modifiedDate;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
@@ -572,7 +450,6 @@ public class Solution implements Serializable {
             ", authorLogin='" + getAuthorLogin() + "'" +
             ", authorName='" + getAuthorName() + "'" +
             ", company='" + getCompany() + "'" +
-            ", coAuthors='" + getCoAuthors() + "'" +
             ", name='" + getName() + "'" +
             ", version='" + getVersion() + "'" +
             ", summary='" + getSummary() + "'" +
@@ -587,17 +464,12 @@ public class Solution implements Serializable {
             ", active='" + isActive() + "'" +
             ", modelType='" + getModelType() + "'" +
             ", toolkitType='" + getToolkitType() + "'" +
-            ", validationStatus='" + getValidationStatus() + "'" +
-            ", publishStatus='" + getPublishStatus() + "'" +
-            ", publishRequest='" + getPublishRequest() + "'" +
-            ", createdDate='" + getCreatedDate() + "'" +
-            ", modifiedDate='" + getModifiedDate() + "'" +
+            ", starCount=" + getStarCount() +
             ", viewCount=" + getViewCount() +
             ", downloadCount=" + getDownloadCount() +
-            ", lastDownload='" + getLastDownload() + "'" +
             ", commentCount=" + getCommentCount() +
-            ", ratingCount=" + getRatingCount() +
-            ", ratingAverage=" + getRatingAverage() +
+            ", createdDate='" + getCreatedDate() + "'" +
+            ", modifiedDate='" + getModifiedDate() + "'" +
             "}";
     }
 }
