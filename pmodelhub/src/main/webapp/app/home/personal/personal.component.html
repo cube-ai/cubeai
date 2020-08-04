@@ -1,0 +1,133 @@
+<jhi-pageheader></jhi-pageheader>
+
+<div style="margin: 20px 20px 50px 20px">
+    <mat-card style="margin-top: 20px; background-color: #f0f0f0">
+        <span style="font-weight: bold; font-size: 28px" *ngIf="isMyself">我的模型</span>
+        <span style="font-weight: bold; font-size: 28px" *ngIf="!isMyself">{{authorLogin}}&nbsp;的模型</span>
+        <button mat-raised-button style="margin-left: 60px; font-size: 20px" (click)="gotoAllModels()">
+            所有模型
+        </button>
+        <button mat-raised-button style="margin-left: 60px; font-size: 20px" (click)="gotoMyStars()" *ngIf="isMyself">
+            我的关注
+        </button>
+        <button mat-raised-button style="margin-left: 50px; font-size: 20px" (click)="gotoAuthorStars()" *ngIf="!isMyself">
+            {{authorLogin}}&nbsp;的关注
+        </button>
+        <button mat-raised-button style="margin-left: 60px; font-size: 20px" (click)="gotoMyTasks()" *ngIf="isMyself">
+            我的任务
+        </button>
+        <button mat-raised-button style="margin-left: 60px; font-size: 20px" (click)="gotoMyAbilitys()" *ngIf="isMyself">
+            我的能力
+        </button>
+        <button mat-raised-button style="margin-left: 50px; font-size: 20px" (click)="gotoAuthorAbilitys()" *ngIf="!isMyself">
+            {{authorLogin}}&nbsp;的能力
+        </button>
+        <button mat-raised-button color="primary" style="font-size: 20px; float: right" (click)="gotoOnboarding()" *ngIf="isMyself && !isMobile">
+           导入新模型
+        </button>
+    </mat-card>
+    <mat-card>
+        <div class="row" style="margin-top: 20px; margin-bottom: 20px">
+            <div class="col-6">
+                <input name="search" type="text" class="form-control" placeholder="搜索" [(ngModel)]="filter"
+                       (blur)="refresh()">
+            </div>
+            <div class="col-6">
+                <div class="pull-right" *ngIf="!isMobile">
+                    <mat-button-toggle-group #group="matButtonToggleGroup" [(ngModel)]="predicate" (change)="refresh()"
+                                             style="height: 36px">
+                        <mat-button-toggle value="id" align="center">
+                            最新
+                        </mat-button-toggle>
+                        <mat-button-toggle value="starCount" align="center">
+                            最多关注
+                        </mat-button-toggle>
+                    </mat-button-toggle-group>
+                    <button mat-icon-button (click)="reverse = !reverse; refresh()">
+                        <mat-icon>swap_vert</mat-icon>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <mat-button-toggle-group #group="matButtonToggleGroup" *ngIf="isMyself" [(ngModel)]="isPublic"
+                                 (change)="refresh()" style="height: 36px">
+            <mat-button-toggle [value]=true align="center">
+                公开
+            </mat-button-toggle>
+            <mat-button-toggle [value]=false align="center">
+                私有
+            </mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <div *ngFor="let solution of solutions; trackBy: trackIdentity">
+            <mat-card style="margin:20px 0">
+                <mat-list>
+                    <mat-list-item>
+                        <img mat-list-avatar src="{{solution.pictureUrl}}" (click)="viewSolution(solution)"
+                             style="width: 64px; height: 64px; cursor: pointer">
+                        <div mat-line>
+                            <a (click)="viewSolution(solution)">
+                                <span style="font-size: 20px; font-weight: bold">
+                                    {{solution.name}}
+                                </span>
+                            </a>
+                            <div class="pull-right" *ngIf="!isMobile">
+                                <a (click)="toggleStar(solution)">
+                                    <span *ngIf="isMyStar(solution)" class="fa fa-star" style="color: gold"></span>
+                                    <span *ngIf="!isMyStar(solution)" class="fa fa-star-o"></span>
+                                </a>
+                                &nbsp;
+                                <a (click)="gotoStargazers(solution)">
+                                    <span>{{solution.starCount}}</span>
+                                </a>
+
+                            </div>
+                        </div>
+                        <div mat-line style="font-size: 16px; margin-top: 10px">
+                            <a (click)="viewSolution(solution)" style="font-weight: normal">
+                                {{solution.summary}}
+                            </a>
+                        </div>
+                        <div mat-line style="font-size: 14px; margin-top: 10px" *ngIf="solution.tag1">
+                            <span class="fa fa-tag">
+                                {{solution.tag1}}
+                            </span>
+                            &nbsp;&nbsp;&nbsp;
+                            <span *ngIf="solution.tag2" class="fa fa-tag">
+                                {{solution.tag2}}
+                            </span>
+                            &nbsp;&nbsp;&nbsp;
+                            <span *ngIf="solution.tag3" class="fa fa-tag">
+                                {{solution.tag3}}
+                            </span>
+                        </div>
+                        <div mat-line style="font-size: 14px; margin-top: 10px">
+                            {{solution.company || solution.authorName || solution.authorLogin}}
+                            &nbsp;&nbsp;&nbsp;
+                            {{solution.createdDate | date:'yyyy-MM-dd'}}
+                            <div class="pull-right" *ngIf="!isMobile">
+                                <span>评论数：{{solution.commentCount}}</span>
+                                &nbsp;&nbsp;&nbsp;
+                                <span>浏览量：{{solution.viewCount}}</span>
+                            </div>
+                        </div>
+                    </mat-list-item>
+                </mat-list>
+            </mat-card>
+        </div>
+
+        <div>
+            <mat-paginator #paginator
+                           [length]="totalItems"
+                           [pageSize]="itemsPerPage"
+                           [pageSizeOptions]="pageSizeOptions"
+                           (page)="reloadPage($event)"
+                           showFirstLastButtons>
+            </mat-paginator>
+        </div>
+    </mat-card>
+
+</div>
+
+

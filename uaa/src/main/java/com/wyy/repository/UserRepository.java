@@ -19,8 +19,8 @@ import java.time.Instant;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     String USERS_BY_LOGIN_CACHE = "usersByLogin";
-
     String USERS_BY_EMAIL_CACHE = "usersByEmail";
+    String USERS_BY_PHONE_CACHE = "usersByPhone";
 
     Optional<User> findOneByActivationKey(String activationKey);
 
@@ -46,6 +46,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph(attributePaths = "authorities")
     @Cacheable(cacheNames = USERS_BY_EMAIL_CACHE)
     Optional<User> findOneWithAuthoritiesByEmail(String email);
+
+    @EntityGraph(attributePaths = "authorities")
+    @Cacheable(cacheNames = USERS_BY_PHONE_CACHE)
+    Optional<User> findOneWithAuthoritiesByPhone(String phone);
 
     Page<User> findAllByLoginNot(Pageable pageable, String login);
 }

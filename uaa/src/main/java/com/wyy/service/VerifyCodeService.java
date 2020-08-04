@@ -2,6 +2,7 @@ package com.wyy.service;
 
 import com.wyy.domain.VerifyCode;
 import com.wyy.repository.VerifyCodeRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -27,8 +28,20 @@ public class VerifyCodeService {
             result = 0;
         }
 
-        verifyCodeRepository.delete(id);
+        try {
+            verifyCodeRepository.delete(id);
+        } catch (Exception e) {
+        }
+
         return result;
+    }
+
+    /**
+     * Not used verify code should be automatically deleted everyday, at 03:00 (am).
+     */
+    @Scheduled(cron = "0 0 3 * * ?")
+    public void removeNotUsedVerifyCode() {
+        verifyCodeRepository.deleteAll();
     }
 
 }

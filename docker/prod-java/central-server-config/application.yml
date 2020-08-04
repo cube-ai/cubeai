@@ -1,0 +1,54 @@
+#common configuration shared between all applications
+configserver:
+    name: Docker JHipster Registry
+    status: Connected to Consul running in Docker
+
+spring:
+    mail:
+        host: smtp.163.com
+        port: 25
+        username: abc@163.com
+        password: password
+        properties:
+            mail:
+                smtp:
+                    auth: true
+    zipkin:
+        base-url: http://jhipster-zipkin:9411
+        enabled: true
+
+jhipster:
+    security:
+        authentication:
+            jwt:
+                secret: my-secret-token-to-change-in-production
+    mail: # specific JHipster mail property, for standard properties see MailProperties
+        from: abc@163.com
+    logging:
+        logstash: # forward logs to ELK
+            enabled: true
+            host: jhipster-logstash
+    metrics:
+        logs: # report metrics in the logs
+            enabled: true
+            report-frequency: 60 # in seconds
+
+nexus:
+    maven:
+        url: https://nexus.mycompany.com:8001/repository/cubeai
+        username: username
+        password: password
+    docker:
+        host: docker.mycompany.com
+        port: 2375
+        registryUsername: username
+        registryPassword: password
+        imagetagPrefix: docker.mycompany.com:8801
+
+kubernetes:
+    ability:
+        internalIP: k8s.mycompany.com
+    api:
+        ipIpTunnelCidr: 172.16.132.192/32
+        url: https://k8s.docker.mycompany.com:65464
+        token: change_it

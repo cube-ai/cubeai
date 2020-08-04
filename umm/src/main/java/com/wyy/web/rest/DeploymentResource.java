@@ -3,15 +3,12 @@ package com.wyy.web.rest;
 import com.alibaba.fastjson.JSONObject;
 import com.codahale.metrics.annotation.Timed;
 import com.wyy.domain.Deployment;
-
 import com.wyy.domain.Solution;
 import com.wyy.repository.DeploymentRepository;
 import com.wyy.repository.SolutionRepository;
-import com.wyy.web.rest.errors.BadRequestAlertException;
+import com.wyy.repository.StarRepository;
 import com.wyy.web.rest.util.HeaderUtil;
-import com.wyy.web.rest.util.JwtUtil;
 import com.wyy.web.rest.util.PaginationUtil;
-import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -29,13 +26,10 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * REST controller for managing Deployment.
@@ -50,10 +44,14 @@ public class DeploymentResource {
 
     private final DeploymentRepository deploymentRepository;
     private final SolutionRepository solutionRepository;
+    private final StarRepository starRepository;
 
-    public DeploymentResource(DeploymentRepository deploymentRepository, SolutionRepository solutionRepository) {
+    public DeploymentResource(DeploymentRepository deploymentRepository,
+                              SolutionRepository solutionRepository,
+                              StarRepository starRepository) {
         this.deploymentRepository = deploymentRepository;
         this.solutionRepository = solutionRepository;
+        this.starRepository = starRepository;
     }
 
     /**
@@ -63,20 +61,22 @@ public class DeploymentResource {
      */
     @PostMapping("/deployments")
     @Timed
-    public ResponseEntity<Void> createDeployment(HttpServletRequest httpServletRequest,
-                                                       @Valid @RequestBody Deployment deployment) {
+    public ResponseEntity<Void> createDeployment(HttpServletRequest request,
+                                                 @Valid @RequestBody Deployment deployment) {
         log.debug("REST request to save Deployment : {}", deployment);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        if (null == userLogin || !userLogin.equals("system")) {
-            // createDeployment只能由umd微服务中的异步任务调用，不能由前端用户调用
+        String userLogin = request.getRemoteUser();
+        if (null == userLogin || !(userLogin.equals("internal") || userLogin.equals(deployment.getDeployer()))) {
+            // createDeployment只能由umd微服务中的异步任务调用，或者拥有者自己调用
             return ResponseEntity.status(403).build();
         }
 
         deployment.setId(null);
+        deployment.setStarCount(0L);
+        deployment.setCallCount(0L);
+        deployment.setDisplayOrder(0L);
         deployment.setCreatedDate(Instant.now());
         deployment.setModifiedDate(Instant.now());
-        deployment.setCallCount(0L);
         deploymentRepository.save(deployment);
 
         return ResponseEntity.status(201).build(); // 201 Created
@@ -92,31 +92,52 @@ public class DeploymentResource {
      */
     @PutMapping("/deployments")
     @Timed
-    public ResponseEntity<Deployment> updateDeployment(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> updateDeployment(HttpServletRequest request,
                                                        @Valid @RequestBody Deployment deployment) {
         log.debug("REST request to update Deployment : {}", deployment);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        String userRoles = JwtUtil.getUserRoles(httpServletRequest);
-        if (null == userLogin || !(userLogin.equals("system") || ((userRoles != null) && userRoles.contains("ROLE_OPERATOR")))) {
-            // updateDeployment只能由umd微服务中的异步任务调用，或者拥有ROLE_OPERATOR权限
+        String userLogin = request.getRemoteUser();
+        Boolean hasRole = request.isUserInRole("ROLE_OPERATOR");
+        Deployment old = deploymentRepository.findOne(deployment.getId());
+        if (null == userLogin || !userLogin.equals("internal")) {
+            // updateDeployment只能由umd微服务中的异步任务在进行生命周期管理过程中调用
             return ResponseEntity.status(403).build();
         }
 
-        Deployment result = deploymentRepository.save(deployment);
-        return ResponseEntity.ok()
-            .body(result);
+        deploymentRepository.save(deployment);
+        return ResponseEntity.ok().build();
     }
 
     /**
-     * PUT  /deployments/subjects : 更新deployment对象中的subject和displayOrder等诸字段
-     * @param jsonObject the JSONObject with subjects to be updated
-     * @return the ResponseEntity with status 200 (OK) and with body the updated deployment or status 400 (Bad Request)
+     * PUT  /deployments/solutioninfo : 更新deployment对象中的solution相关字段
+     * @param jsonObject the JSONObject with ability id to be updated
+     * @return the ResponseEntity with status 200 (OK) and with body the updated deployment
      */
-    @PutMapping("/deployments/subjects")
+    @PutMapping("/deployments/solutioninfo")
     @Timed
-    @Secured({"ROLE_OPERATOR"})  // subject字段只能由能力开放平台管理员更新
-    public ResponseEntity<Deployment> updateDeploymentSubjects(@Valid @RequestBody JSONObject jsonObject) {
+    public ResponseEntity<Void> updateDeploymentSolutionInfo(@Valid @RequestBody JSONObject jsonObject) {
+        log.debug("REST request to update Deployment subjects: {}", jsonObject);
+
+        Deployment deployment = deploymentRepository.findOne(jsonObject.getLong("id"));
+        List<Solution> solutionList = solutionRepository.findAllByUuid(deployment.getSolutionUuid());
+        if (!solutionList.isEmpty()) {
+            deployment.setSolutionName(solutionList.get(0).getName());
+            deployment.setPictureUrl(solutionList.get(0).getPictureUrl());
+            deploymentRepository.save(deployment);
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * PUT  /deployments/admininfo : 更新deployment对象中的管理相关字段
+     * @param jsonObject the JSONObject with subjects to be updated
+     * @return the ResponseEntity with status 200 (OK) and with body the updated deployment
+     */
+    @PutMapping("/deployments/admininfo")
+    @Timed
+    @Secured({"ROLE_OPERATOR"})  // admin信息相关字段只能由能力开放平台管理员更新
+    public ResponseEntity<Void> updateDeploymentAdminInfo(@Valid @RequestBody JSONObject jsonObject) {
         log.debug("REST request to update Deployment subjects: {}", jsonObject);
 
         Deployment deployment = deploymentRepository.findOne(jsonObject.getLong("id"));
@@ -124,34 +145,46 @@ public class DeploymentResource {
         deployment.setSubject2(jsonObject.getString("subject2"));
         deployment.setSubject3(jsonObject.getString("subject3"));
         deployment.setDisplayOrder(jsonObject.getLong("displayOrder"));
-
         deployment.setModifiedDate(Instant.now());
-        Deployment result = deploymentRepository.save(deployment);
+        deploymentRepository.save(deployment);
 
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok().build();
     }
 
     /**
-     * PUT  /deployments/solution_info : 更新deployment对象中的与solution对象相关的字段
-     * @return the ResponseEntity with status 200 (OK)
+     * PUT  /deployments/demourl : 更新deployment对象中的demoUrl字段
+     * @param jsonObject the JSONObject with subjects to be updated
+     * @return the ResponseEntity with status 200 (OK) and with body the updated deployment
      */
-    @PutMapping("/deployments/solution_info")
+    @PutMapping("/deployments/demourl")
     @Timed
-    public ResponseEntity<Deployment> updateDeploymentSolutionInfo(@Valid @RequestBody JSONObject jsonObject) {
-        log.debug("REST request to update Deployment solution infomation: {}", jsonObject);
+    @Secured({"ROLE_OPERATOR"})  // demoUrl字段只能由能力开放平台管理员更新
+    public ResponseEntity<Void> updateDeploymentDemoUrl(@Valid @RequestBody JSONObject jsonObject) {
+        log.debug("REST request to update Deployment subjects: {}", jsonObject);
 
         Deployment deployment = deploymentRepository.findOne(jsonObject.getLong("id"));
-        Solution solution = solutionRepository.findAllByUuid(deployment.getSolutionUuid()).get(0);
-
-        deployment.setSolutionName(solution.getName());
-        deployment.setSolutionAuthor(solution.getAuthorName());
-        deployment.setSolutionCompany(solution.getCompany());
-        deployment.setPictureUrl(solution.getPictureUrl());
-        deployment.setModelType(solution.getModelType());
-        deployment.setToolkitType(solution.getToolkitType());
+        deployment.setDemoUrl(jsonObject.getString("demoUrl"));
         deployment.setModifiedDate(Instant.now());
         Deployment result = deploymentRepository.save(deployment);
-        return ResponseEntity.ok().body(result);
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * PUT /deployments/star-count : Updates an existing deployment's starCount.
+     * @param jsonObject the JSONObject with soluton id to be updated
+     * @return the ResponseEntity with status 200 (OK) and with body the updated deployment
+     */
+    @PutMapping("/deployments/star-count")
+    @Timed
+    public ResponseEntity<Void> updateDeploymentStarCount(@Valid @RequestBody JSONObject jsonObject) {
+        log.debug("REST request to update Deployment star count : {}", jsonObject);
+
+        Deployment deployment = deploymentRepository.findOne(jsonObject.getLong("id"));
+        deployment.setStarCount(starRepository.countAllByTargetUuid(deployment.getUuid()));
+        Deployment result = deploymentRepository.save(deployment);
+
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -162,8 +195,9 @@ public class DeploymentResource {
     @GetMapping("/deployments")
     @Timed
     public ResponseEntity<List<Deployment>> getAllDeployments(
-        HttpServletRequest httpServletRequest,
+        HttpServletRequest request,
         @RequestParam(value = "isPublic", required = false) Boolean isPublic,
+        @RequestParam(value = "deployer", required = false) String deployer,
         @RequestParam(value = "status", required = false) String status,
         @RequestParam(value = "uuid", required = false) String uuid,
         @RequestParam(value = "solutionUuid", required = false) String solutionUuid,
@@ -172,20 +206,12 @@ public class DeploymentResource {
 
         log.debug("REST request to get all Deployments");
 
-        if (null == uuid && null == isPublic) {
-            // 查询条件中必须存在uuid或isPublic字段（可能同时存在），否则为非法访问
-            return ResponseEntity.status(403).build(); // 403 Forbidden
-        }
-
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        if (null == userLogin) {
-            return ResponseEntity.status(403).build(); // 403 Forbidden
-        }
+        String userLogin = request.getRemoteUser();
+        Boolean hasRole = request.isUserInRole("ROLE_OPERATOR");
 
         Page<Deployment> page;
 
         Specification specification = new Specification<Deployment>() {
-
             @Override
             public Predicate toPredicate(Root<Deployment> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
 
@@ -194,10 +220,15 @@ public class DeploymentResource {
 
                 if (null != isPublic) {
                     predicates1.add(criteriaBuilder.equal(root.get("isPublic"), isPublic));
-                    if (!isPublic) {
+                    if (null != deployer) {
+                        predicates1.add(criteriaBuilder.equal(root.get("deployer"), deployer));
+                    } else if (!isPublic && !hasRole) {
                         predicates1.add(criteriaBuilder.equal(root.get("deployer"), userLogin));
                     }
+                } else if (null != deployer) {
+                    predicates1.add(criteriaBuilder.equal(root.get("deployer"), deployer));
                 }
+
                 if (null != status) {
                     predicates1.add(criteriaBuilder.equal(root.get("status"), status));
                 }
@@ -211,7 +242,6 @@ public class DeploymentResource {
                 if (null != filter) {
                     predicates2.add(criteriaBuilder.like(root.get("solutionName"), "%"+filter+"%"));
                     predicates2.add(criteriaBuilder.like(root.get("solutionAuthor"), "%"+filter+"%"));
-                    predicates2.add(criteriaBuilder.like(root.get("solutionCompany"), "%"+filter+"%"));
                     predicates2.add(criteriaBuilder.like(root.get("deployer"), "%"+filter+"%"));
                     predicates2.add(criteriaBuilder.like(root.get("status"), "%"+filter+"%"));
                 }
@@ -234,74 +264,7 @@ public class DeploymentResource {
     }
 
     /**
-     * GET  /deployments/all : get all the deployments for ROLE_OPERATOR. 专门为ROLE_OPERATOR设置的查询所有部署实例的查询接口
-     *
-     * @return the ResponseEntity with status 200 (OK) and the list of deployments in body
-     */
-    @GetMapping("/deployments/all")
-    @Timed
-    @Secured({"ROLE_OPERATOR"})  // 专门为ROLE_OPERATOR设置的查询所有部署实例的查询接口
-    public ResponseEntity<List<Deployment>> getAllDeploymentsByOperator(@RequestParam(value = "filter", required = false) String filter,
-                                                                        @RequestParam(value = "status", required = false) String status,
-                                                                        Pageable pageable) {
-
-        log.debug("REST request to get all Deployments");
-
-        Page<Deployment> page;
-
-        Specification specification = new Specification<Deployment>() {
-
-            @Override
-            public Predicate toPredicate(Root<Deployment> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
-
-                List<Predicate> predicates1 = new ArrayList<>();
-                List<Predicate> predicates2 = new ArrayList<>();
-
-                if (null != status) {
-                    predicates1.add(criteriaBuilder.equal(root.get("status"), status));
-                }
-
-                if (null != filter) {
-                    predicates2.add(criteriaBuilder.like(root.get("solutionName"), "%"+filter+"%"));
-                    predicates2.add(criteriaBuilder.like(root.get("solutionAuthor"), "%"+filter+"%"));
-                    predicates2.add(criteriaBuilder.like(root.get("solutionCompany"), "%"+filter+"%"));
-                    predicates2.add(criteriaBuilder.like(root.get("deployer"), "%"+filter+"%"));
-                    predicates2.add(criteriaBuilder.like(root.get("status"), "%"+filter+"%"));
-                }
-
-                Predicate predicate1 = criteriaBuilder.and(predicates1.toArray(new Predicate[predicates1.size()]));
-                Predicate predicate2 = criteriaBuilder.or(predicates2.toArray(new Predicate[predicates2.size()]));
-
-                if (predicates2.size() > 0) {
-                    return criteriaBuilder.and(predicate1, predicate2);
-                } else {
-                    return predicate1;
-                }
-            }
-        };
-
-        page =  this.deploymentRepository.findAll(specification, pageable);
-
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/deployments/all");
-        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
-    }
-
-    /**
-     * GET  /deployments/:id : get the "id" deployment.
-     *
-     * @param id the id of the deployment to retrieve
-     * @return the ResponseEntity with status 200 (OK) and with body the deployment, or with status 404 (Not Found)
-     */
-    @GetMapping("/deployments/{id}")
-    @Timed
-    public ResponseEntity<Deployment> getDeployment(@PathVariable Long id) {
-        log.debug("REST request to get Deployment : {}", id);
-        Deployment deployment = deploymentRepository.findOne(id);
-        return ResponseUtil.wrapOrNotFound(Optional.ofNullable(deployment));
-    }
-
-    /**
-     * DELETE  /deployments/:id : delete the "id" deployment.
+     * DELETE  /deployments/:id : delete the "id" deployment. deployment正常不应该被删除，所以暂不使用
      *
      * @param id the id of the deployment to delete
      * @return the ResponseEntity with status 200 (OK)

@@ -1,0 +1,19 @@
+<div class="header-container" style="margin-top: 40px">
+    <br><br>
+    <div class="text-center"><h1 style="color: aliceblue">CubeAI ★ 智立方</h1></div>
+    <br>
+    <div class="text-center"><h1 style="color: aliceblue">中国联通AI应用共享与能力开放实验床</h1></div>
+    <br><br>
+</div>
+
+<mat-card style="margin: 20px">
+    <div [innerHTML]="homepageIntro | html">
+    </div>
+</mat-card>
+
+<jhi-app-list #appList></jhi-app-list>
+
+<mat-card style="margin: 20px 20px 50px 20px">
+    <div [innerHTML]="homepagePartners | html">
+    </div>
+</mat-card>

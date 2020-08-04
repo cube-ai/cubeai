@@ -26,7 +26,7 @@ import org.apache.maven.wagon.providers.http.LightweightHttpWagonAuthenticator;
 import org.apache.maven.wagon.providers.http.LightweightHttpsWagon;
 import org.apache.maven.wagon.repository.Repository;
 import org.springframework.web.client.RestTemplate;
-// import javax.annotation.PostConstruct;
+
 
 @Service
 public class NexusArtifactClient {
@@ -52,16 +52,8 @@ public class NexusArtifactClient {
         return this.userName;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
     public String getPassword() {
         return this.password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
 

@@ -2,13 +2,9 @@
 
 CubeAI ★ 智立方 用户认证授权中心
 
-CubeAI基于微服务架构进行开发和部署，UAA（User Authentication and Authorization，用户认证授权中心）是在其中起重要作用的一个微服务。
-
-UAA主要使用OAuth2和JWT技术进行用户认证和授权，以及基于角色的访问控制。
+CubeAI基于微服务架构进行开发和部署。UAA（User Authentication and Authorization，用户认证授权中心）主要使用OAuth2和JWT技术进行用户认证和授权，以及基于角色的访问控制。
 
 UAA使用Consul来进行微服务注册和发现，以及集中的配置管理。在UAA启动时，它首先尝试与Consul建立连接。如果Consul未就绪，则UAA将启动失败。
-
-本微服务初始代码框架使用开源工具Jhipster(http://www.jhipster.tech)生成。
 
 ## 基本配置
 
@@ -55,24 +51,16 @@ UAA使用Consul来进行微服务注册和发现，以及集中的配置管理�
 
 ## 部署
 
-- 使用war包
-
-1. 使用prod profile来构建用于生产环境性能优化的war包:
-
-        cd ~/cubeai/uaa
-        ./mvnw -Pprod clean package
-
-2. 运行war包:
-
-        java -jar target/*.war
-        
-- Docker方式部署
-
-1. 构建uaa docker：
+1. 编译并生成微服务docker镜像：
 
         cd ~/cubeai/uaa
         ./mvnw clean verify -Pprod dockerfile:build -DskipTests
         
-2. 拉起docker
+2. docker-compose部署
 
     参见docker/prod文件夹下面的README文档。
+
+3. k8s部署
+
+    参见docker/k8s文件夹下面的README文档。
+

@@ -1,0 +1,17 @@
+.table {
+    line-height: 100%;
+    font-size: 12px;
+}
+
+td {
+    border-bottom: solid 1px #e0e0e0;
+}
+
+.icon-inline {
+    color: #673ab7;
+}
+
+.mat-menu-item {
+    font-size: 10px;
+}
+

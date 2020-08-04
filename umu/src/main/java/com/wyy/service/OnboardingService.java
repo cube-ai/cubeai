@@ -74,8 +74,8 @@ public class OnboardingService {
         if (this.doOnboarding(task, solution, modelFiles)) {
             this.messageService.sendMessage(solution.getAuthorLogin(),
                 "模型 " + solution.getName() + " 导入完成",
-                "你的模型 " + solution.getName() + " 已导入系统！\n\n请点击下方[目标页面]按钮进入模型页面，补充完整模型信息后就可以申请上架了...",
-                "/ucumos/solution/" + solution.getUuid() + "/edit",
+                "你的模型 " + solution.getName() + " 已导入系统！\n\n请点击下方[目标页面]按钮进入模型页面...",
+                "/pmodelhub/#/solution/" + solution.getUuid(),
                 false);
 
         } else {
@@ -83,7 +83,7 @@ public class OnboardingService {
             this.messageService.sendMessage(solution.getAuthorLogin(),
                 "模型 " + task.getTaskName() + " 导入失败",
                 "你的模型 " + task.getTaskName() + " 导入失败！\n\n请点击下方[目标页面]按钮查看任务执行情况...",
-                "/ucumos/task-onboarding/" + taskUuid + "/" + task.getTaskName(),
+                "/pmodelhub/#/task-onboarding/" + taskUuid + "/" + task.getTaskName(),
                 false);
         }
     }
@@ -349,7 +349,7 @@ public class OnboardingService {
         this.saveTaskStepProgress(task.getUuid(), "添加artifact", "执行", 20,
             "开始添加artifact文件...");
 
-        if (!this.addArtifact(solution, modelFiles.getObject("modelFile", File.class), "模型镜像")) {
+        if (!this.addArtifact(solution, modelFiles.getObject("modelFile", File.class), "模型程序")) {
             this.saveTaskStepProgress(task.getUuid(), "添加artifact", "失败", 100,
                 "添加模型镜像artifact文件失败。");
             return false;

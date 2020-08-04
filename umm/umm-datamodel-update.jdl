@@ -1,3 +1,35 @@
+// jhipster import-jdl ./umm-datamodel-update.jdl
+
+/**
+ * 解决方案（AI模型）
+ */
+entity Solution {
+    uuid String required,
+    authorLogin String,
+    authorName String,
+    company String,
+    name String,
+    version String,
+    summary String,
+    tag1 String,
+    tag2 String,
+    tag3 String,
+    subject1 String,
+    subject2 String,
+    subject3 String,
+    displayOrder Long,
+    pictureUrl TextBlob,
+    active Boolean,
+    modelType String,
+    toolkitType String,
+    starCount Long,
+    viewCount Long,
+    downloadCount Long,
+    commentCount Long,
+    createdDate Instant,
+    modifiedDate Instant,
+}
+
 /**
   * 模型部署实例（能力）
   */
@@ -7,15 +39,13 @@ entity Deployment {
     solutionUuid String,
     solutionName String,
     solutionAuthor String,
-    solutionCompany String,
     k8sPort Integer,
     isPublic Boolean,
     status String,
     createdDate Instant,
     modifiedDate Instant,
-    pictureUrl String maxlength(512),
-    modelType String,
-    toolkitType String,
+    pictureUrl TextBlob,
+    starCount Long,
     callCount Long,
     demoUrl String maxlength(512),
     subject1 String,

@@ -81,17 +81,13 @@ public class UaaConfiguration extends AuthorizationServerConfigurerAdapter imple
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
-                .authorizeRequests()
-                .antMatchers("/api/articles").permitAll()  // huolongshe, 20190510
-                .antMatchers("/api/verify-codes").permitAll()  // huolongshe, 20190411
-                .antMatchers("/api/users/exist/**").permitAll()  // huolongshe, 20181017
-                .antMatchers("/api/register").permitAll()
-                .antMatchers("/api/activate").permitAll()
-                .antMatchers("/api/authenticate").permitAll()
-                .antMatchers("/api/account/reset-password/init").permitAll()
-                .antMatchers("/api/account/reset-password/finish").permitAll()
-                .antMatchers("/api/profile-info").permitAll()
-                .antMatchers("/api/**").authenticated()
+                .authorizeRequests()  // 相同前缀路径，应先写具体的匹配（前缀长的），再写前缀短的统配
+                .antMatchers("/api/attachments/**").authenticated()
+                .antMatchers("/api/message/**").authenticated()
+                .antMatchers("/api/mail/**").authenticated()
+                .antMatchers("/api/users/exist/**").permitAll()
+                .antMatchers("/api/users/**").authenticated()
+                .antMatchers("/api/**").permitAll()
                 .antMatchers("/management/health").permitAll()
                 .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN)
                 .antMatchers("/v2/api-docs/**").permitAll()

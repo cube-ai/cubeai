@@ -15,6 +15,8 @@ public class ManagedUserVM extends UserDTO {
     @Size(min = PASSWORD_MIN_LENGTH, max = PASSWORD_MAX_LENGTH)
     private String password;
 
+    private String activateUrlPrefix;
+
     public ManagedUserVM() {
         // Empty constructor needed for Jackson.
     }
@@ -25,6 +27,14 @@ public class ManagedUserVM extends UserDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getActivateUrlPrefix() {
+        return activateUrlPrefix;
+    }
+
+    public void setActivateUrlPrefix(String activateUrlPrefix) {
+        this.activateUrlPrefix = activateUrlPrefix;
     }
 
     @Override

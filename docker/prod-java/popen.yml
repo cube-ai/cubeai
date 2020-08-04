@@ -1,0 +1,8 @@
+version: '2'
+services:
+    popen-app:
+        image: popen
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod
+            - SPRING_CLOUD_CONSUL_HOST=consul
+            - SPRING_CLOUD_CONSUL_PORT=8500

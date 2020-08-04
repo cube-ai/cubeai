@@ -11,6 +11,6 @@ import org.springframework.data.jpa.repository.*;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface CompositeSolutionMapRepository extends JpaRepository<CompositeSolutionMap, Long> {
+public interface CompositeSolutionMapRepository extends JpaRepository<CompositeSolutionMap, Long> ,JpaSpecificationExecutor{
 
 }

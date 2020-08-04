@@ -2,14 +2,11 @@ package com.wyy.web.rest;
 
 import com.alibaba.fastjson.JSONObject;
 import com.codahale.metrics.annotation.Timed;
-import com.wyy.domain.Description;
-import com.wyy.domain.PublishRequest;
-import com.wyy.domain.Solution;
+import com.wyy.domain.*;
 import com.wyy.repository.*;
-import com.wyy.service.MessageService;
-import com.wyy.web.rest.util.JwtUtil;
+import com.wyy.service.CreditService;
+import com.wyy.service.NexusArtifactClient;
 import com.wyy.web.rest.util.PaginationUtil;
-import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -26,8 +23,6 @@ import javax.validation.Valid;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
 
 /**
  * REST controller for managing Solution.
@@ -39,23 +34,30 @@ public class SolutionResource {
     private final Logger log = LoggerFactory.getLogger(SolutionResource.class);
     private final SolutionRepository solutionRepository;
     private final DescriptionRepository descriptionRepository;
-    private final SolutionRatingRepository solutionRatingRepository;
+    private final StarRepository starRepository;
     private final CommentRepository commentRepository;
-    private final PublishRequestRepository publishRequestRepository;
-    private final MessageService messageService;
+    private final NexusArtifactClient nexusArtifactClient;
+    private final ArtifactRepository artifactRepository;
+    private final DocumentRepository documentRepository;
+    private final CreditService creditService;
 
     public SolutionResource(SolutionRepository solutionRepository,
                             DescriptionRepository descriptionRepository,
-                            SolutionRatingRepository solutionRatingRepository,
+                            StarRepository starRepository,
                             CommentRepository commentRepository,
-                            PublishRequestRepository publishRequestRepository,
-                            MessageService messageService) {
+                            NexusArtifactClient nexusArtifactClient,
+                            ArtifactRepository artifactRepository,
+                            DocumentRepository documentRepository,
+                            CreditService creditService
+                            ) {
         this.solutionRepository = solutionRepository;
         this.descriptionRepository = descriptionRepository;
-        this.solutionRatingRepository = solutionRatingRepository;
+        this.starRepository = starRepository;
         this.commentRepository = commentRepository;
-        this.publishRequestRepository = publishRequestRepository;
-        this.messageService = messageService;
+        this.documentRepository = documentRepository;
+        this.artifactRepository = artifactRepository;
+        this.nexusArtifactClient = nexusArtifactClient;
+        this.creditService = creditService;
     }
 
     /**
@@ -65,25 +67,23 @@ public class SolutionResource {
      */
     @PostMapping("/solutions")
     @Timed
-    public ResponseEntity<Void> createSolution(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> createSolution(HttpServletRequest request,
                                                @Valid @RequestBody Solution solution) {
         log.debug("REST request to save Solution : {}", solution);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || userLogin.equals("system"))) {
+        String userLogin = request.getRemoteUser();
+        if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || userLogin.equals("internal"))) {
             // createSolution只能由umu微服务中的异步任务OnBoardingServie调用，或者作者自己调用
             return ResponseEntity.status(403).build();
         }
 
         solution.setId(null);
-        solution.setActive(true);
-        solution.setPublishStatus("下架");
-        solution.setPublishRequest("无申请");
+        solution.setActive(true); // 重定义为表示：公开或私有
+        solution.setStarCount(0L);
         solution.setViewCount(0L);
         solution.setDownloadCount(0L);
         solution.setCommentCount(0L);
-        solution.setRatingCount(0L);
-        solution.setRatingAverage(0.0);
+        solution.setDisplayOrder(0L);
         solution.setCreatedDate(Instant.now());
         solution.setModifiedDate(Instant.now());
         this.solutionRepository.save(solution);
@@ -96,29 +96,33 @@ public class SolutionResource {
         description.setContent("<p>无内容</p>");
         this.descriptionRepository.save(description);
 
+        Credit credit = creditService.findCredit(solution.getAuthorLogin());
+        creditService.updateCredit(credit, 3L, "创建新模型<" + solution.getName() + ">");
+
         return ResponseEntity.status(201).build(); // 201 Created
     }
 
     /**
-     * PUT  /solutions/baseinfo : 更新Solution对象中的基础可变字段
+     * PUT  /solutions/baseinfo : 更新Solution对象中的基础信息相关字段
      * @param jsonObject JSONObject with base info fields to be updated
      * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 401 Unauthorized
      */
     @PutMapping("/solutions/baseinfo")
     @Timed
-    public ResponseEntity<Solution> updateBaseinfo(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> updateBaseinfo(HttpServletRequest request,
                                                    @Valid @RequestBody JSONObject jsonObject) {
         log.debug("REST request to update Solution base info: {}", jsonObject);
 
         Solution solution = solutionRepository.findOne(jsonObject.getLong("id"));
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        if (null == userLogin || !userLogin.equals(solution.getAuthorLogin())) {
-            // solution中的下属基础信息只能由作者自己修改
+        String userLogin = request.getRemoteUser();
+        Boolean hasRole = request.isUserInRole("ROLE_MANAGER");
+        if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || hasRole)) {
+            // solution中的基础信息字段只能由作者自己或管理员修改
             return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
+        solution.setName(jsonObject.getString("name"));
         solution.setCompany(jsonObject.getString("company"));
-        solution.setCoAuthors(jsonObject.getString("coAuthors"));
         solution.setVersion(jsonObject.getString("version"));
         solution.setSummary(jsonObject.getString("summary"));
         solution.setTag1(jsonObject.getString("tag1"));
@@ -130,24 +134,50 @@ public class SolutionResource {
         solution.setModifiedDate(Instant.now());
         Solution result = solutionRepository.save(solution);
 
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * PUT  /solutions/name : 更新Solution的 name
+     * @param jsonObject the JSONObject with name to be updated
+     * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 403
+     */
+    @PutMapping("/solutions/name")
+    @Timed
+    public ResponseEntity<Void> updateName(HttpServletRequest request,
+                                               @Valid @RequestBody JSONObject jsonObject) {
+        log.debug("REST request to update Solution Name: {}", jsonObject);
+
+        Solution solution = solutionRepository.findOne(jsonObject.getLong("id"));
+        String userLogin = request.getRemoteUser();
+        if (null == userLogin || !userLogin.equals(solution.getAuthorLogin())) {
+            // solution中的name字段只能由作者自己修改
+            return ResponseEntity.status(403).build(); // 403 Forbidden
+        }
+
+        solution.setName(jsonObject.getString("name"));
+        solution.setModifiedDate(Instant.now());
+        Solution result = solutionRepository.save(solution);
+
+        return ResponseEntity.ok().build();
     }
 
     /**
      * PUT  /solutions/picture-url : 更新Solution的 pictureUrl
      * @param jsonObject the JSONObject with pictureUrl to be updated
-     * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 401
+     * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 403
      */
     @PutMapping("/solutions/picture-url")
     @Timed
-    public ResponseEntity<Solution> updatePictureUrl(HttpServletRequest httpServletRequest,
-                                                           @Valid @RequestBody JSONObject jsonObject) {
+    public ResponseEntity<Void> updatePictureUrl(HttpServletRequest request,
+                                                     @Valid @RequestBody JSONObject jsonObject) {
         log.debug("REST request to update Solution pictureUrl: {}", jsonObject);
 
         Solution solution = solutionRepository.findOne(jsonObject.getLong("id"));
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        if (null == userLogin || !userLogin.equals(solution.getAuthorLogin())) {
-            // solution中的pictureUrl字段只能由作者自己修改
+        String userLogin = request.getRemoteUser();
+        Boolean hasRole = request.isUserInRole("ROLE_MANAGER");
+        if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || hasRole)) {
+            // solution中的pictureUrl字段只能由作者自己或管理员修改
             return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
@@ -155,7 +185,7 @@ public class SolutionResource {
         solution.setModifiedDate(Instant.now());
         Solution result = solutionRepository.save(solution);
 
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -165,108 +195,48 @@ public class SolutionResource {
      */
     @PutMapping("/solutions/active")
     @Timed
-    public ResponseEntity<Solution> updateActive(HttpServletRequest httpServletRequest,
-                                                             @Valid @RequestBody JSONObject jsonObject) {
+    public ResponseEntity<Void> updateActive(HttpServletRequest request,
+                                                 @Valid @RequestBody JSONObject jsonObject) {
         log.debug("REST request to update Solution active: {}", jsonObject);
 
         Solution solution = solutionRepository.findOne(jsonObject.getLong("id"));
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        if (null == userLogin || !userLogin.equals(solution.getAuthorLogin())) {
-            // solution中的active字段只能由作者自己修改
+        String userLogin = request.getRemoteUser();
+        Boolean hasRole = request.isUserInRole("ROLE_MANAGER");
+        if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || hasRole)) {
+            // solution中的active字段只能由作者自己或管理员修改
             return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
-        solution.setActive(jsonObject.getBoolean("active"));
-        solution.setModifiedDate(Instant.now());
-        Solution result = solutionRepository.save(solution);
+        if (solution.isActive() && !jsonObject.getBoolean("active")) {
+            Credit credit = creditService.findCredit(userLogin);
+            if (credit.getCredit() < 20) {
+                return ResponseEntity.status(400).build(); // bad request
+            } else {
+                solution.setActive(jsonObject.getBoolean("active"));
+                solution.setModifiedDate(Instant.now());
+                Solution result = solutionRepository.save(solution);
+                creditService.updateCredit(credit, -20L, "将AI模型<" + solution.getName() + ">设为私有");
 
-        return ResponseEntity.ok().body(result);
-    }
-
-    /**
-     * PUT  /solutions/publish-request : 申请模型上架/下架
-     * @param jsonObject the JSONObject with publishRequest to be updated
-     * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 401
-     */
-    @PutMapping("/solutions/publish-request")
-    @Timed
-    public ResponseEntity<Solution> requestPublish(HttpServletRequest httpServletRequest,
-                                                         @Valid @RequestBody JSONObject jsonObject) {
-        log.debug("REST request to update Solution publishRequest: {}", jsonObject);
-
-        Solution solution = solutionRepository.findOne(jsonObject.getLong("id"));
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        if (null == userLogin || !userLogin.equals(solution.getAuthorLogin())) {
-            // 模型上架/下架申请只能由作者自己提出
-            return ResponseEntity.status(403).build(); // 403 Forbidden
-        }
-
-        PublishRequest publishRequest = new PublishRequest();
-        publishRequest.setSolutionUuid(solution.getUuid());
-        publishRequest.setRequestUserLogin(userLogin);
-        publishRequest.setSolutionName(solution.getName());
-        publishRequest.setRequestType(jsonObject.getString("requestType"));
-        publishRequest.setRequestReason(jsonObject.getString("requestReason"));
-        publishRequest.setReviewed(false);
-        publishRequest.setRequestDate(Instant.now());
-        publishRequestRepository.save(publishRequest);
-
-        solution.setPublishRequest(jsonObject.getString("requestType"));
-        solution.setModifiedDate(Instant.now());
-        Solution result = solutionRepository.save(solution);
-
-        return ResponseEntity.ok().body(result);
-    }
-
-    /**
-     * PUT  /solutions/publish-status : 批准模型上架/下架申请
-     * @param jsonObject the JSONObject with publishStatus and publishRequest to be updated
-     * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 400 (Bad Request)
-     */
-    @PutMapping("/solutions/publish-approve")
-    @Timed
-    @Secured({"ROLE_MANAGER"})  // 模型上架/下架申请只能由平台管理员进行批准
-    public ResponseEntity<Solution> approvePublish(HttpServletRequest httpServletRequest,
-                                                   @Valid @RequestBody JSONObject jsonObject) {
-        log.debug("REST request to update Solution publishStatus: {}", jsonObject);
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-
-        Solution solution = solutionRepository.findOne(jsonObject.getLong("solutionId"));
-        if (jsonObject.getBoolean("toPublish")) {
-            solution.setPublishStatus(jsonObject.getBoolean("approved") ? "上架" : "下架");
+                return ResponseEntity.ok().build();
+            }
         } else {
-            solution.setPublishStatus(jsonObject.getBoolean("approved") ? "下架" : "上架");
+            solution.setActive(jsonObject.getBoolean("active"));
+            solution.setModifiedDate(Instant.now());
+            Solution result = solutionRepository.save(solution);
+
+            return ResponseEntity.ok().build();
         }
-        solution.setPublishRequest("无申请");
-        solution.setModifiedDate(Instant.now());
-        Solution result = solutionRepository.save(solution);
-
-        PublishRequest publishRequest = publishRequestRepository.findOne(jsonObject.getLong("publishRequestId"));
-        publishRequest.setReviewUserLogin(userLogin);
-        publishRequest.setReviewed(true);
-        publishRequest.setReviewResult(jsonObject.getBoolean("approved") ? "批准" : "拒绝");
-        publishRequest.setReviewComment(jsonObject.getString("reviewComment"));
-        publishRequest.setReviewDate(Instant.now());
-        publishRequestRepository.save(publishRequest);
-
-        String title = "模型" + publishRequest.getSolutionName() + publishRequest.getRequestType() + "审批被" + publishRequest.getReviewResult();
-        String content = "你的模型" + publishRequest.getSolutionName() + publishRequest.getRequestType() + "审批被" + publishRequest.getReviewResult()
-            + "。\n\n请点击下方[目标页面]按钮进入模型页面进行后续处理...";
-        String url = "/ucumos/solution/" + publishRequest.getSolutionUuid() + "/edit";
-        messageService.sendMessage(publishRequest.getRequestUserLogin(), title, content, url, false);
-
-        return ResponseEntity.ok().body(result);
     }
 
     /**
-     * PUT  /solutions/subjects : 更新Solution对象中的subjectdeng诸字段
+     * PUT  /solutions/admininfo : 更新Solution对象中的管理相关字段
      * @param jsonObject the JSONObject with subjects to be updated
      * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 400 (Bad Request)
      */
-    @PutMapping("/solutions/subjects")
+    @PutMapping("/solutions/admininfo")
     @Timed
     @Secured({"ROLE_MANAGER"})  // subject字段只能由平台管理员更新
-    public ResponseEntity<Solution> updateSolutionSubjects(@Valid @RequestBody JSONObject jsonObject) {
+    public ResponseEntity<Void> updateSolutionSubjects(@Valid @RequestBody JSONObject jsonObject) {
         log.debug("REST request to update Solution subjects: {}", jsonObject);
 
         Solution solution = solutionRepository.findOne(jsonObject.getLong("id"));
@@ -278,40 +248,34 @@ public class SolutionResource {
         solution.setModifiedDate(Instant.now());
         Solution result = solutionRepository.save(solution);
 
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok().build();
     }
 
     /**
-     * PUT /solutions/rating-stats : Updates an existing solution's ratingCount and ratingAverage.
-     * @param jsonObject the JSONObject with soluton id to be updated
-     * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 400 (Bad Request)
+     * PUT /solutions/star-count : Updates an existing solution's starCount.
+     * @param jsonObject the JSONObject with solution id to be updated
+     * @return the ResponseEntity with status 200 (OK) and with body the updated solution
      */
-    @PutMapping("/solutions/rating-stats")
+    @PutMapping("/solutions/star-count")
     @Timed
-    public ResponseEntity<Solution> updateSolutionRatingStats(@Valid @RequestBody JSONObject jsonObject) {
-        log.debug("REST request to update Solution rating stats : {}", jsonObject);
+    public ResponseEntity<Void> updateSolutionStarCount(@Valid @RequestBody JSONObject jsonObject) {
+        log.debug("REST request to update Solution star count : {}", jsonObject);
 
         Solution solution = solutionRepository.findOne(jsonObject.getLong("id"));
-
-        Long ratingCount = solutionRatingRepository.countAllBySolutionUuidAndRatingScoreGreaterThan(solution.getUuid(), 0);
-        Integer sumRatingScore = solutionRatingRepository.sumRatingScore(solution.getUuid());
-        solution.setRatingCount(ratingCount);
-        solution.setRatingAverage(sumRatingScore * 1.0 / ratingCount);
-
-        solution.setModifiedDate(Instant.now()); // 每次更新时修改modifiedDate
+        solution.setStarCount(starRepository.countAllByTargetUuid(solution.getUuid()));
         Solution result = solutionRepository.save(solution);
 
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok().build();
     }
 
     /**
      * PUT /solutions/comment-count : Updates an existing solution's commentCount.
      * @param jsonObject the JSONObject with soluton id to be updated
-     * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 400 (Bad Request)
+     * @return the ResponseEntity with status 200 (OK) and with body the updated solution
      */
     @PutMapping("/solutions/comment-count")
     @Timed
-    public ResponseEntity<Solution> updateSolutionCommentCount(@Valid @RequestBody JSONObject jsonObject) {
+    public ResponseEntity<Void> updateSolutionCommentCount(@Valid @RequestBody JSONObject jsonObject) {
         log.debug("REST request to update Solution comment count : {}", jsonObject);
 
         Solution solution = solutionRepository.findOne(jsonObject.getLong("id"));
@@ -319,47 +283,43 @@ public class SolutionResource {
         Long commentCount = commentRepository.countAllBySolutionUuid(solution.getUuid());
         solution.setCommentCount(commentCount);
 
-        solution.setModifiedDate(Instant.now()); // 每次更新时修改modifiedDate
         Solution result = solutionRepository.save(solution);
 
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok().build();
     }
 
     /**
      * PUT  /solutions/view-count : Updates an existing solution's viewCount.
      * @param jsonObject the JSONObject with soluton id to be updated
-     * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 400 (Bad Request)
+     * @return the ResponseEntity with status 200 (OK) and with body the updated solution
      */
     @PutMapping("/solutions/view-count")
     @Timed
-    public ResponseEntity<Solution> updateSolutionViewCount(@Valid @RequestBody JSONObject jsonObject) {
+    public ResponseEntity<Void> updateSolutionViewCount(@Valid @RequestBody JSONObject jsonObject) {
         log.debug("REST request to update Solution view count : {}", jsonObject);
 
         Solution solution = solutionRepository.findOne(jsonObject.getLong("id"));
         solution.setViewCount(solution.getViewCount() + 1);
-        solution.setModifiedDate(Instant.now()); // 每次更新时修改modifiedDate
         Solution result = solutionRepository.save(solution);
 
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok().build();
     }
 
     /**
      * PUT  /solutions/download-count : Updates an existing solution's downloadCount.
      * @param jsonObject the JSONObject with soluton id to be updated
-     * @return the ResponseEntity with status 200 (OK) and with body the updated solution, or status 400 (Bad Request)
+     * @return the ResponseEntity with status 200 (OK) and with body the updated solution
      */
     @PutMapping("/solutions/download-count")
     @Timed
-    public ResponseEntity<Solution> updateSolutionDownloadCount(@Valid @RequestBody JSONObject jsonObject) {
+    public ResponseEntity<Void> updateSolutionDownloadCount(@Valid @RequestBody JSONObject jsonObject) {
         log.debug("REST request to update Solution download count : {}", jsonObject);
 
         Solution solution = solutionRepository.findOne(jsonObject.getLong("id"));
         solution.setDownloadCount(solution.getDownloadCount() + 1);
-        solution.setLastDownload(Instant.now());
-        solution.setModifiedDate(Instant.now()); // 每次更新时修改modifiedDate
         Solution result = solutionRepository.save(solution);
 
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -369,7 +329,7 @@ public class SolutionResource {
     @GetMapping("/solutions")
     @Timed
     public ResponseEntity<List<Solution>> getSolutions(
-        HttpServletRequest httpServletRequest,
+        HttpServletRequest request,
         @RequestParam(value = "active", required = false) Boolean active,
         @RequestParam(value = "uuid", required = false) String uuid,
         @RequestParam(value = "name", required = false) String name,
@@ -377,8 +337,6 @@ public class SolutionResource {
         @RequestParam(value = "company", required = false) String company,
         @RequestParam(value = "modelType", required = false) String modelType,
         @RequestParam(value = "toolkitType", required = false) String toolkitType,
-        @RequestParam(value = "publishStatus", required = false) String publishStatus,
-        @RequestParam(value = "publishRequest", required = false) String publishRequest,
         @RequestParam(value = "subject1", required = false) String subject1,
         @RequestParam(value = "subject2", required = false) String subject2,
         @RequestParam(value = "subject3", required = false) String subject3,
@@ -388,20 +346,16 @@ public class SolutionResource {
 
         log.debug("REST request to get all Solutions");
 
-        if (null == uuid && null == publishStatus) {
-            // 查询条件中必须存在uuid或publishStatus字段（不可能同时存在），否则为非法访问
-            return ResponseEntity.status(403).build(); // 403 Forbidden
-        }
+        String userLogin = request.getRemoteUser();
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        if (null != publishStatus && publishStatus.equals("下架") && null != authorLogin && !authorLogin.equals(userLogin)) {
+        // 将active的含义重定义为：公开或私有
+        if ((null != active) && !active && null == userLogin) {
+            // 非登录用户不能查询私有模型
             return ResponseEntity.status(403).build(); // 403 Forbidden
         }
 
         Page<Solution> page;
-
         Specification specification = new Specification<Solution>() {
-
             @Override
             public Predicate toPredicate(Root<Solution> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
 
@@ -409,19 +363,21 @@ public class SolutionResource {
                 List<Predicate> predicates2 = new ArrayList<>();
                 List<Predicate> predicates3 = new ArrayList<>();
 
-                if(null != active){
+                if (null != active) {
                     predicates1.add(criteriaBuilder.equal(root.get("active"), active));
+                    if (!active) {
+                        // 用户只能查询自己的私有模型
+                        predicates1.add(criteriaBuilder.equal(root.get("authorLogin"), userLogin));
+                    }
                 }
-                if(null != uuid){
+                if (null != authorLogin && (null == active || active)) {
+                    predicates1.add(criteriaBuilder.equal(root.get("authorLogin"), authorLogin));
+                }
+                if (null != uuid) {
                     predicates1.add(criteriaBuilder.equal(root.get("uuid"), uuid));
                 }
                 if (null != name) {
                     predicates1.add(criteriaBuilder.equal(root.get("name"), name));
-                }
-                if (null != authorLogin) {
-                    predicates1.add(criteriaBuilder.or(
-                        criteriaBuilder.equal(root.get("authorLogin"), authorLogin),
-                        criteriaBuilder.equal(root.get("authorName"), authorLogin)));
                 }
                 if (null != company) {
                     predicates1.add(criteriaBuilder.equal(root.get("company"), company));
@@ -431,12 +387,6 @@ public class SolutionResource {
                 }
                 if (null != toolkitType) {
                     predicates1.add(criteriaBuilder.equal(root.get("toolkitType"), toolkitType));
-                }
-                if (null != publishStatus) {
-                    predicates1.add(criteriaBuilder.equal(root.get("publishStatus"), publishStatus));
-                }
-                if (null != publishRequest) {
-                    predicates1.add(criteriaBuilder.equal(root.get("publishRequest"), publishRequest));
                 }
                 if (null != subject1) {
                     predicates1.add(criteriaBuilder.equal(root.get("subject1"), subject1));
@@ -465,7 +415,6 @@ public class SolutionResource {
                     predicates3.add(criteriaBuilder.like(root.get("tag2"), "%"+filter+"%"));
                     predicates3.add(criteriaBuilder.like(root.get("tag3"), "%"+filter+"%"));
                     predicates3.add(criteriaBuilder.like(root.get("company"), "%"+filter+"%"));
-                    // predicates3.add(criteriaBuilder.like(root.get("coAuthors"), "%"+filter+"%"));
                 }
 
                 Predicate predicate1 = criteriaBuilder.and(predicates1.toArray(new Predicate[predicates1.size()]));
@@ -490,54 +439,43 @@ public class SolutionResource {
     }
 
     /**
-     * GET  /solutions/:id : get the "id" solution.
-     * @param id the id of the solution to retrieve
-     * @return the ResponseEntity with status 200 (OK) and with body the solution, or with status 404 (Not Found)
-     */
-    @GetMapping("/solutions/{id}")
-    @Timed
-    public ResponseEntity<Solution> getSolution(@PathVariable Long id) {
-        log.debug("REST request to get Solution : {}", id);
-        Solution solution = solutionRepository.findOne(id);
-        return ResponseUtil.wrapOrNotFound(Optional.ofNullable(solution));
-    }
-
-    /**
-     * GET  /solutions/:id/picture-url : get the picture-url of "id" solution.
-     * @param id the id of the solution to retrieve
-     * @return the ResponseEntity with status 200 (OK) and with the solution pictureUrl, or with status 404 (Not Found)
-     */
-    @GetMapping("/solutions/{id}/picture-url")
-    @Timed
-    public ResponseEntity<JSONObject> getPictureUrl(@PathVariable Long id) {
-        log.debug("REST request to get Solution : {}", id);
-
-        Solution solution = solutionRepository.findOne(id);
-        if (null == solution) {
-            return ResponseEntity.notFound().build();
-        }
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("pictureUrl", solution.getPictureUrl());
-        return ResponseEntity.ok().body(jsonObject);
-    }
-
-    /**
      * DELETE  /solutions/:id : delete the "id" solution.
      * @param id the id of the solution to delete
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/solutions/{id}")
     @Timed
-    public ResponseEntity<Void> deleteSolution(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> deleteSolution(HttpServletRequest request,
                                                @PathVariable Long id) {
         log.debug("REST request to delete Solution : {}", id);
 
         Solution solution = solutionRepository.findOne(id);
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || userLogin.equals("system"))) {
-            // solution只能由作者自己删除，或者由umu微服务中的onboardService异步服务删除
+        String userLogin = request.getRemoteUser();
+        Boolean hasRole = request.isUserInRole("ROLE_MANAGER");
+        if (null == userLogin || !(userLogin.equals(solution.getAuthorLogin()) || userLogin.equals("internal") || hasRole)) {
+            // solution只能由作者自己或者管理员删除，或者由umu微服务中的onboardService异步服务删除
             return ResponseEntity.status(403).build(); // 403 Forbidden
+        }
+
+        List<Document> documentList = documentRepository.findAllBySolutionUuid(solution.getUuid());
+        for (Document document: documentList) {
+            this.nexusArtifactClient.deleteArtifact(document.getUrl());
+            this.documentRepository.delete(document.getId());
+        }
+
+        List<Artifact> artifactList = artifactRepository.findAllBySolutionUuid(solution.getUuid());
+        for (Artifact artifact: artifactList) {
+            if (artifact.getType().equals("DOCKER镜像")) {
+                this.nexusArtifactClient.deleteDockerImage(artifact.getUrl());
+            } else {
+                this.nexusArtifactClient.deleteArtifact(artifact.getUrl());
+            }
+            this.artifactRepository.delete(artifact.getId());
+        }
+
+        List<Star> starList = starRepository.findAllByTargetUuid(solution.getUuid(), null).getContent();
+        for (Star star: starList) {
+            this.starRepository.delete(star.getId());
         }
 
         solutionRepository.delete(id);

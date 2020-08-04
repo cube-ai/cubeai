@@ -5,11 +5,7 @@ import com.wyy.domain.Message;
 
 import com.wyy.dto.MessageDraft;
 import com.wyy.repository.MessageRepository;
-import com.wyy.web.rest.errors.BadRequestAlertException;
-import com.wyy.web.rest.util.HeaderUtil;
-import com.wyy.web.rest.util.JwtUtil;
 import com.wyy.web.rest.util.PaginationUtil;
-import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -23,14 +19,12 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.criteria.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.net.URI;
 import java.net.URISyntaxException;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+
 
 /**
  * REST controller for managing Message.
@@ -57,10 +51,10 @@ public class MessageResource {
      */
     @PostMapping("/messages/send")
     @Timed
-    public ResponseEntity<Void> sendMessage(HttpServletRequest httpServletRequest, @Valid @RequestBody Message message) {
+    public ResponseEntity<Void> sendMessage(HttpServletRequest request, @Valid @RequestBody Message message) {
         log.debug("REST request to send Message : {}", message);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
         if (null != userLogin) {
             message.setSender(userLogin);
             message.setId(null);
@@ -85,10 +79,10 @@ public class MessageResource {
      */
     @PostMapping("/messages/multicast")
     @Timed
-    public ResponseEntity<Void> sendMulticastMessage(HttpServletRequest httpServletRequest, @Valid @RequestBody MessageDraft messageDraft) {
+    public ResponseEntity<Void> sendMulticastMessage(HttpServletRequest request, @Valid @RequestBody MessageDraft messageDraft) {
         log.debug("REST request to send a new multicast Message : {}", messageDraft);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
         if (null != userLogin) {
             Message message = messageDraft.getMessage();
             List<String> receivers = messageDraft.getReceivers();
@@ -119,12 +113,12 @@ public class MessageResource {
      */
     @PutMapping("/messages/viewed")
     @Timed
-    public ResponseEntity<Message> updateMessageViewed(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Message> updateMessageViewed(HttpServletRequest request,
                                                        @RequestParam(value = "id") Long id,
                                                        @RequestParam(value = "viewed") Boolean viewed) throws URISyntaxException {
         log.debug("REST request to update Message viewed: {}", id);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
         Message message = messageRepository.findOne(id);
         if (null != userLogin && message.getReceiver().equals(userLogin)) {
             message.setViewed(viewed);
@@ -144,13 +138,13 @@ public class MessageResource {
      */
     @PutMapping("/messages/deleted")
     @Timed
-    public ResponseEntity<Message> updateMessageDeleted(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Message> updateMessageDeleted(HttpServletRequest request,
                                                        @RequestParam(value = "id") Long id,
                                                        @RequestParam(value = "deleted") Boolean deleted) throws URISyntaxException {
         log.debug("REST request to update Message deleted: {}", id);
 
         Message message = messageRepository.findOne(id);
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
         if (null != userLogin && message.getReceiver().equals(userLogin)) {
             message.setDeleted(deleted);
             messageRepository.save(message);
@@ -168,7 +162,7 @@ public class MessageResource {
     @GetMapping("/messages")
     @Timed
     public ResponseEntity<List<Message>> getAllmessages(
-        HttpServletRequest httpServletRequest,
+        HttpServletRequest request,
         @RequestParam(value = "receiver", required = false) String receiver,
         @RequestParam(value = "sender", required = false) String sender,
         @RequestParam(value = "deleted", required = false) Boolean deleted,
@@ -212,7 +206,7 @@ public class MessageResource {
             }
         };
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
         if ((null != userLogin)
             && ((null != receiver && receiver.equals(userLogin)) || (null != sender && sender.equals(userLogin)))) {
             page =  this.messageRepository.findAll(specification, pageable);
@@ -232,11 +226,11 @@ public class MessageResource {
      */
     @GetMapping("/messages/{id}")
     @Timed
-    public ResponseEntity<Message> getMessage(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Message> getMessage(HttpServletRequest request,
                                               @PathVariable Long id) {
         log.debug("REST request to get Message : {}", id);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
         Message message = messageRepository.findOne(id);
 
         if ((null != message) && (null != userLogin) && (message.getReceiver().equals(userLogin) || message.getSender().equals(userLogin))) {
@@ -254,11 +248,11 @@ public class MessageResource {
      */
     @DeleteMapping("/messages/{id}")
     @Timed
-    public ResponseEntity<Void> deleteMessage(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> deleteMessage(HttpServletRequest request,
                                               @PathVariable Long id) {
         log.debug("REST request to delete Message : {}", id);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
         Message message = messageRepository.findOne(id);
 
         if ((null != message) && (null != userLogin) && message.getReceiver().equals(userLogin)) {

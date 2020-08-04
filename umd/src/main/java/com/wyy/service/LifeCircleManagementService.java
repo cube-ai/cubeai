@@ -68,18 +68,18 @@ public class LifeCircleManagementService {
             return;
         }
 
-        this.saveTaskProgress(task, "正在执行", 60, "删除部署实例...", null);
-        this.saveTaskStepProgress(task.getUuid(), "执行", 60, "删除部署实例...");
+        this.saveTaskProgress(task, "正在执行", 60, "停止运行部署实例...", null);
+        this.saveTaskStepProgress(task.getUuid(), "执行", 60, "停止运行部署实例...");
         if (!kubernetesClient.deleteDeploy(deployment.getUuid())) {
-            this.saveTaskStepProgress(task.getUuid(), "失败", 100, "部署实例删除失败。");
-            this.saveTaskProgress(task, "失败", 100, "部署实例删除失败。", Instant.now());
+            this.saveTaskStepProgress(task.getUuid(), "失败", 100, "停止运行部署实例失败。");
+            this.saveTaskProgress(task, "失败", 100, "停止运行部署实例失败。", Instant.now());
             return;
         }
 
         deployment.setStatus("停止");
         this.ummClient.updateDeployment(deployment);
-        this.saveTaskStepProgress(task.getUuid(), "成功", 100, "成功删除部署实例。");
-        this.saveTaskProgress(task, "成功", 100, "成功删除部署实例。", Instant.now());
+        this.saveTaskStepProgress(task.getUuid(), "成功", 100, "成功停止运行部署实例。");
+        this.saveTaskProgress(task, "成功", 100, "成功停止运行部署实例。", Instant.now());
 
         // TODO 发送messageService.sendMessage
     }

@@ -42,10 +42,6 @@
                 <constraints nullable="true" />
             </column>
 
-            <column name="solution_company" type="varchar(255)">
-                <constraints nullable="true" />
-            </column>
-
             <column name="k_8_s_port" type="integer">
                 <constraints nullable="true" />
             </column>
@@ -66,15 +62,11 @@
                 <constraints nullable="true" />
             </column>
 
-            <column name="picture_url" type="varchar(512)">
+            <column name="picture_url" type="clob">
                 <constraints nullable="true" />
             </column>
 
-            <column name="model_type" type="varchar(255)">
-                <constraints nullable="true" />
-            </column>
-
-            <column name="toolkit_type" type="varchar(255)">
+            <column name="star_count" type="bigint">
                 <constraints nullable="true" />
             </column>
 
@@ -106,14 +98,7 @@
         </createTable>
         <dropDefaultValue tableName="deployment" columnName="created_date" columnDataType="datetime"/>
         <dropDefaultValue tableName="deployment" columnName="modified_date" columnDataType="datetime"/>
-
-        <!-- Huolongshe: 为uuid字段建索引，使用Jhipster导入模型后手工添加-->
-        <createIndex indexName="idx_deployment_uuid"
-                     tableName="deployment"
-                     unique="true">
-            <column name="uuid" type="varchar(255)"/>
-        </createIndex>
-
+        
     </changeSet>
     <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here, do not remove-->
 </databaseChangeLog>

@@ -6,7 +6,6 @@ import com.wyy.domain.Solution;
 import com.wyy.domain.Task;
 import com.wyy.service.KafkaProducer;
 import com.wyy.service.UmmClient;
-import com.wyy.web.rest.util.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +27,6 @@ public class DeployResource {
 
     private final UmmClient ummClient;
     private final KafkaProducer kafkaProducer;
-
     public DeployResource(UmmClient ummClient,
                           KafkaProducer kafkaProducer) {
         this.ummClient = ummClient;
@@ -37,13 +35,20 @@ public class DeployResource {
 
     @PostMapping("/deploy")
     @Timed
-    public ResponseEntity<Void> deploy(HttpServletRequest httpServletRequest,
-                                           @Valid @RequestBody JSONObject jsonObject) {
+    public ResponseEntity<Void> deploy(HttpServletRequest request,
+                                       @Valid @RequestBody JSONObject jsonObject) {
         log.debug("REST request to deploy");
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
+        if (null == userLogin) {
+            return ResponseEntity.status(403).build();
+        }
 
         Solution solution = this.ummClient.getSolutions(jsonObject.getString("solutionUuid")).get(0);
+
+        if (solution.isActive() && !jsonObject.getBoolean("public")) {
+            return ResponseEntity.status(403).build();  // 公开模型不能部署为私有
+        }
 
         Task task = new Task();
         task.setUuid(jsonObject.getString("taskUuid"));

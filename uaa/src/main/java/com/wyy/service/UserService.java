@@ -270,6 +270,7 @@ public class UserService {
             userRepository.delete(user);
             cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).evict(user.getLogin());
             cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE).evict(user.getEmail());
+            cacheManager.getCache(UserRepository.USERS_BY_PHONE_CACHE).evict(user.getPhone());
         }
     }
 

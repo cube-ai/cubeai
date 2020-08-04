@@ -22,14 +22,6 @@
             "fieldType": "String"
         },
         {
-            "fieldName": "coAuthors",
-            "fieldType": "String",
-            "fieldValidateRules": [
-                "maxlength"
-            ],
-            "fieldValidateRulesMaxlength": 512
-        },
-        {
             "fieldName": "name",
             "fieldType": "String"
         },
@@ -71,11 +63,8 @@
         },
         {
             "fieldName": "pictureUrl",
-            "fieldType": "String",
-            "fieldValidateRules": [
-                "maxlength"
-            ],
-            "fieldValidateRulesMaxlength": 512
+            "fieldType": "byte[]",
+            "fieldTypeBlobContent": "text"
         },
         {
             "fieldName": "active",
@@ -83,36 +72,15 @@
         },
         {
             "fieldName": "modelType",
-            "javadoc": "模型类型，直接用中文字符串表示。主要包括：分类, 预测, 回归, 数据源, 数据变换, ...",
             "fieldType": "String"
         },
         {
             "fieldName": "toolkitType",
-            "javadoc": "工具箱类型，直接用中文字符串表示。主要包括：\n模型组合（Composite-Solution）, 模型编排（Design-Studio）, H2O, Probe, R, Scikit-Learn, TensorFlow, Training-Client, Data-Broker, ONAP, ...",
             "fieldType": "String"
         },
         {
-            "fieldName": "validationStatus",
-            "javadoc": "验证状态，直接用中文字符串表示。主要包括：提交验证，正在验证，验证通过，验证失败，未验证",
-            "fieldType": "String"
-        },
-        {
-            "fieldName": "publishStatus",
-            "javadoc": "发布状态，直接用中文字符串表示。包括：下架， 上架",
-            "fieldType": "String"
-        },
-        {
-            "fieldName": "publishRequest",
-            "javadoc": "上架、下架申请状态，直接用中文字符串表示，包括3种状态：无申请，申请上架, 申请下架\npublishRequest为申请上架时，publishStatus必定为下架。\npublishRequest为申请下架时，publishStatus必定为上架。\npublishRequest为无申请时，publishStatus可为上架或下架。",
-            "fieldType": "String"
-        },
-        {
-            "fieldName": "createdDate",
-            "fieldType": "Instant"
-        },
-        {
-            "fieldName": "modifiedDate",
-            "fieldType": "Instant"
+            "fieldName": "starCount",
+            "fieldType": "Long"
         },
         {
             "fieldName": "viewCount",
@@ -123,20 +91,16 @@
             "fieldType": "Long"
         },
         {
-            "fieldName": "lastDownload",
-            "fieldType": "Instant"
-        },
-        {
             "fieldName": "commentCount",
             "fieldType": "Long"
         },
         {
-            "fieldName": "ratingCount",
-            "fieldType": "Long"
+            "fieldName": "createdDate",
+            "fieldType": "Instant"
         },
         {
-            "fieldName": "ratingAverage",
-            "fieldType": "Double"
+            "fieldName": "modifiedDate",
+            "fieldType": "Instant"
         }
     ],
     "changelogDate": "20190225070738",

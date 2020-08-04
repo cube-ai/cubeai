@@ -2,13 +2,11 @@
 
 CubeAI ★ 智立方 AI模型导入
 
-CubeAI基于微服务架构进行开发和部署，umu是在其中起重要作用的一个微服务。
+CubeAI基于微服务架构进行开发和部署，umu是其中负责AI模型导入的微服务。
 
 umu使用Consul来进行微服务注册和发现，以及集中的配置管理。在umu启动时，它首先尝试与Consul建立连接。如果Consul未就绪，则umu将启动失败。
 
 umu使用uaa来进行用户管理（用户认证、授权、基于角色的访问控制等）。在umu启动时，它会尝试与uaa建立连接。如果uaa未就绪，则用户无法成功登录并执行相应的业务操作。
-
-本微服务初始代码框架使用开源工具Jhipster( http://www.jhipster.tech )生成。
 
 ## 基本配置
 
@@ -51,25 +49,17 @@ umu使用uaa来进行用户管理（用户认证、授权、基于角色的访�
 
 ## 部署
 
-- 使用war包
-
-1. 使用prod profile来构建用于生产环境性能优化的war包:
+1. 编译并生成微服务docker镜像：
 
         cd ~/cubeai/umu
-        ./mvnw -Pprod clean package
-
-2. 运行war包:
-
-        java -jar target/*.war
-        
-- Docker方式部署
-
-1. 构建umu docker：
-
-        cd ~/cubeai/umu
+        yarn install
         ./mvnw clean verify -Pprod dockerfile:build -DskipTests
         
-2. 拉起docker
+2. docker-compose部署
 
     参见docker/prod文件夹下面的README文档。
+
+3. k8s部署
+
+    参见docker/k8s文件夹下面的README文档。
 

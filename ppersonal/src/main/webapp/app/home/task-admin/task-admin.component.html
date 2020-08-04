@@ -1,0 +1,100 @@
+<jhi-pageheader></jhi-pageheader>
+
+<div style="margin: 20px 20px 50px 20px">
+    <mat-card style="margin-top: 20px; background-color: #f0f0f0">
+        <span style="font-weight: bold; font-size: 28px">任务管理</span>
+    </mat-card>
+    <mat-card>
+        <div class="row" style="margin-top: 20px; margin-bottom: 20px">
+            <div class="col-6">
+                <input name="search" type="text" class="form-control" placeholder="用户名" [(ngModel)]="searchUserLogin"
+                       (blur)="refresh()">
+            </div>
+            <div class="col-6">
+                <div class="pull-right">
+                    <mat-form-field >
+                        <mat-select [(ngModel)]="searchTaskStatus" (selectionChange)="refresh()">
+                            <mat-option value="all">
+                                全部
+                            </mat-option>
+                            <mat-option value="等待调度">
+                                等待调度
+                            </mat-option>
+                            <mat-option value="正在执行">
+                                正在执行
+                            </mat-option>
+                            <mat-option value="成功">
+                                成功
+                            </mat-option>
+                            <mat-option value="失败">
+                                失败
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="tasks">
+            <mat-card *ngFor="let task of tasks; trackBy: trackIdentity" style="font-size: 14px; margin: 20px 0; background-color: #fdfdfd">
+                <div class="row">
+                    <div class="col-md-3">
+                        <mat-list>
+                            <mat-list-item>
+                                <mat-icon mat-list-icon color="primary">person</mat-icon>
+                                <div mat-line>
+                                    <h3>
+                                        <a (click)="searchUserLogin = task.userLogin; refresh()">
+                                            {{task.userLogin}}
+                                        </a>
+                                    </h3>
+                                </div>
+                            </mat-list-item>
+                        </mat-list>
+                    </div>
+                    <div class="col-md-3">
+                        <a (click)="viewTaskDetails(task)">
+                            <span style="font-size: 20px">
+                                {{task.taskName}}
+                            </span>
+                        </a>
+                        <br>
+                        <span>{{task.taskType}}</span>
+                    </div>
+                    <div class="col-md-1">
+                        <span *ngIf="task.taskStatus === '等待调度'" style="color: grey">{{task.taskStatus}}</span>
+                        <span *ngIf="task.taskStatus === '正在执行'" style="color: blue">{{task.taskStatus}}</span>
+                        <span *ngIf="task.taskStatus === '成功'" style="color: green">{{task.taskStatus}}</span>
+                        <span *ngIf="task.taskStatus === '失败'" style="color: red">{{task.taskStatus}}</span>
+                        <br>
+                        <span>{{task.taskProgress}}%</span>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="float-right">
+                            <a (click)="deleteTask(task.id)"><span class="fa fa-remove" style="color: red"></span></a>
+                        </div>
+                        <span> {{task.description}}</span>
+                        <br>
+                        <span>
+                            {{task.startDate | date:'yyyy-MM-dd HH:mm:ss'}} —— {{task.endDate | date:'yyyy-MM-dd HH:mm:ss'}}
+                        </span>
+                    </div>
+                </div>
+            </mat-card>
+        </div>
+
+        <br>
+        <div>
+            <mat-paginator #paginator
+                           [length]="totalItems"
+                           [pageSize]="itemsPerPage"
+                           [pageSizeOptions]="pageSizeOptions"
+                           (page)="reloadPage($event)"
+                           showFirstLastButtons>
+            </mat-paginator>
+        </div>
+    </mat-card>
+
+</div>
+
+

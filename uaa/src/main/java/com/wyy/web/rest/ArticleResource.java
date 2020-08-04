@@ -4,9 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.wyy.domain.Article;
 
 import com.wyy.repository.ArticleRepository;
-import com.wyy.web.rest.errors.BadRequestAlertException;
 import com.wyy.web.rest.util.HeaderUtil;
-import com.wyy.web.rest.util.JwtUtil;
 import com.wyy.web.rest.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
@@ -26,9 +24,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,11 +55,11 @@ public class ArticleResource {
     @PostMapping("/articles")
     @Timed
     @Secured({"ROLE_CONTENT"})
-    public ResponseEntity<Article> createArticle(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Article> createArticle(HttpServletRequest request,
                                                  @Valid @RequestBody Article article) {
         log.debug("REST request to save Article : {}", article);
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
         article.setAuthorLogin(userLogin);
         article.setCreatedDate(Instant.now());
         article.setModifiedDate(Instant.now());
@@ -200,17 +195,19 @@ public class ArticleResource {
     @DeleteMapping("/articles/{id}")
     @Timed
     @Secured({"ROLE_CONTENT"})
-    public ResponseEntity<Void> deleteArticle(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> deleteArticle(HttpServletRequest request,
                                               @PathVariable Long id) {
         log.debug("REST request to delete Article : {}", id);
 
         Article article = articleRepository.findOne(id);
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
-        if (null == userLogin || !userLogin.equals(article.getAuthorLogin())) {
+        String userLogin = request.getRemoteUser();
+        Boolean isAdmin = request.isUserInRole("ROLE_ADMIN");
+
+        if (userLogin.equals(article.getAuthorLogin()) || isAdmin) {
+            articleRepository.delete(id);
+            return ResponseEntity.ok().build();
+        } else {
             return ResponseEntity.status(403).build(); // 403 Forbidden
         }
-
-        articleRepository.delete(id);
-        return ResponseEntity.ok().build();
     }
 }

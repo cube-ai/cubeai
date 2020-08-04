@@ -2,7 +2,6 @@ package com.wyy.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.wyy.web.rest.util.HeaderUtil;
-import com.wyy.web.rest.util.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -31,10 +30,13 @@ public class ModelFileResource {
     @RequestMapping(value = "/modelfile/{taskUuid}", method = RequestMethod.POST, consumes = "multipart/form-data")
     @Timed
     public ResponseEntity<Void> uploadModelFile(MultipartHttpServletRequest request,
-                                                           @PathVariable("taskUuid") String taskUuid) {
+                                                @PathVariable("taskUuid") String taskUuid) {
         log.debug("REST request to upload ucumos model file");
 
-        String userLogin = JwtUtil.getUserLogin(request);
+        String userLogin = request.getRemoteUser();
+        if (null == userLogin) {
+            return ResponseEntity.status(403).build();
+        }
 
         MultipartFile multipartFile = request.getFile(userLogin);
         if (null == multipartFile) {
@@ -96,11 +98,15 @@ public class ModelFileResource {
 
     @RequestMapping(value = "/modelfile/{taskUuid}", method = RequestMethod.DELETE)
     @Timed
-    public ResponseEntity<Void> deleteTempModelFile(HttpServletRequest httpServletRequest,
+    public ResponseEntity<Void> deleteTempModelFile(HttpServletRequest request,
                                                 @PathVariable("taskUuid") String taskUuid) {
         log.debug("REST request to delete temp ucumos model file");
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
+        if (null == userLogin) {
+            return ResponseEntity.status(403).build();
+        }
+
         FileUtil.deleteDirectory(System.getProperty("user.home") + "/tempfile/ucumosmodels/" + userLogin + "/" + taskUuid);
 
         return ResponseEntity.ok().build();

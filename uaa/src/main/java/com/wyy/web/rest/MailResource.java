@@ -21,7 +21,7 @@ import javax.validation.Valid;
  */
 @RestController
 @RequestMapping("/api")
-@Secured({AuthoritiesConstants.ADMIN, "ROLE_MANAGER"})
+@Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
 public class MailResource {
 
     private final Logger log = LoggerFactory.getLogger(MailResource.class);

@@ -12,15 +12,13 @@ public class Deployment {
     private String solutionUuid;
     private String solutionName;
     private String solutionAuthor;
-    private String solutionCompany;
     private Integer k8sPort;
     private Boolean isPublic;
     private String status;
     private Instant createdDate;
     private Instant modifiedDate;
     private String pictureUrl;
-    private String modelType;
-    private String toolkitType;
+    private Long starCount;
     private Long callCount;
     private String demoUrl;
     private String subject1;
@@ -101,19 +99,6 @@ public class Deployment {
         this.solutionAuthor = solutionAuthor;
     }
 
-    public String getSolutionCompany() {
-        return solutionCompany;
-    }
-
-    public Deployment solutionCompany(String solutionCompany) {
-        this.solutionCompany = solutionCompany;
-        return this;
-    }
-
-    public void setSolutionCompany(String solutionCompany) {
-        this.solutionCompany = solutionCompany;
-    }
-
     public Integer getk8sPort() {
         return k8sPort;
     }
@@ -187,31 +172,19 @@ public class Deployment {
         this.pictureUrl = pictureUrl;
     }
 
-    public String getModelType() {
-        return modelType;
+    public Long getStarCount() {
+        return starCount;
     }
 
-    public Deployment modelType(String modelType) {
-        this.modelType = modelType;
+    public Deployment starCount(Long starCount) {
+        this.starCount = starCount;
         return this;
     }
 
-    public void setModelType(String modelType) {
-        this.modelType = modelType;
+    public void setStarCount(Long starCount) {
+        this.starCount = starCount;
     }
 
-    public String getToolkitType() {
-        return toolkitType;
-    }
-
-    public Deployment toolkitType(String toolkitType) {
-        this.toolkitType = toolkitType;
-        return this;
-    }
-
-    public void setToolkitType(String toolkitType) {
-        this.toolkitType = toolkitType;
-    }
 
     public Long getCallCount() {
         return callCount;
@@ -318,15 +291,13 @@ public class Deployment {
             ", solutionUuid='" + getSolutionUuid() + "'" +
             ", solutionName='" + getSolutionName() + "'" +
             ", solutionAuthor='" + getSolutionAuthor() + "'" +
-            ", solutionCompany='" + getSolutionCompany() + "'" +
             ", k8sPort=" + getk8sPort() +
             ", isPublic='" + isIsPublic() + "'" +
             ", status='" + getStatus() + "'" +
             ", createdDate='" + getCreatedDate() + "'" +
             ", modifiedDate='" + getModifiedDate() + "'" +
             ", pictureUrl='" + getPictureUrl() + "'" +
-            ", modelType='" + getModelType() + "'" +
-            ", toolkitType='" + getToolkitType() + "'" +
+            ", starCount=" + getStarCount() +
             ", callCount=" + getCallCount() +
             ", demoUrl='" + getDemoUrl() + "'" +
             ", subject1='" + getSubject1() + "'" +

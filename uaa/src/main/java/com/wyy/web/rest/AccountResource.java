@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 
 import com.wyy.domain.User;
 import com.wyy.repository.UserRepository;
+import com.wyy.security.AuthoritiesConstants;
 import com.wyy.security.SecurityUtils;
 import com.wyy.service.MailService;
 import com.wyy.service.UserService;
@@ -17,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -69,7 +71,7 @@ public class AccountResource {
         userRepository.findOneByLogin(managedUserVM.getLogin().toLowerCase()).ifPresent(u -> {throw new LoginAlreadyUsedException();});
         userRepository.findOneByEmailIgnoreCase(managedUserVM.getEmail()).ifPresent(u -> {throw new EmailAlreadyUsedException();});
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
-        mailService.sendActivationEmail(user);  // huolongshe: 用户注册后需要发激活邮件
+        mailService.sendActivationEmail(user, managedUserVM.getActivateUrlPrefix());  // huolongshe: 用户注册后需要发激活邮件
     }
 
     /**
@@ -108,7 +110,11 @@ public class AccountResource {
      */
     @GetMapping("/account")
     @Timed
-    public UserDTO getAccount() {
+    public UserDTO getAccount(HttpServletRequest request) {
+        if (null == request.getRemoteUser()) {
+            throw new ForbiddenException();
+        }
+
         return userService.getUserWithAuthorities()
             .map(UserDTO::new)
             .orElseThrow(() -> new InternalServerErrorException("User could not be found"));
@@ -123,12 +129,23 @@ public class AccountResource {
      */
     @PostMapping("/account")
     @Timed
-    public void saveAccount(@Valid @RequestBody UserDTO userDTO) {
-        final String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() -> new InternalServerErrorException("Current user login not found"));
+    public void saveAccount(HttpServletRequest request, @Valid @RequestBody UserDTO userDTO) {
+        String userLogin = request.getRemoteUser();
+
+        if ((null == userLogin) || !userLogin.equals(userDTO.getLogin())) {
+            throw new UnauthorizedException();
+        }
+
         Optional<User> existingUser = userRepository.findOneByEmailIgnoreCase(userDTO.getEmail());
         if (existingUser.isPresent() && (!existingUser.get().getLogin().equalsIgnoreCase(userLogin))) {
             throw new EmailAlreadyUsedException();
         }
+
+        existingUser = userRepository.findOneByPhone(userDTO.getPhone());
+        if (existingUser.isPresent() && (!existingUser.get().getLogin().equalsIgnoreCase(userLogin))) {
+            throw new EmailAlreadyUsedException();
+        }
+
         Optional<User> user = userRepository.findOneByLogin(userLogin);
         if (!user.isPresent()) {
             throw new InternalServerErrorException("User could not be found");
@@ -145,7 +162,11 @@ public class AccountResource {
      */
     @PostMapping(path = "/account/change-password")
     @Timed
-    public void changePassword(@RequestBody String password) {
+    public void changePassword(HttpServletRequest request, @RequestBody String password) {
+        if (null == request.getRemoteUser()) {
+            throw new UnauthorizedException();
+        }
+
         if (!checkPasswordLength(password)) {
             throw new InvalidPasswordException();
         }
@@ -164,11 +185,11 @@ public class AccountResource {
 
         if (1 == this.verifyCodeService.validateVerifyCode(Long.valueOf(params.get("verifyId")), params.get("verifyCode"))) {
             mailService.sendPasswordResetMail(
-                userService.requestPasswordReset(params.get("email"))
-                    .orElseThrow(EmailNotFoundException::new)
+                userService.requestPasswordReset(params.get("email")).orElseThrow(EmailNotFoundException::new),
+                params.get("resetUrlPrefix")
             );
         } else {
-            throw new EmailNotFoundException();  // 这里实际上是验证码比对错误，但是我们仍抛出email找不到的异常
+            throw new VerifyCodeErrorException();
         }
     }
 

@@ -6,11 +6,9 @@ import com.wyy.domain.Deployment;
 import com.wyy.domain.Task;
 import com.wyy.service.KafkaProducer;
 import com.wyy.service.UmmClient;
-import com.wyy.web.rest.util.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,12 +35,16 @@ public class LifeCircleManagementResource {
 
     @PutMapping("/stop")
     @Timed
-    @Secured({"ROLE_OPERATOR"})
-    public ResponseEntity<Deployment> stop(HttpServletRequest httpServletRequest,
-                                               @Valid @RequestBody Deployment deployment) {
+    public ResponseEntity<Void> stop(HttpServletRequest request,
+                                     @Valid @RequestBody Deployment deployment) {
         log.debug("REST request to stop running the deployment (ability)");
 
-        String userLogin = JwtUtil.getUserLogin(httpServletRequest);
+        String userLogin = request.getRemoteUser();
+        Boolean hasRole = request.isUserInRole("ROLE_OPERATOR");
+        Deployment old = ummClient.getDeployment(deployment.getUuid()).get(0);
+        if (null == userLogin || !(hasRole || (userLogin.equals(deployment.getDeployer()) && userLogin.equals(old.getDeployer())))) {
+            return ResponseEntity.status(403).build();
+        }
 
         Task task = new Task();
         task.setUuid(UUID.randomUUID().toString().replace("-", "").toLowerCase());

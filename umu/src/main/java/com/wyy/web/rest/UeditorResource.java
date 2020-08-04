@@ -8,6 +8,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -63,10 +64,16 @@ public class UeditorResource {
     @RequestMapping(value = "/ueditor", method = RequestMethod.POST, consumes = "multipart/form-data")
     @Timed
     public String ueditorController(MultipartHttpServletRequest request,
-                                             @RequestParam(value = "action") String action) {
+                                    @RequestParam(value = "action") String action) {
         log.debug("REST request to perform Ueditor actions");
 
         Ueditor ueditor = new Ueditor();
+
+        String userLogin = request.getRemoteUser();
+        if (null == userLogin) {
+            ueditor.setState("用户未登录！");
+            return JSONObject.toJSONString(ueditor);
+        }
 
         if (!action.equals("uploadimage") && ! action.equals("uploadscrawl")) {
             ueditor.setState("不支持操作！");

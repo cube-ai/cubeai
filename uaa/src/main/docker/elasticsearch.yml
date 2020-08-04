@@ -1,9 +1,0 @@
-version: '2'
-services:
-    uaa-elasticsearch:
-        image: elasticsearch:2.4.6
-        # volumes:
-        #     - ~/volumes/jhipster/uaa/elasticsearch/:/usr/share/elasticsearch/data/
-        ports:
-            - 9200:9200
-            - 9300:9300
