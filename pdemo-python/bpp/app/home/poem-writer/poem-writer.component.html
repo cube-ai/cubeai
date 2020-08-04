@@ -1,0 +1,45 @@
+<my-pageheader></my-pageheader>
+
+<mat-card style="margin: 20px 20px 50px 20px">
+    <h2 align="center">会写诗的机器人</h2>
+    <br><br>
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%">
+            <mat-form-field>
+                <input matInput [(ngModel)]="word" type="text" placeholder="第一个字" maxlength="1" style="font-size: 80px">
+            </mat-form-field>
+        </mat-card>
+    </div>
+    <br>
+    <div class="row justify-content-center">
+        <button mat-raised-button color="primary" (click)="write()" [disabled]="sending || !word">
+            作诗
+        </button>
+    </div>
+    <br>
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%">
+            <div *ngIf="!error && ! sending">
+                <p *ngFor="let sentence of sentences">
+                    <span *ngIf="sentence">
+                        {{sentence}}。
+                    </span>
+                </p>
+            </div>
+            <p *ngIf="!sentences && !sending && !error">
+                熟读唐诗三百首，不会写诗也会绉...
+            </p>
+
+            <div *ngIf="error">
+                出错啦...
+            </div>
+
+            <div *ngIf="sending">
+                正在苦思冥想...
+            </div>
+            <mat-spinner *ngIf="sending"></mat-spinner>
+
+        </mat-card>
+    </div>
+</mat-card>
+

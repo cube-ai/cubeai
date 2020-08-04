@@ -1,0 +1,99 @@
+<my-pageheader></my-pageheader>
+
+<mat-card style="margin: 20px 20px 50px 20px">
+    <h2 align="center">多语言翻译</h2>
+    <br><br>
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%">
+            <div>
+                <mat-form-field >
+                    <mat-select placeholder="原文语种" [(ngModel)]="src">
+                        <mat-option value="zh-cn">
+                            简体中文
+                        </mat-option>
+                        <mat-option value="zh-tw">
+                            繁体中文
+                        </mat-option>
+                        <mat-option value="en">
+                            英语
+                        </mat-option>
+                        <mat-option value="ja">
+                            日语
+                        </mat-option>
+                        <mat-option value="la">
+                            意大利语
+                        </mat-option>
+                        <mat-option value="la">
+                            拉丁语
+                        </mat-option>
+                        <mat-option value="ru">
+                            俄语
+                        </mat-option>
+                        <mat-option value="fr">
+                            法语
+                        </mat-option>
+                        <mat-option value="de">
+                            德国
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <button mat-icon-button (click)="exchange()" matTooltip="交换原文与译文语种">
+                    <mat-icon color="primary">swap_horiz</mat-icon>
+                </button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <mat-form-field >
+                    <mat-select placeholder="译文语种" [(ngModel)]="dest">
+                        <mat-option value="zh-cn">
+                            简体中文
+                        </mat-option>
+                        <mat-option value="zh-tw">
+                            繁体中文
+                        </mat-option>
+                        <mat-option value="en">
+                            英语
+                        </mat-option>
+                        <mat-option value="ja">
+                            日语
+                        </mat-option>
+                        <mat-option value="la">
+                            意大利
+                        </mat-option>
+                        <mat-option value="la">
+                            拉丁语
+                        </mat-option>
+                        <mat-option value="ru">
+                            俄语
+                        </mat-option>
+                        <mat-option value="fr">
+                            法语
+                        </mat-option>
+                        <mat-option value="de">
+                            德国
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <br>
+                <mat-form-field style="width: 100%">
+                    <textarea matInput style="height: 200px" [(ngModel)]="sentence" placeholder="原文"></textarea>
+                </mat-form-field>
+                <br>
+            </div>
+        </mat-card>
+    </div>
+    <br>
+    <div class="row justify-content-center">
+        <button mat-raised-button color="primary" (click)="classify()" [disabled]="sending || !src || !dest">
+            翻译
+        </button>
+    </div>
+    <br>
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%">
+            <mat-form-field style="width: 100%">
+                <textarea matInput style="height: 160px" [(ngModel)]="result" placeholder="译文"></textarea>
+            </mat-form-field>
+        </mat-card>
+    </div>
+</mat-card>
+

@@ -1,0 +1,5 @@
+tornado==6.0.4
+python-consul==1.1.0
+python_jwt==3.2.6
+docker==4.2.1
+pyyaml==5.3.1

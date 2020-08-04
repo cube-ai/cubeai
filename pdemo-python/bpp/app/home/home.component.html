@@ -1,0 +1,555 @@
+<my-pageheader></my-pageheader>
+
+<mat-card style="margin: 20px 20px 50px 20px">
+    <div class="row">
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    天线角度识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/antennaMeasurement')">
+                    <img mat-card-image src="../../content/images/demos/antenna_measurement.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    光性能监测
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/opm')">
+                    <img mat-card-image src="../../content/images/demos/OPM.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    文章图谱提取
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/text_grapher')">
+                    <img mat-card-image src="../../content/images/demos/text_grapher.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    机器人对对联
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/couplet')">
+                    <img mat-card-image src="../../content/images/demos/duiduilian.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    写诗机器人
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/poemwriter')">
+                    <img mat-card-image src="../../content/images/demos/libai.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    成语接龙
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/idiom_solitaire')">
+                    <img mat-card-image src="../../content/images/demos/chengyu.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    艺术字体生成
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/art_word')">
+                    <img mat-card-image src="../../content/images/demos/art_word.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    证件照片裁切
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/face_cut')">
+                    <img mat-card-image src="../../content/images/demos/face_cut.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    AI换脸
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/faceswap')">
+                    <img mat-card-image src="../../content/images/demos/face_swap.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    人脸识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/facerecognizer')">
+                    <img mat-card-image src="../../content/images/demos/face1.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    性别年龄识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/gender_age_estimate')">
+                    <img mat-card-image src="../../content/images/demos/gender_age.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    年龄识别v2
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/facialage2')">
+                    <img mat-card-image src="../../content/images/demos/face3.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    人脸年龄识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/facialage')">
+                    <img mat-card-image src="../../content/images/demos/face_age.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    人脸表情识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/facialemotion')">
+                    <img mat-card-image src="../../content/images/demos/face_emotion.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    文本识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/ocr')">
+                    <img mat-card-image src="../../content/images/demos/ocr2.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    身份证信息识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/idcardinfo')">
+                    <img mat-card-image src="../../content/images/demos/idcard1.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    身份证号识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/idcardnumber')">
+                    <img mat-card-image src="../../content/images/demos/idcard.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    车牌识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/carplate')">
+                    <img mat-card-image src="../../content/images/demos/carplate.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    场景分类
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/scene-classify')">
+                    <img mat-card-image src="../../content/images/demos/scene_classify.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    物体识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/imagenet')">
+                    <img mat-card-image src="../../content/images/demos/image_flowers.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    道路车辆检测
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/vehicle')">
+                    <img mat-card-image src="../../content/images/demos/vehicle.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    图像风格迁移
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/imagestyletransfer')">
+                    <img mat-card-image src="../../content/images/demos/image_style_transfer.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: 17px">
+                    图像分辨率增强
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/imageupscale')">
+                    <img mat-card-image src="../../content/images/demos/image_upscale.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    黑白图像着色
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/imagecolorizer')">
+                    <img mat-card-image src="../../content/images/demos/image_colorizer.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    多语言翻译
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/google-translate')">
+                    <img mat-card-image src="../../content/images/demos/google-translate.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    中文全文纠错
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/textcorrect')">
+                    <img mat-card-image src="../../content/images/demos/text_correct.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    中文摘要生成
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/chinese-sammary')">
+                    <img mat-card-image src="../../content/images/demos/chinese_summary.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    中文词云生成
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/wordcloud')">
+                    <img mat-card-image src="../../content/images/demos/wordcloud.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: 17px">
+                    二维码生成与识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/qrcode')">
+                    <img mat-card-image src="../../content/images/demos/erweima.png">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: 17px">
+                    语音相似度判别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/dimsim')">
+                    <img mat-card-image src="../../content/images/demos/dimsim.gif">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    汉字转拼音
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/pinyin')">
+                    <img mat-card-image src="../../content/images/demos/pinyin.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    中文OCR
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/chinese-ocr')">
+                    <img mat-card-image src="../../content/images/demos/ocr1.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    手写数字识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/handwriting')">
+                    <img mat-card-image src="../../content/images/demos/handwriting.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    天气预报
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/weather')">
+                    <img mat-card-image src="../../content/images/demos/weather.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    声音类型识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/audio-classifier')">
+                    <img mat-card-image src="../../content/images/demos/audio_classiifer.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    金融实体识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/fincial-entity')">
+                    <img mat-card-image src="../../content/images/demos/fincial_entity.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: 17px">
+                    手机更换预测
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/cellphone-change')">
+                    <img mat-card-image src="../../content/images/demos/cellphone.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    LTE速率预测
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/ltespeed')">
+                    <img mat-card-image src="../../content/images/demos/LTE200.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: 17px">
+                    套餐满意度预测
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/taocan')">
+                    <img mat-card-image src="../../content/images/demos/sat.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    言外行为识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/speechact')">
+                    <img mat-card-image src="../../content/images/demos/speechact.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    中文OCR生成词云
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/ocrwordcloud')">
+                    <img mat-card-image src="../../content/images/demos/ocrwordcloud.png">
+                </a>
+            </div>
+        </mat-card>
+
+        <mat-card class="pull-right" style="max-width: 200px; max-height: 270px; margin: 10px">
+            <mat-card-header style="height: 70px">
+                <mat-card-title style="font-size: large">
+                    蚂蚁与蜜蜂识别
+                </mat-card-title>
+            </mat-card-header>
+            <div  style="height: 200px">
+                <a (click)="navigateTo('/ants-bees')">
+                    <img mat-card-image src="../../content/images/demos/bees.jpg">
+                </a>
+            </div>
+        </mat-card>
+
+    </div>
+</mat-card>

@@ -1,0 +1,39 @@
+<mat-card class="page-title">
+    <div class="btn-toolbar float-left" role="toolbar">
+        <a mat-icon-button (click)="globalService.toggleSideNav()">
+            <mat-icon color="primary">menu</mat-icon>
+        </a>
+    </div>
+    <span>角色管理</span>
+    <div class="btn-toolbar float-right" role="toolbar">
+        <a (click)="refresh()" matTooltip="刷新">
+            <mat-icon color="primary">refresh</mat-icon>
+        </a>
+    </div>
+</mat-card>
+
+<mat-card style="margin-bottom: 50px">
+    <div>
+        <span>&nbsp;&nbsp;</span>
+        <mat-form-field >
+            <input matInput type="text" placeholder="新角色" [(ngModel)]="role" minlength="8" maxlength="20">
+        </mat-form-field>
+        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <button mat-raised-button color="primary" (click)="createRole()" [disabled]="!role">
+            <span class="fa fa-plus">&nbsp;&nbsp;添加角色</span>
+        </button>
+    </div>
+    <mat-list>
+        <mat-list-item *ngFor="let role of roles">
+            <mat-icon mat-list-icon color="primary">info</mat-icon>
+            <p mat-line>
+                {{role}}
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <a (click)="deleteRole(role)" matTooltip="删除角色" *ngIf="!isSysRole(role)">
+                    <span class="fa fa-trash" style="color: red"></span>
+                </a>
+            </p>
+        </mat-list-item>
+    </mat-list>
+</mat-card>
+

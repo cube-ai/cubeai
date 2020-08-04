@@ -1,0 +1,126 @@
+<my-pageheader></my-pageheader>
+
+<div style="margin: 20px 20px 50px 20px">
+    <mat-card style="margin-top: 20px; background-color: #f0f0f0">
+        <span  style="font-weight: bold; font-size: 28px">
+            所有能力
+        </span>
+        <button mat-raised-button style="margin-left: 60px; font-size: 20px" (click)="gotoMyAbilitys()" *ngIf="userLogin">
+            我的能力
+        </button>
+        <button mat-raised-button style="margin-left: 60px; font-size: 20px" (click)="gotoMyStars()" *ngIf="userLogin">
+            我的关注
+        </button>
+        <button mat-raised-button style="margin-left: 60px; font-size: 20px" (click)="gotoMyTasks()" *ngIf="userLogin">
+            我的任务
+        </button>
+    </mat-card>
+    <mat-card>
+        <div class="row" style="margin-top: 20px; margin-bottom: 20px">
+            <div class="col-6">
+                <input name="search" type="text" class="form-control" placeholder="搜索" [(ngModel)]="filter"
+                       (blur)="refresh()">
+            </div>
+            <div class="col-6">
+                <div class="pull-right" *ngIf="!isMobile">
+                    <mat-button-toggle-group #group="matButtonToggleGroup" [(ngModel)]="predicate" (change)="refresh()"
+                                             style="height: 36px">
+                        <mat-button-toggle value="displayOrder" align="center">
+                            默认
+                        </mat-button-toggle>
+                        <mat-button-toggle value="id" align="center">
+                            最新
+                        </mat-button-toggle>
+                        <mat-button-toggle value="callCount" align="center">
+                            调用最多
+                        </mat-button-toggle>
+                    </mat-button-toggle-group>
+                    <button mat-icon-button (click)="reverse = !reverse; refresh()">
+                        <mat-icon>swap_vert</mat-icon>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <mat-form-field >
+            <mat-select [(ngModel)]="searchStatus" (selectionChange)="refresh()">
+                <mat-option value="运行">
+                    运行中
+                </mat-option>
+                <mat-option value="停止">
+                    已停止
+                </mat-option>
+                <mat-option value="all">
+                    全部
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <div *ngFor="let ability of abilitys; trackBy: trackIdentity">
+            <mat-card style="margin:20px 0">
+                <mat-list>
+                    <mat-list-item>
+                        <img mat-list-avatar src="{{ability.pictureUrl}}" (click)="viewAbility(ability)"
+                             style="width: 64px; height: 64px; cursor: pointer">
+                        <div mat-line>
+                            <a (click)="viewAbility(ability)">
+                                <span style="font-size: 20px; font-weight: bold">
+                                    {{ability.solutionName}}
+                                </span>
+                            </a>
+                            <div class="pull-right" *ngIf="!isMobile">
+                                <a (click)="toggleStar(ability)">
+                                    <span *ngIf="isMyStar(ability)" class="fa fa-star" style="color: gold"></span>
+                                    <span *ngIf="!isMyStar(ability)" class="fa fa-star-o"></span>
+                                </a>
+                                &nbsp;
+                                <a (click)="gotoStargazers(ability)">
+                                    <span>{{ability.starCount}}</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div mat-line style="font-size: 16px; margin-top: 10px">
+                            模型上传：
+                            <a (click)="gotoPersonalModels(ability.solutionAuthor)">
+                                {{ability.solutionAuthor}}
+                            </a>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            能力部署：
+                            <a (click)="gotoPersonalAbilitys(ability.deployer)">
+                                {{ability.deployer}}
+                            </a>
+
+                            <span *ngIf="!ability.isPublic && isOperator" style="color: red">
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;私有
+                            </span>
+                        </div>
+                        <div mat-line style="font-size: 16px; margin-top: 10px">
+                            <span *ngIf="ability.status === '运行'" style="color: green">
+                                正在运行
+                            </span>
+                            <span *ngIf="ability.status === '停止'" style="color: red">
+                                已停止
+                            </span>
+                            <div class="pull-right" *ngIf="!isMobile">
+                                <span>调用次数：{{ability.callCount}}</span>
+                            </div>
+                        </div>
+                    </mat-list-item>
+                </mat-list>
+            </mat-card>
+        </div>
+
+        <div>
+            <mat-paginator #paginator
+                           [length]="totalItems"
+                           [pageSize]="itemsPerPage"
+                           [pageSizeOptions]="pageSizeOptions"
+                           (page)="reloadPage($event)"
+                           showFirstLastButtons>
+            </mat-paginator>
+        </div>
+    </mat-card>
+
+</div>
+
+

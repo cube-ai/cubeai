@@ -1,0 +1,48 @@
+<my-pageheader></my-pageheader>
+
+<mat-card style="margin: 20px 20px 50px 20px">
+    <h2 align="center">中文语音相似度判别</h2>
+    <br><br>
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%">
+            <mat-form-field>
+                <input matInput [(ngModel)]="sentence1" type="text" placeholder="短语1"/>
+            </mat-form-field>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <mat-form-field>
+                <input matInput [(ngModel)]="sentence2" type="text" placeholder="短语2"/>
+            </mat-form-field>
+            <br>
+            <button mat-raised-button color="primary" (click)="get_distance()" [disabled]="sending || !sentence1 || !sentence2">
+                判别发音相似度
+            </button>
+            <br><br>
+            <span>
+                {{similarity !== '-1' ? similarity : '短语长度不一致'}}
+            </span>
+            <br><br>
+            <span *ngIf="similarity && similarity !== '-1'" style="font-size: smaller">
+                注：数值越小表示相似度越高
+            </span>
+        </mat-card>
+        <mat-card style="width: 90%; margin-top: 20px">
+            <mat-form-field>
+                <input matInput [(ngModel)]="sentence" type="text" placeholder="短语"/>
+            </mat-form-field>
+            <br>
+            <button mat-raised-button color="primary" (click)="get_candidates()" [disabled]="sending || !sentence">
+                查找发音相似短语
+            </button>
+            <br><br>
+            <p *ngIf="candidates.length > 0">
+                <span *ngFor="let candidate of candidates">
+                    {{candidate}}&nbsp;&nbsp;
+                </span>
+            </p>
+            <p *ngIf="candidates.length < 1">
+                没找到...
+            </p>
+        </mat-card>
+    </div>
+</mat-card>
+

@@ -1,0 +1,28 @@
+<my-pageheader></my-pageheader>
+
+<mat-card style="margin: 20px 20px 50px 20px">
+    <h2 align="center">言外行为识别</h2>
+    <h5 align="center">竹间智能</h5>
+    <br><br>
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%">
+            <mat-form-field style="width: 100%">
+                <textarea matInput style="height: 100px" [(ngModel)]="text" placeholder="请输入你想说的话"></textarea>
+            </mat-form-field>
+        </mat-card>
+    </div>
+    <br>
+    <div class="row justify-content-center">
+        <button mat-raised-button color="primary" (click)="predict()" [disabled]="sending || !text">
+            识别
+        </button>
+    </div>
+    <br>
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%">
+            <p>言外之意： {{label}}</p>
+            <p>&nbsp;&nbsp;&nbsp;信心度： {{score}}</p>
+        </mat-card>
+    </div>
+</mat-card>
+

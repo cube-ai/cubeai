@@ -6,20 +6,21 @@
 
 ## 开发环境
 
-- 参见dev-java目录下README文件
+- 参见dev-python目录下README文件
 
 ## 生产环境
 
 - docker-compose部署
  
-    - Java版本部署
+    - Python版本部署
     
             cd cubeai/docker
-            sh build-all-java.sh
-            cd cubeai/docker/prod-java
+            sh build-all-python.sh
+            cd cubeai/docker/prod-python
             docker-compose up
     
-    - 详情参见prod-java目录下README文件
+    - 详情参见prod目录下README文件
 
 - k8s部署
 
+    - 参见k8s目录下README文件

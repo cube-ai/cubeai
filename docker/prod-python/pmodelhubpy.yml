@@ -1,0 +1,6 @@
+version: '2'
+services:
+    pmodelhubpy-app:
+        image: pmodelhubpy
+        environment:
+            - START_SLEEP=0

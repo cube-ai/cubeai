@@ -1,0 +1,6 @@
+version: '2'
+services:
+    popenpy-app:
+        image: popenpy
+        environment:
+            - START_SLEEP=0

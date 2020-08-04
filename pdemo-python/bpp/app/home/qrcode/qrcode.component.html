@@ -1,0 +1,50 @@
+<my-pageheader></my-pageheader>
+
+<mat-card style="margin: 20px 20px 50px 20px">
+    <h2 align="center">二维码生成</h2>
+    <br><br>
+    <div class="row">
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-5">
+            <mat-form-field style="width: 100%">
+                <textarea matInput style="height: 240px" [(ngModel)]="text1" placeholder="文字"></textarea>
+            </mat-form-field>
+        </div>
+        <div class="col-md-1">
+            <br><br><br>
+            <button mat-raised-button color="primary" (click)="make()" [disabled]="sending1 || !text1">
+                生成二维码
+            </button>
+        </div>
+        <div class="col-md-5">
+            <img style="max-width: 100%" src="{{img_url1}}" alt="{{img_url1}}">
+        </div>
+    </div>
+    <br>
+</mat-card>
+
+<mat-card style="margin: 20px 20px 50px 20px">
+    <h2 align="center">二维码识别</h2>
+    <br><br>
+    <div class="row">
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-5">
+            <div>
+                <input type="file" ng2FileSelect [uploader]="fileSelector" accept=".jpg, .jpeg, .png, .gif, image/*" [disabled]="sending2" />
+            </div>
+            <div>
+                <img style="max-width: 100%" src="{{img_url2}}"  alt="">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <mat-form-field style="width: 100%" *ngIf="text2 && !sending2">
+                <textarea matInput style="height: 240px" [(ngModel)]="text2" placeholder="识别结果" readonly></textarea>
+            </mat-form-field>
+            <p *ngIf="!text2 && !sending2">二维码识别结果</p>
+            <p *ngIf="sending2">正在努力识别...</p>
+        </div>
+    </div>
+    <br>
+</mat-card>

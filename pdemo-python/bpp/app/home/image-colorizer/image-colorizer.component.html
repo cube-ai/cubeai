@@ -1,0 +1,30 @@
+<my-pageheader></my-pageheader>
+
+<mat-card style="margin: 20px 20px 50px 20px">
+    <h2 align="center">黑白图像着色</h2>
+    <br><br>
+
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%">
+            <div>
+                <input type="file" ng2FileSelect [uploader]="fileSelector" accept=".jpg, .jpeg, .png, image/*" [disabled]="sending" />
+            </div>
+            <br>
+            <div>
+                <img style="max-width: 100%" src="{{selectedImgDataUrl}}" alt="">
+            </div>
+        </mat-card>
+    </div>
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%; margin-top: 20px">
+            <div *ngIf="img_url && !sending && !noSupportImg">
+                <img style="max-width: 100%" src="{{img_url}}" alt="">
+            </div>
+            <p *ngIf="!img_url && !sending">图像着色结果</p>
+            <p *ngIf="sending">正在努力计算...</p>
+            <mat-spinner *ngIf="sending"></mat-spinner>
+            <p *ngIf="error">出错啦...</p>
+            <p *ngIf="noSupportImg">{{img_url}}</p>
+        </mat-card>
+    </div>
+</mat-card>

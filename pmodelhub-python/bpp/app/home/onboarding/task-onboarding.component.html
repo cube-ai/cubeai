@@ -1,0 +1,83 @@
+<my-pageheader></my-pageheader>
+
+<div style="margin: 20px 20px 50px 20px">
+    <mat-card style="margin-top: 20px; background-color: #f0f0f0">
+        <span style="font-weight: bold; font-size: 28px">模型导入任务详情 —— {{taskName}}</span>
+    </mat-card>
+    <mat-card>
+        <div>
+            ①提取模型文件
+        </div>
+        <mat-progress-bar mode="determinate" [value]="progressExtractModelFile" color="primary" *ngIf="statusExtractModelFile !== '失败'"></mat-progress-bar>
+        <mat-progress-bar mode="determinate" [value]="progressExtractModelFile" color="warn" *ngIf="statusExtractModelFile === '失败'"></mat-progress-bar>
+        <mat-form-field style="width: 100%">
+            <textarea matInput style="height: 100px; font-size: small"
+                      [(ngModel)]="detailExtractModelFile" [readonly]="true">
+            </textarea>
+        </mat-form-field>
+    </mat-card>
+    <mat-card *ngIf="statusExtractModelFile === '成功'">
+        <div>
+            ②创建模型对象
+        </div>
+        <mat-progress-bar mode="determinate" [value]="progressCreateSolution" color="primary" *ngIf="statusCreateSolution !== '失败'"></mat-progress-bar>
+        <mat-progress-bar mode="determinate" [value]="progressCreateSolution" color="warn" *ngIf="statusCreateSolution === '失败'"></mat-progress-bar>
+        <mat-form-field style="width: 100%">
+            <textarea matInput style="height: 100px; font-size: small"
+                      [(ngModel)]="detailCreateSolution" [readonly]="true">
+            </textarea>
+        </mat-form-field>
+    </mat-card>
+    <mat-card *ngIf="statusCreateSolution === '成功'">
+        <div>
+            ③添加artifact
+        </div>
+        <mat-progress-bar mode="determinate" [value]="progressAddArtifact" color="primary" *ngIf="statusAddArtifact !== '失败'"></mat-progress-bar>
+        <mat-progress-bar mode="determinate" [value]="progressAddArtifact" color="warn" *ngIf="statusAddArtifact === '失败'"></mat-progress-bar>
+        <mat-form-field style="width: 100%">
+            <textarea matInput style="height: 100px; font-size: small"
+                  [(ngModel)]="detailAddArtifact" [readonly]="true">
+            </textarea>
+        </mat-form-field>
+    </mat-card>
+    <mat-card *ngIf="statusAddArtifact === '成功'">
+        <div>
+            ④生成TOSCA文件
+        </div>
+        <mat-progress-bar mode="determinate" [value]="progressCreateTosca" color="primary" *ngIf="statusCreateTosca !== '失败'"></mat-progress-bar>
+        <mat-progress-bar mode="determinate" [value]="progressCreateTosca" color="warn" *ngIf="statusCreateTosca === '失败'"></mat-progress-bar>
+        <mat-form-field style="width: 100%">
+            <textarea matInput style="height: 100px; font-size: small"
+                  [(ngModel)]="detailCreateTosca" [readonly]="true">
+            </textarea>
+        </mat-form-field>
+    </mat-card>
+    <mat-card *ngIf="statusCreateTosca === '成功'">
+        <div>
+            ⑤创建微服务
+        </div>
+        <mat-progress-bar mode="determinate" [value]="progressGenerateMicroService" color="primary" *ngIf="statusGenerateMicroService !== '失败'"></mat-progress-bar>
+        <mat-progress-bar mode="determinate" [value]="progressGenerateMicroService" color="warn" *ngIf="statusGenerateMicroService === '失败'"></mat-progress-bar>
+        <mat-form-field style="width: 100%">
+            <textarea matInput style="height: 100px; font-size: small"
+                  [(ngModel)]="detailGenerateMicroService" [readonly]="true">
+            </textarea>
+        </mat-form-field>
+    </mat-card>
+    <mat-card *ngIf="getCompleteSuccess() || getCompleteFail()">
+        <div class="row justify-content-center">
+            <div *ngIf="getCompleteSuccess()">
+                <span class="alert alert-success" style="font-size: 18px">
+                    模型导入成功！
+                </span>
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <button (click)="gotoMyModel()">查看模型</button>
+            </div>
+            <h4 class="alert alert-danger" *ngIf="getCompleteFail()">
+                模型导入失败！
+            </h4>
+        </div>
+    </mat-card>
+    <br><br>
+</div>
+
