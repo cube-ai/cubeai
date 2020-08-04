@@ -1,0 +1,71 @@
+<my-pageheader></my-pageheader>
+
+<mat-card style="margin: 20px 20px 50px 20px">
+    <h2 align="center">汉字转拼音</h2>
+    <br><br>
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%">
+            <mat-form-field style="width: 100%">
+                <textarea matInput style="height: 160px" [(ngModel)]="hanzi" placeholder="汉字"></textarea>
+            </mat-form-field>
+            <br>
+            <mat-form-field>
+                <input matInput [(ngModel)]="split" type="text" placeholder="分隔符">
+            </mat-form-field>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <mat-form-field >
+                <mat-select placeholder="显示风格" [(ngModel)]="style">
+                    <mat-option value="0">
+                        无声调
+                    </mat-option>
+                    <mat-option value="1">
+                        带声调
+                    </mat-option>
+                    <mat-option value="2">
+                        数字声调
+                    </mat-option>
+                    <mat-option value="3">
+                        声母(带h)
+                    </mat-option>
+                    <mat-option value="4">
+                        声母(不带h)
+                    </mat-option>
+                    <mat-option value="5">
+                        韵母
+                    </mat-option>
+                    <mat-option value="6">
+                        韵母带声调
+                    </mat-option>
+                    <mat-option value="7">
+                        韵母带数字声调
+                    </mat-option>
+                    <mat-option value="8">
+                        数字声调放最后
+                    </mat-option>
+                    <mat-option value="9">
+                        韵母带数字声调放最后
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <mat-checkbox color="primary" [(ngModel)]="multi">
+                列出多音字所有读音
+            </mat-checkbox>
+        </mat-card>
+    </div>
+    <br>
+    <div class="row justify-content-center">
+        <button mat-raised-button color="primary" (click)="han2pin()" [disabled]="sending || !hanzi">
+            转换
+        </button>
+    </div>
+    <br>
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%">
+            <mat-form-field style="width: 100%">
+                <textarea matInput style="height: 160px" [(ngModel)]="pinyin" placeholder="拼音" readonly></textarea>
+            </mat-form-field>
+        </mat-card>
+    </div>
+</mat-card>
+

@@ -1,0 +1,81 @@
+<mat-card class="page-title">
+    <div class="btn-toolbar float-left" role="toolbar">
+        <button mat-icon-button (click)="globalService.toggleSideNav()">
+            <mat-icon color="primary">menu</mat-icon>
+        </button>
+    </div>
+    <span>已删除</span>
+    <span>&nbsp;&nbsp;</span>
+    <span style="font-size: 12px" *ngIf="unreadCount > 0">未读消息：{{unreadCount}}条</span>
+
+    <div class="btn-toolbar float-right" role="toolbar">
+        <button mat-icon-button (click)="refresh()" matTooltip="刷新">
+            <mat-icon color="primary">refresh</mat-icon>
+        </button>
+    </div>
+</mat-card>
+
+<mat-card style="margin-bottom: 50px">
+    <input name="search" type="text" class="form-control" placeholder="搜索" [(ngModel)]="filter"
+           (blur)="refresh()" style="width:200px">
+    <br>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th width="10px"><span></span></th>
+                    <th width="120px"><span>发信人</span> <span class="fa fa-sort"></span></th>
+                    <th><span>主题</span> <span class="fa fa-sort"></span></th>
+                    <th><span>正文</span> <span class="fa fa-sort"></span></th>
+                    <th width="180px"><span>日期</span> <span class="fa fa-sort"></span></th>
+                    <th width="60px">操作</th>
+                </tr>
+            </thead>
+            <tbody *ngIf="messages">
+            <tr *ngFor="let message of messages">
+                <td width="10px" align="center" [ngClass]="{'unreaded': !message.viewed}"><span *ngIf="message.urgent" style="color: red">!</span></td>
+                <td width="120px" [ngClass]="{'unreaded': !message.viewed}" (click)="markAsViewed(message)">{{message.sender}}</td>
+                <td [ngClass]="{'unreaded': !message.viewed}"><a (click)="viewMessage(message)">{{abbreviateText(message.subject, 20)}}</a></td>
+                <td [ngClass]="{'unreaded': !message.viewed}" (click)="markAsViewed(message)">{{abbreviateText(message.content, 50)}}</td>
+                <td width="180px" [ngClass]="{'unreaded': !message.viewed}" (click)="markAsViewed(message)">{{message.createdDate | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                <td width="60px" align="center">
+                    <a [matMenuTriggerFor]="actionMenu" [matMenuTriggerData]="{message: message}">
+                        <span class="fa fa-cog icon-inline"></span>
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <br>
+    <div>
+        <mat-paginator #paginator
+                       [length]="totalItems"
+                       [pageSize]="itemsPerPage"
+                       [pageSizeOptions]="pageSizeOptions"
+                       (page)="reloadPage($event)"
+                       showFirstLastButtons>
+        </mat-paginator>
+    </div>
+</mat-card>
+
+<mat-menu #actionMenu="matMenu" [overlapTrigger]="false">
+    <ng-template matMenuContent let-message="message" align="middle">
+        <button mat-menu-item (click)="viewMessage(message)">
+            <span class="fa fa-eye">&nbsp;&nbsp;查看</span>
+        </button>
+        <button mat-menu-item (click)="markAsUndeleted(message)">
+            <span class="fa fa-recycle">&nbsp;&nbsp;恢复</span>
+        </button>
+        <button mat-menu-item (click)="deleteMessage(message)">
+            <span class="fa fa-remove">&nbsp;&nbsp;永久删除</span>
+        </button>
+        <button mat-menu-item (click)="markAsViewed(message)" *ngIf="!message.viewed">
+            <span class="fa fa-envelope-open-o">&nbsp;&nbsp;标为已读</span>
+        </button>
+        <button mat-menu-item (click)="markAsUnviewed(message)" *ngIf="message.viewed">
+            <span class="fa fa-envelope-o">&nbsp;&nbsp;标为未读</span>
+        </button>
+    </ng-template>
+</mat-menu>

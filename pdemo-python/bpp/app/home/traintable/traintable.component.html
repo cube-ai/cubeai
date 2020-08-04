@@ -1,0 +1,36 @@
+<my-pageheader></my-pageheader>
+
+<mat-card style="margin: 20px 20px 50px 20px">
+    <h2 align="center">列车时刻查询</h2>
+    <br><br>
+
+    <mat-form-field>
+        <input matInput [(ngModel)]="startCity" type="text" placeholder="出发城市">
+    </mat-form-field>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <mat-form-field>
+        <input matInput [(ngModel)]="targetCity" type="text" placeholder="目的城市">
+    </mat-form-field>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <mat-form-field>
+        <input matInput [(ngModel)]="trainDate" [min]="minDate" [max]="maxDate" [matDatepicker]="datePicker" placeholder="乘车日期">
+        <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+        <mat-datepicker #datePicker></mat-datepicker>
+    </mat-form-field>
+    <br><br>
+    <div>
+        <button mat-raised-button color="primary" (click)="classify()" [disabled]="sending || !startCity || !targetCity">
+            开始查询
+        </button>
+    </div>
+    <br><br>
+    <div>
+        <ul>
+            <li *ngFor="let result of results">
+                {{result}}
+            </li>
+        </ul>
+    </div>
+    <br><br>
+</mat-card>
+

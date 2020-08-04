@@ -1,0 +1,32 @@
+<my-pageheader></my-pageheader>
+
+<mat-card style="margin: 20px 20px 50px 20px">
+    <h2 align="center">中文文本摘要生成</h2>
+    <br><br>
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%">
+            <div>
+                <br>
+                <mat-form-field style="width: 100%">
+                    <textarea matInput style="height: 200px" [(ngModel)]="sentence" placeholder="原文"></textarea>
+                </mat-form-field>
+                <br>
+            </div>
+        </mat-card>
+    </div>
+    <br>
+    <div class="row justify-content-center">
+        <button mat-raised-button color="primary" (click)="classify()" [disabled]="sending || !sentence">
+            生成摘要
+        </button>
+    </div>
+    <br>
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%">
+            <mat-form-field style="width: 100%">
+                <textarea matInput style="height: 160px" [(ngModel)]="result" placeholder="摘要" readonly></textarea>
+            </mat-form-field>
+        </mat-card>
+    </div>
+</mat-card>
+

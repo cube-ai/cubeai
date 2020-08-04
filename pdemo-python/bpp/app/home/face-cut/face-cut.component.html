@@ -1,0 +1,36 @@
+<my-pageheader></my-pageheader>
+
+<mat-card style="margin: 20px 20px 50px 20px">
+    <h2 align="center">证件照片裁切</h2>
+    <br><br>
+
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%">
+            <div>
+                <input type="file" ng2FileSelect [uploader]="fileSelector" accept=".jpg, .jpeg, .png, .gif, image/*" [disabled]="sending" />
+            </div>
+            <br>
+            <div>
+                <img style="max-width: 100%" src="{{selectedImgDataUrl}}" alt="">
+            </div>
+            <br>
+            <label for="bg_color">
+                背景颜色： &nbsp;&nbsp;&nbsp;
+            </label>
+            <input id="bg_color" [(colorPicker)]="color" (colorPickerChange)="onColorPickerChange()"  [style.background]="color" [disabled]="sending" />
+        </mat-card>
+    </div>
+    <div class="row justify-content-center">
+        <mat-card style="width: 90%; margin-top: 20px">
+            <div *ngIf="img_url && !sending">
+                <img style="max-width: 100%" src="{{img_url}}" alt="">
+            </div>
+            <p *ngIf="!img_url && !sending">标准证件照</p>
+            <p *ngIf="sending">正在努力工作...</p>
+            <mat-spinner *ngIf="sending"></mat-spinner>
+            <p *ngIf="error">出错啦...</p>
+        </mat-card>
+    </div>
+</mat-card>
+
+

@@ -1,9 +1,0 @@
-
-  ${AnsiColor.GREEN}████████╗ ██╗   ██╗ ██╗       ████████╗${AnsiColor.RED} ████████╗ ████████╗
-  ${AnsiColor.GREEN}██╔═════╝ ██║   ██║ ██║       ██╔═════╝${AnsiColor.RED} ██║   ██║ ╚══██╔══╝
-  ${AnsiColor.GREEN}██║       ██║   ██║ ████████╗ ██████╗  ${AnsiColor.RED} ████████║    ██║
-  ${AnsiColor.GREEN}██║       ██║   ██║ ██    ██║ ██╔═══╝  ${AnsiColor.RED} ██╔═══██║    ██║
-  ${AnsiColor.GREEN}████████╗ ████████║ ████████║ ████████╗${AnsiColor.RED} ██║   ██║ ████████╗
-  ${AnsiColor.GREEN}╚═══════╝ ╚═══════╝ ╚═══════╝ ╚═══════╝${AnsiColor.RED} ╚═╝   ╚═╝ ╚═══════╝
-
-${AnsiColor.BRIGHT_BLUE}:: CubeAI 🤓  :: Running Spring Boot ${spring-boot.version} ::

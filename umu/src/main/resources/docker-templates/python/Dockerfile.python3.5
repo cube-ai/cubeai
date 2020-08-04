@@ -1,7 +1,0 @@
-FROM ubuntu/python:3.0.3
-WORKDIR /app
-ENV LANG C.UTF-8
-ADD . /app
-RUN pip3 install -r requirements.txt -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
-EXPOSE 3330
-CMD ["cubeai_model_runner", "model/"]

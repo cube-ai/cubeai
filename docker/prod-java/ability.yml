@@ -1,8 +1,0 @@
-version: '2'
-services:
-    ability-app:
-        image: ability
-        environment:
-            - SPRING_PROFILES_ACTIVE=prod
-            - SPRING_CLOUD_CONSUL_HOST=consul
-            - SPRING_CLOUD_CONSUL_PORT=8500

@@ -1,0 +1,21 @@
+/* ==========================================================================
+Footer
+========================================================================== */
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    z-index: 2;
+    height: 30px;
+    background-color: #000000;
+    color: #cccccc;
+    font-size: 12px;
+}
+
+.footer-spacer {
+    flex: 1 1 auto;
+}
+
+.footer-split {
+    flex: 0 0 20px;
+}
