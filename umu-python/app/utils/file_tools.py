@@ -20,3 +20,4 @@ def del_path_files(path):
             os.remove(full)
         elif os.path.isdir(full):
             shutil.rmtree(full)
+

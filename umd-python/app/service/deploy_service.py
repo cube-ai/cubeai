@@ -2,7 +2,7 @@ import time
 from app.utils import mytime
 from app.utils.file_tools import replace_special_char
 from app.service import umm_client, message_service
-from app.service.task_service import save_task_progress, save_task_step_progress
+from app.service.task_service import save_task_progress, save_task_step_progress, deletes_task_steps
 from app.domain.task import Task
 from app.domain.solution import Solution
 from app.domain.deployment import Deployment
@@ -168,6 +168,8 @@ def create_deployment(task, namespace):
         if progress > 79:
             progress = 40
         time.sleep(1)
+
+    deletes_task_steps(task.uuid, 40, 80)
 
     if ok:
         save_task_step_progress(task.uuid, '模型部署', '执行', 80, '创建Kubernetes部署对象完成。')

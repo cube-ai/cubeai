@@ -83,7 +83,7 @@ class DeploymentApiA(tornado.web.RequestHandler):
 
         where2 = ''
         if filter is not None:
-            where2 += 'name solution_name "%{}%"'.format(filter)
+            where2 += 'solution_name like "%{}%"'.format(filter)
             where2 += ' or solution_author like "%{}%"'.format(filter)
             where2 += ' or deployer like "%{}%"'.format(filter)
             where2 += ' or status like "%{}%"'.format(filter)

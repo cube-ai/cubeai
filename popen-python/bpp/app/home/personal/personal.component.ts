@@ -200,6 +200,10 @@ export class PersonalComponent implements OnInit {
         }
     }
 
+    gotoDemos() {
+        this.router.navigate(['/demo']);
+    }
+
     goBack() {
         this.location.back();
     }

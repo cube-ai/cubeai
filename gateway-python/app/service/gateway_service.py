@@ -68,6 +68,7 @@ async def gen_next_request(prev_request):
     method = prev_request.method
     body = prev_request.body if method == 'POST' or method == 'PUT' else None
     headers = prev_request.headers
+
     try:
         headers.pop('If-Modified-Since')
     except:
@@ -76,6 +77,7 @@ async def gen_next_request(prev_request):
         headers.pop('If-None-Match')
     except:
         pass
+
     next_request = HTTPRequest(
         url=url,
         method=method,

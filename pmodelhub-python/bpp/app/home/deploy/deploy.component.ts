@@ -29,6 +29,7 @@ export class DeployComponent implements OnInit, OnDestroy {
     deployStarted = false;
     progressDeploy = 0;
     detailDeploy = '';
+    viewDetailDeploy = true;
     statusDeploy = '';
     statusCreateTaskError = false;
 
@@ -224,6 +225,10 @@ export class DeployComponent implements OnInit, OnDestroy {
                 }
             );
         }
+    }
+
+    toggleViewDetailDeploy() {
+        this.viewDetailDeploy = !this.viewDetailDeploy;
     }
 
     getCompleteSuccess(): boolean {

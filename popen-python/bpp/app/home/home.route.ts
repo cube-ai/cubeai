@@ -3,6 +3,7 @@ import {HomeComponent} from './home.component';
 import {
     marketRoutes,
     personalRoutes,
+    demoRoutes,
     abilityRoutes,
     stargazerRoutes,
 } from './';
@@ -20,5 +21,6 @@ export const homeRoutes: Routes = [
     ...marketRoutes,
     ...personalRoutes,
     ...abilityRoutes,
+    ...demoRoutes,
     ...stargazerRoutes,
 ];

@@ -13,6 +13,8 @@ from .credit_history_api import CreditHistoryApi
 from .composite_solution_map_api import CompositeSolutionMapApiA, CompositeSolutionMapApiB
 from .deployment_api import DeploymentApiA, DeploymentApiB
 from .ability_api import AbilityApi
+from .composite_solution_api import CompositeSolutionApiA, CompositeSolutionApiB
+from .composite_deployment_api import CompositeDeploymentApiA, CompositeDeploymentApiB
 
 
 API_ROUTES = [
@@ -20,6 +22,8 @@ API_ROUTES = [
     (r'/management/health', HealthChecker),
     (r'/api/solutions', SolutionApiA),
     (r'/api/solutions/(.*)', SolutionApiB),
+    (r'/api/composite-solutions', CompositeSolutionApiA),
+    (r'/api/composite-solutions/(.*)', CompositeSolutionApiB),
     (r'/api/artifacts', ArtifactApiA),
     (r'/api/artifacts/(\w+)', ArtifactApiB),
     (r'/api/documents', DocumentApiA),
@@ -42,6 +46,8 @@ API_ROUTES = [
     (r'/api/composite-solution-maps/(\w+)', CompositeSolutionMapApiB),
     (r'/api/deployments', DeploymentApiA),
     (r'/api/deployments/(.*)', DeploymentApiB),
+    (r'/api/composite-deployments', CompositeDeploymentApiA),
+    (r'/api/composite-deployments/(.*)', CompositeDeploymentApiB),
     (r'/model/ability', AbilityApi),
 
 ]

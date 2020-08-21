@@ -5,12 +5,13 @@ import { Location } from '@angular/common';
 import { Subscription } from 'rxjs/Subscription';
 import {ConfirmService, GlobalService, SnackBarService} from '../../shared';
 import {Principal} from '../../shared';
-import {AbilityService} from '../index';
-import {SolutionService} from '../service/solution.service';
+import {AbilityService} from '..';
+import {SolutionService} from '..';
 import {Ability} from '../model/ability.model';
 import {DocumentService, DownloadService} from '../';
-import {StarService} from '../service/star.service';
+import {StarService} from '..';
 import {Star} from '../model/star.model';
+import {DeploymentStatus} from '../model/deployment-status.model';
 
 @Component({
     templateUrl: './ability.component.html',
@@ -24,12 +25,19 @@ export class AbilityComponent implements OnInit, OnDestroy {
     isOperator: boolean;
     abilityUuid: string;
     ability: Ability = null;
-    modelMethod: string;
+    url_model = '';
+    url_web = '';
     requestBody: string;
     responseBody: string;
     sending = false;
     examples: any[];
     star: Star;
+    statusTimer: any;
+    deploymentStatus: DeploymentStatus = null;
+    resource: DeploymentStatus = null;
+    changing = false;
+    podLogs = null;
+    showPodLogs = false;
 
     constructor(
         private globalService: GlobalService,
@@ -60,6 +68,7 @@ export class AbilityComponent implements OnInit, OnDestroy {
         }
 
         this.subscription.unsubscribe();
+        clearInterval(this.statusTimer);
     }
 
     ngOnInit() {
@@ -75,8 +84,14 @@ export class AbilityComponent implements OnInit, OnDestroy {
             }).subscribe(
                 (res) => {
                     this.ability = res.body[0];
+                    this.url_model = location.protocol + '//' + location.host + '/ability/model/' + this.ability.uuid;
+                    this.url_web = location.protocol + '//' + location.host + '/ability/web/' + this.ability.uuid + '/';
                     this.isOwner = this.userLogin === this.ability.deployer;
                     this.loadStar();
+
+                    if (this.ability.status === '运行') {
+                        this.startGetAbilityStatus();
+                    }
 
                     this.solutionService.query({
                         uuid: this.ability.solutionUuid,
@@ -144,24 +159,6 @@ export class AbilityComponent implements OnInit, OnDestroy {
         }
     }
 
-    genAbilityUrl(): string {
-        let methods = '';
-        if (this.examples && this.examples.length > 0) {
-            methods = ': ';
-            for (let i = 0; i < this.examples.length; i++) {
-                methods += this.examples[i]['model-method'];
-                if (i < this.examples.length - 1) {
-                    methods += ' | ';
-                }
-            }
-        }
-        return 'POST ' + location.protocol + '//' + location.host + '/ability/model/' + this.ability.uuid + '/{模型方法' + methods + '}';
-    }
-
-    genAbilityUrlPrefix(): string {
-        return location.protocol + '//' + location.host + '/ability/model/' + this.ability.uuid + '/';
-    }
-
     getExampleRequest() {
         this.documentService.query({
             solutionUuid: this.ability.solutionUuid,
@@ -170,9 +167,9 @@ export class AbilityComponent implements OnInit, OnDestroy {
             (res) => {
                 if (res && res.body.length > 0) {
                     const url = res.body[0].url;
-                    this.downloadService.getFileText(url).subscribe(
+                    this.downloadService.download(url).subscribe(
                         (res1) => {
-                            this.examples = JSON.parse(res1.body['text'])['examples'];
+                            this.examples = JSON.parse(res1.body)['examples'];
                         }
                     );
                 }
@@ -184,15 +181,13 @@ export class AbilityComponent implements OnInit, OnDestroy {
         if (this.examples) {
             const index = Math.floor(Math.random() * this.examples.length);
             const example = this.examples[index]; // 从所有例子中随机取一个
-            this.modelMethod = example['model-method'];
-            this.requestBody = JSON.stringify(example['body'], null, 4);
+            this.requestBody = JSON.stringify(example, null, 4);
         } else {
             this.snackBarService.error('无可用测试数据！');
         }
     }
 
     cleanTestRequest() {
-        this.modelMethod = null;
         this.requestBody = null;
     }
 
@@ -202,7 +197,6 @@ export class AbilityComponent implements OnInit, OnDestroy {
 
     sendTestRequest() {
         this.sending = true;
-        const url = this.genAbilityUrlPrefix() + this.modelMethod;
         const params = {
             headers: {
                 'Content-Type': 'application/json',
@@ -212,7 +206,7 @@ export class AbilityComponent implements OnInit, OnDestroy {
             method: 'POST',
         };
 
-        fetch(url, params).then((data) => data.text())
+        fetch(this.url_model, params).then((data) => data.text())
             .then((res) => {
                 this.responseBody = JSON.stringify(JSON.parse(res), null, 4);
                 this.sending = false;
@@ -231,26 +225,135 @@ export class AbilityComponent implements OnInit, OnDestroy {
         }).subscribe();
     }
 
+    changeAbility(lcm) {
+        const body = {
+            deployment: this.ability,
+            resource: this.resource,
+            lcm
+        };
+        if (lcm === 'start') {
+            this.confirmService.ask('确定要重新启动该实例？').then((confirm) => {
+                if (confirm) {
+                    const oldStatus = this.ability.status;
+                    this.ability.status = '正在启动...';
+                    this.changing = false;
+                    this.abilityService.change(body).subscribe(
+                        () => {
+                            this.snackBarService.success('启动命令已发出，请等待所有容器副本就绪...');
+                            this.ability.status = '运行';
+                            this.startGetAbilityStatus();
+                        }, () => {
+                            this.ability.status = oldStatus;
+                        }
+                    );
+                }
+            });
+        } else if (lcm === 'pause') {
+            this.confirmService.ask('确定要暂停该实例？').then((confirm) => {
+                if (confirm) {
+                    const oldStatus = this.ability.status;
+                    this.ability.status = '正在暂停...';
+                    this.changing = false;
+                    this.abilityService.change(body).subscribe(
+                        () => {
+                            this.snackBarService.success('暂停命令已发出，请等待...');
+                            this.ability.status = '暂停';
+                        }, () => {
+                            this.ability.status = oldStatus;
+                            this.startGetAbilityStatus();
+                        }
+                    );
+                }
+            });
+        } else {
+            if (this.changing && lcm === 'change') {
+                this.abilityService.change(body).subscribe(
+                    () => {
+                        this.snackBarService.success('扩缩容命令已发出，请等待所有容器副本就绪...');
+                    }, () => {
+                        this.snackBarService.info('扩缩容操作失败！');
+                    }
+                );
+            } else {
+                this.getAbilityStatus();
+                this.resource = this.deploymentStatus;
+            }
+            this.changing = !this.changing;
+        }
+    }
+
     stopAbility() {
         this.confirmService.ask('确定要停止运行该实例？').then((confirm) => {
             if (confirm) {
                 const oldStatus = this.ability.status;
-                this.ability.status = '停止';
+                this.ability.status = '正在停止...';
                 this.abilityService.stop(this.ability).subscribe(
                     () => {
-                        this.snackBarService.success('停止命令已发出，请稍后刷新能力列表查看结果...');
-                        this.ability.status = '正在停止...';
+                        this.snackBarService.success('停止命令已发出，请等待...');
+                        this.ability.status = '停止';
                     }, () => {
                         this.ability.status = oldStatus;
+                        this.startGetAbilityStatus();
                     }
                 );
             }
         });
     }
 
+    startGetAbilityStatus() {
+        if ((this.isOperator || this.isOwner) && !this.isMobile) {
+            this.getAbilityStatus();
+            this.statusTimer = setInterval(() => {
+                this.getAbilityStatus();
+            }, 5000);
+        }
+    }
+
+    getAbilityStatus() {
+        if (this.ability.status !== '运行') {
+            clearInterval(this.statusTimer);
+        }
+        this.abilityService.status({
+            uuid: this.abilityUuid,
+            user: this.ability.deployer,
+        }).subscribe(
+            (res) => {
+                this.deploymentStatus = res.body;
+            }
+        );
+        if (this.showPodLogs) {
+            this.abilityService.logs({
+                uuid: this.abilityUuid,
+                user: this.ability.deployer,
+            }).subscribe(
+                (res) => {
+                    this.podLogs = res.body.logs;
+                    console.log(this.podLogs);
+                }
+            );
+        }
+    }
+
+    togglePodLogs() {
+        if (!this.showPodLogs) {
+            this.getAbilityStatus();
+        }
+        this.showPodLogs = !this.showPodLogs;
+    }
+
     openDemoUrl() {
         const link: HTMLElement = document.createElement('a');
         link.setAttribute('href', this.ability.demoUrl);
+        link.setAttribute('target', '_blank');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    openWeb() {
+        const link: HTMLElement = document.createElement('a');
+        link.setAttribute('href', this.url_web);
         link.setAttribute('target', '_blank');
         link.style.visibility = 'hidden';
         document.body.appendChild(link);

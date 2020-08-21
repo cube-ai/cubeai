@@ -16,7 +16,7 @@ def upload_artifact(short_url, file_path):
         try:
             res = requests.put(long_url, data=file, auth=(username, password))
         except Exception as e:
-            logging.DEBUG(e)
+            logging.error(str(e))
 
     return long_url if res.status_code == 201 else None
 
@@ -29,7 +29,7 @@ def delete_artifact(url):
     try:
         res = requests.delete(url, auth=(username, password))
     except Exception as e:
-        logging.DEBUG(e)
+        logging.error(str(e))
 
 
 def get_artifact(url):
@@ -40,7 +40,7 @@ def get_artifact(url):
     try:
         res = requests.get(url, auth=(username, password))
     except Exception as e:
-        logging.DEBUG(e)
+        logging.error(str(e))
         return None
 
     if res and res.status_code == 200:

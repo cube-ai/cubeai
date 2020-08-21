@@ -9,6 +9,8 @@ export * from './market/market.component';
 export * from './market/market.route';
 export * from './personal/personal.component';
 export * from './personal/personal.route';
+export * from './demo/demo.component';
+export * from './demo/demo.route';
 export * from './ability/ability.component';
 export * from './ability/ability.route';
 export * from './stargazer/stargazer.component';

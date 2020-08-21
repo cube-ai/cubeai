@@ -21,8 +21,13 @@ def create_task_step(task_step, jwt):
     return http_client('post', service_name, '/api/task-steps', body=json.dumps(task_step.__dict__), jwt=jwt)
 
 
+def delete_task_steps(body, jwt):
+    return http_client('put', service_name, '/api/task-steps', body=json.dumps(body), jwt=jwt)
+
+
 def get_solutions(uuid, jwt=None):
     return http_client('get', service_name, '/api/solutions?uuid={}'.format(uuid), jwt=jwt)
+
 
 def create_solution(solution, jwt):
     return http_client('post', service_name, '/api/solutions', body=json.dumps(solution.__dict__), jwt=jwt)

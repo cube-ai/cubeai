@@ -32,10 +32,6 @@ sh build-docker.sh
 cd ~/cubeai/ability-python
 sh build-docker.sh
 
-cd ~/cubeai/pdemo-python
-yarn install
-sh build-docker.sh
-
 cd ~/cubeai/pface-python
 yarn install
 sh build-docker.sh

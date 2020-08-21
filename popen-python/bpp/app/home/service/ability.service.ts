@@ -3,6 +3,7 @@ import {HttpClient, HttpResponse} from '@angular/common/http';
 import {Observable} from 'rxjs/Observable';
 import {createRequestOption} from '../../shared';
 import {Ability} from '../model/ability.model';
+import {DeploymentStatus} from '../model/deployment-status.model';
 import { SERVER_API_URL } from '../../app.constants';
 
 @Injectable()
@@ -41,4 +42,25 @@ export class AbilityService {
         return this.http.put<any>(this.resourceUrlLcm + '/stop', body, { observe: 'response' });
     }
 
+    // start(body: any): Observable<HttpResponse<any>> {
+    //     return this.http.put<any>(this.resourceUrlLcm + '/start', body, { observe: 'response' });
+    // }
+    //
+    // pause(body: any): Observable<HttpResponse<any>> {
+    //     return this.http.put<any>(this.resourceUrlLcm + '/pause', body, { observe: 'response' });
+    // }
+
+    change(body: any): Observable<HttpResponse<any>> {
+        return this.http.put<any>(this.resourceUrlLcm + '/change', body, { observe: 'response' });
+    }
+
+    status(req?: any): Observable<HttpResponse<DeploymentStatus>> {
+        const options = createRequestOption(req);
+        return this.http.get<DeploymentStatus>(this.resourceUrlLcm + '/status', { params: options, observe: 'response' });
+    }
+
+    logs(req?: any): Observable<HttpResponse<any>> {
+        const options = createRequestOption(req);
+        return this.http.get<any>(this.resourceUrlLcm + '/logs', { params: options, observe: 'response' });
+    }
 }

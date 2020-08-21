@@ -46,13 +46,20 @@
             <br>
 
             <mat-card *ngIf="deployStarted && !statusCreateTaskError">
-                <mat-progress-bar mode="determinate" [value]="progressDeploy" color="primary" *ngIf="statusDeploy !== '失败'"></mat-progress-bar>
-                <mat-progress-bar mode="determinate" [value]="progressDeploy" color="warn" *ngIf="statusDeploy === '失败'"></mat-progress-bar>
-                <mat-form-field style="width: 100%">
-                    <textarea matInput style="height: 100px; font-size: small"
-                              [(ngModel)]="detailDeploy" [readonly]="true">
-                    </textarea>
-                </mat-form-field>
+                <div>
+                    部署进度
+                    <a (click)="toggleViewDetailDeploy()" *ngIf="detailDeploy && viewDetailDeploy">
+                        <span class="fa fa-minus-square" style="color: #673ab7"></span>
+                    </a>
+                    <a (click)="toggleViewDetailDeploy()" *ngIf="detailDeploy && !viewDetailDeploy">
+                        <span class="fa fa-plus-square" style="color: #673ab7"></span>
+                    </a>
+                </div>
+                <div style="margin: 20px 20px 0 20px">
+                    <mat-progress-bar mode="determinate" [value]="progressDeploy" color="primary" *ngIf="statusDeploy !== '失败'"></mat-progress-bar>
+                    <mat-progress-bar mode="determinate" [value]="progressDeploy" color="warn" *ngIf="statusDeploy === '失败'"></mat-progress-bar>
+                </div>
+                <pre style="margin: 20px 20px 0 20px; font-size: small" *ngIf="viewDetailDeploy">{{detailDeploy}}</pre>
             </mat-card>
 
             <mat-card *ngIf="getCompleteSuccess() || getCompleteFail() || statusCreateTaskError">

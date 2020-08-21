@@ -34,6 +34,12 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     detailCreateTosca = '';
     detailGenerateMicroService = '';
 
+    viewDetailExtractModelFile = true;
+    viewDetailCreateSolution = true;
+    viewDetailAddArtifact = true;
+    viewDetailCreateTosca = true;
+    viewDetailGenerateMicroService = true;
+
     statusExtractModelFile = '';
     statusCreateSolution = '';
     statusAddArtifact = '';
@@ -215,11 +221,40 @@ export class OnboardingComponent implements OnInit, OnDestroy {
                         this.detailGenerateMicroService += (taskStep.description + '\n');
                         this.lastId = taskStep.id;
                     }
+
+                    if (this.progressGenerateMicroService >= 40 && this.progressGenerateMicroService < 69) {
+                            this.progressGenerateMicroService += 1;
+                            this.detailGenerateMicroService += '正在创建微服务docker镜像...\n';
+                            if (this.progressGenerateMicroService === 69) {
+                                this.progressGenerateMicroService = 40;
+                            }
+                    }
+
                     this.pullingTaskSteps = false;
                     return;
                 }
             );
         }
+    }
+
+    toggleViewDetailExtractModelFile() {
+        this.viewDetailExtractModelFile = !this.viewDetailExtractModelFile;
+    }
+
+    toggleViewDetailCreateSolution() {
+        this.viewDetailCreateSolution = !this.viewDetailCreateSolution;
+    }
+
+    toggleViewDetailAddArtifact() {
+        this.viewDetailAddArtifact = !this.viewDetailAddArtifact;
+    }
+
+    toggleViewDetailCreateTosca() {
+        this.viewDetailCreateTosca = !this.viewDetailCreateTosca;
+    }
+
+    toggleViewDetailGenerateMicroService() {
+        this.viewDetailGenerateMicroService = !this.viewDetailGenerateMicroService;
     }
 
     getCompleteSuccess(): boolean {
@@ -232,7 +267,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
             || this.statusGenerateMicroService === '失败';
     }
 
-    gotoToMyModel() {
+    gotoMyModel() {
         this.router.navigate(['/solution/' + this.taskUuid]);
     }
 

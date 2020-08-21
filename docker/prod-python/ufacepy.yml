@@ -1,6 +1,0 @@
-version: '2'
-services:
-    ufacepy-app:
-        image: ufacepy
-        environment:
-            - START_SLEEP=0

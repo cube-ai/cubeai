@@ -36,8 +36,8 @@ export class HomeComponent implements OnInit {
                     needRoles: 'ROLE_USER',
                 },
                 {
-                    name: '示范应用',
-                    url: '/pdemo/#/',
+                    name: '应用示范',
+                    url: '/demo',
                     picture: null,
                     needRoles: '',
                 },
