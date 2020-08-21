@@ -36,6 +36,9 @@ class GatewayApi(tornado.web.RequestHandler):
         except:
             self._headers = res.headers
 
+        if self.request.path.startswith('/ability/web'):
+            self.set_header("Access-Control-Allow-Origin", "*")  # 允许跨域访问
+
         self.write(res.body)
 
     async def post(self, *args, **kwargs):
@@ -64,6 +67,12 @@ class GatewayApi(tornado.web.RequestHandler):
             json.loads(str(res.body, encoding='utf-8'))
         except:
             self._headers = res.headers
+
+        if self.request.path.startswith('/ability/model') or self.request.path.startswith('/ability/sream'):
+            self.set_header("Access-Control-Allow-Origin", "*")  # 允许跨域访问
+        elif self.request.path.startswith('/ability/file'):
+            self.set_header('Access-Control-Allow-Credentials', 'true')
+            self.set_header('Access-Control-Allow-Origin', self.request.headers.get('Origin'))
 
         self.write(res.body)
 
@@ -124,3 +133,24 @@ class GatewayApi(tornado.web.RequestHandler):
             self._headers = res.headers
 
         self.write(res.body)
+
+    async def options(self, *args, **kwargs):
+        if self.request.path.startswith('/ability/model') \
+                or self.request.path.startswith('/ability/sream') \
+                or self.request.path.startswith('/ability/web'):
+            self.set_status(204)
+            self.set_header("Access-Control-Allow-Origin", "*")
+            self.set_header("Access-Control-Allow-Headers", "content-type")
+            self.set_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.finish()
+            return
+        elif self.request.path.startswith('/ability/file'):
+            self.set_status(204)
+            self.set_header('Access-Control-Allow-Credentials', 'true')
+            self.set_header('Access-Control-Allow-Origin', self.request.headers.get('Origin'))
+            self.set_header("Access-Control-Allow-Headers", "content-type")
+            self.set_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.finish()
+            return
+        else:
+            self.send_error(403)

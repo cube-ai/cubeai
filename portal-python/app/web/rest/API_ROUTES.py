@@ -10,6 +10,6 @@ API_ROUTES = [
     (r'/u(\w+)/(.*)', Error),
     (r'/p(\w+)/(.*)', Error),
     (r'/ability/(.*)', Error),
-    (r'/(.*)', tornado.web.StaticFileHandler, {"path": "app/web/www"})
+    (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'app/web/www', 'default_filename': 'index.html'})
 
 ]

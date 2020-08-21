@@ -1,7 +1,7 @@
 import tornado.web
 from app.domain.document import Document
 from app.service import token_service
-from app.database import document_db, solution_db
+from app.database import document_db, solution_db, composite_solution_db
 from app.utils import mytime
 import json
 
@@ -16,6 +16,8 @@ class DocumentApiA(tornado.web.RequestHandler):
         document = Document()
         document.__dict__ = json.loads(str(self.request.body, encoding='utf-8'))
         solutions = await solution_db.get_solutions_by_uuid(document.solutionUuid)
+        if not solutions:
+            solutions = await composite_solution_db.get_solutions_by_uuid(document.solutionUuid)
         solution = solutions[0]
 
         user_login = token.username

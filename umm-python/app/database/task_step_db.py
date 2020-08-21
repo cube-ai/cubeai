@@ -43,3 +43,11 @@ async def get_task_steps(where):
 
     return task_step_list
 
+
+async def delete_task_steps(task_uuid, start_progress, end_progress):
+    sql = 'DELETE FROM task_step WHERE task_uuid = "{}" and step_progress > "{}" and step_progress < "{}"'.format(task_uuid, start_progress, end_progress)
+
+    async with await g.db.pool.Connection() as conn:
+        async with conn.cursor() as cursor:
+            await cursor.execute(sql)
+            await conn.commit()

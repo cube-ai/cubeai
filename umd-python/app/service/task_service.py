@@ -23,3 +23,12 @@ def save_task_step_progress(taskUuid, stepName, stepStatus, stepProgress, descri
     task_step.stepDate = mytime.now()
 
     umm_client.create_task_step(task_step, jwt=g.oauth_client.get_jwt())
+
+
+def deletes_task_steps(task_uuid, start_progress, end_progress):
+    body = {
+        'task_uuid': task_uuid,
+        'start_progress': start_progress,
+        'end_progress': end_progress,
+    }
+    umm_client.delete_task_steps(body, jwt=g.oauth_client.get_jwt())

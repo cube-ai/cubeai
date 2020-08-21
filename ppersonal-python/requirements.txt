@@ -1,1 +1,2 @@
+tornado==6.0.4
 python-consul==1.1.0

@@ -7,62 +7,82 @@
     <mat-card>
         <div>
             ①提取模型文件
+            <a (click)="toggleViewDetailExtractModelFile()" *ngIf="detailExtractModelFile && viewDetailExtractModelFile">
+                <span class="fa fa-minus-square" style="color: #673ab7"></span>
+            </a>
+            <a (click)="toggleViewDetailExtractModelFile()" *ngIf="detailExtractModelFile && !viewDetailExtractModelFile">
+                <span class="fa fa-plus-square" style="color: #673ab7"></span>
+            </a>
         </div>
-        <mat-progress-bar mode="determinate" [value]="progressExtractModelFile" color="primary" *ngIf="statusExtractModelFile !== '失败'"></mat-progress-bar>
-        <mat-progress-bar mode="determinate" [value]="progressExtractModelFile" color="warn" *ngIf="statusExtractModelFile === '失败'"></mat-progress-bar>
-        <mat-form-field style="width: 100%">
-            <textarea matInput style="height: 100px; font-size: small"
-                      [(ngModel)]="detailExtractModelFile" [readonly]="true">
-            </textarea>
-        </mat-form-field>
+        <div style="margin: 20px 20px 0 20px">
+            <mat-progress-bar mode="determinate" [value]="progressExtractModelFile" color="primary" *ngIf="statusExtractModelFile !== '失败'"></mat-progress-bar>
+            <mat-progress-bar mode="determinate" [value]="progressExtractModelFile" color="warn" *ngIf="statusExtractModelFile === '失败'"></mat-progress-bar>
+        </div>
+        <pre style="margin: 20px 20px 0 20px; font-size: small" *ngIf="viewDetailExtractModelFile">{{detailExtractModelFile}}</pre>
     </mat-card>
     <mat-card *ngIf="statusExtractModelFile === '成功'">
         <div>
             ②创建模型对象
+            <a (click)="toggleViewDetailCreateSolution()" *ngIf="detailCreateSolution && viewDetailCreateSolution">
+                <span class="fa fa-minus-square" style="color: #673ab7"></span>
+            </a>
+            <a (click)="toggleViewDetailCreateSolution()" *ngIf="detailCreateSolution && !viewDetailCreateSolution">
+                <span class="fa fa-plus-square" style="color: #673ab7"></span>
+            </a>
         </div>
-        <mat-progress-bar mode="determinate" [value]="progressCreateSolution" color="primary" *ngIf="statusCreateSolution !== '失败'"></mat-progress-bar>
-        <mat-progress-bar mode="determinate" [value]="progressCreateSolution" color="warn" *ngIf="statusCreateSolution === '失败'"></mat-progress-bar>
-        <mat-form-field style="width: 100%">
-            <textarea matInput style="height: 100px; font-size: small"
-                      [(ngModel)]="detailCreateSolution" [readonly]="true">
-            </textarea>
-        </mat-form-field>
+        <div style="margin: 20px 20px 0 20px">
+            <mat-progress-bar mode="determinate" [value]="progressCreateSolution" color="primary" *ngIf="statusCreateSolution !== '失败'"></mat-progress-bar>
+            <mat-progress-bar mode="determinate" [value]="progressCreateSolution" color="warn" *ngIf="statusCreateSolution === '失败'"></mat-progress-bar>
+        </div>
+        <pre style="margin: 20px 20px 0 20px; font-size: small" *ngIf="viewDetailCreateSolution">{{detailCreateSolution}}</pre>
     </mat-card>
     <mat-card *ngIf="statusCreateSolution === '成功'">
         <div>
             ③添加artifact
+            <a (click)="toggleViewDetailAddArtifact()" *ngIf="detailAddArtifact && viewDetailAddArtifact">
+                <span class="fa fa-minus-square" style="color: #673ab7"></span>
+            </a>
+            <a (click)="toggleViewDetailAddArtifact()" *ngIf="detailAddArtifact && !viewDetailAddArtifact">
+                <span class="fa fa-plus-square" style="color: #673ab7"></span>
+            </a>
         </div>
-        <mat-progress-bar mode="determinate" [value]="progressAddArtifact" color="primary" *ngIf="statusAddArtifact !== '失败'"></mat-progress-bar>
-        <mat-progress-bar mode="determinate" [value]="progressAddArtifact" color="warn" *ngIf="statusAddArtifact === '失败'"></mat-progress-bar>
-        <mat-form-field style="width: 100%">
-            <textarea matInput style="height: 100px; font-size: small"
-                  [(ngModel)]="detailAddArtifact" [readonly]="true">
-            </textarea>
-        </mat-form-field>
+        <div style="margin: 20px 20px 0 20px">
+            <mat-progress-bar mode="determinate" [value]="progressAddArtifact" color="primary" *ngIf="statusAddArtifact !== '失败'"></mat-progress-bar>
+            <mat-progress-bar mode="determinate" [value]="progressAddArtifact" color="warn" *ngIf="statusAddArtifact === '失败'"></mat-progress-bar>
+        </div>
+        <pre style="margin: 20px 20px 0 20px; font-size: small" *ngIf="viewDetailAddArtifact">{{detailAddArtifact}}</pre>
     </mat-card>
     <mat-card *ngIf="statusAddArtifact === '成功'">
         <div>
             ④生成TOSCA文件
+            <a (click)="toggleViewDetailCreateTosca()" *ngIf="detailCreateTosca && viewDetailCreateTosca">
+                <span class="fa fa-minus-square" style="color: #673ab7"></span>
+            </a>
+            <a (click)="toggleViewDetailCreateTosca()" *ngIf="detailCreateTosca && !viewDetailCreateTosca">
+                <span class="fa fa-plus-square" style="color: #673ab7"></span>
+            </a>
         </div>
-        <mat-progress-bar mode="determinate" [value]="progressCreateTosca" color="primary" *ngIf="statusCreateTosca !== '失败'"></mat-progress-bar>
-        <mat-progress-bar mode="determinate" [value]="progressCreateTosca" color="warn" *ngIf="statusCreateTosca === '失败'"></mat-progress-bar>
-        <mat-form-field style="width: 100%">
-            <textarea matInput style="height: 100px; font-size: small"
-                  [(ngModel)]="detailCreateTosca" [readonly]="true">
-            </textarea>
-        </mat-form-field>
+        <div style="margin: 20px 20px 0 20px">
+            <mat-progress-bar mode="determinate" [value]="progressCreateTosca" color="primary" *ngIf="statusCreateTosca !== '失败'"></mat-progress-bar>
+            <mat-progress-bar mode="determinate" [value]="progressCreateTosca" color="warn" *ngIf="statusCreateTosca === '失败'"></mat-progress-bar>
+        </div>
+        <pre style="margin: 20px 20px 0 20px; font-size: small" *ngIf="viewDetailCreateTosca">{{detailCreateTosca}}</pre>
     </mat-card>
     <mat-card *ngIf="statusCreateTosca === '成功'">
         <div>
             ⑤创建微服务
+            <a (click)="toggleViewDetailGenerateMicroService()" *ngIf="detailGenerateMicroService && viewDetailGenerateMicroService">
+                <span class="fa fa-minus-square" style="color: #673ab7"></span>
+            </a>
+            <a (click)="toggleViewDetailGenerateMicroService()" *ngIf="detailGenerateMicroService && !viewDetailGenerateMicroService">
+                <span class="fa fa-plus-square" style="color: #673ab7"></span>
+            </a>
         </div>
-        <mat-progress-bar mode="determinate" [value]="progressGenerateMicroService" color="primary" *ngIf="statusGenerateMicroService !== '失败'"></mat-progress-bar>
-        <mat-progress-bar mode="determinate" [value]="progressGenerateMicroService" color="warn" *ngIf="statusGenerateMicroService === '失败'"></mat-progress-bar>
-        <mat-form-field style="width: 100%">
-            <textarea matInput style="height: 100px; font-size: small"
-                  [(ngModel)]="detailGenerateMicroService" [readonly]="true">
-            </textarea>
-        </mat-form-field>
+        <div style="margin: 20px 20px 0 20px">
+            <mat-progress-bar mode="determinate" [value]="progressGenerateMicroService" color="primary" *ngIf="statusGenerateMicroService !== '失败'"></mat-progress-bar>
+            <mat-progress-bar mode="determinate" [value]="progressGenerateMicroService" color="warn" *ngIf="statusGenerateMicroService === '失败'"></mat-progress-bar>
+        </div>
+        <pre style="margin: 20px 20px 0 20px; font-size: small" *ngIf="viewDetailGenerateMicroService">{{detailGenerateMicroService}}</pre>
     </mat-card>
     <mat-card *ngIf="getCompleteSuccess() || getCompleteFail()">
         <div class="row justify-content-center">

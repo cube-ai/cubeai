@@ -12,8 +12,9 @@ def main():
         return
 
     app = tornado.web.Application(
-        API_ROUTES,
-        cookie_secret=g.config.cookie_secret
+        handlers=API_ROUTES,
+        cookie_secret=g.config.cookie_secret,
+        debug=('dev' == g.config.env)
     )
     http_server = tornado.httpserver.HTTPServer(app, max_buffer_size=800*1024*1024)
     http_server.listen(g.config.server_port)

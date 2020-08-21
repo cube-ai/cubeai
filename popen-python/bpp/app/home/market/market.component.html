@@ -14,6 +14,9 @@
         <button mat-raised-button style="margin-left: 60px; font-size: 20px" (click)="gotoMyTasks()" *ngIf="userLogin">
             我的任务
         </button>
+        <button mat-raised-button style="margin-left: 60px; font-size: 20px" (click)="gotoDemos()">
+            应用示范
+        </button>
     </mat-card>
     <mat-card>
         <div class="row" style="margin-top: 20px; margin-bottom: 20px">
@@ -46,6 +49,9 @@
             <mat-select [(ngModel)]="searchStatus" (selectionChange)="refresh()">
                 <mat-option value="运行">
                     运行中
+                </mat-option>
+                <mat-option value="暂停">
+                    已暂停
                 </mat-option>
                 <mat-option value="停止">
                     已停止
@@ -97,6 +103,9 @@
                         <div mat-line style="font-size: 16px; margin-top: 10px">
                             <span *ngIf="ability.status === '运行'" style="color: green">
                                 正在运行
+                            </span>
+                            <span *ngIf="ability.status === '暂停'" style="color: orange">
+                                已暂停
                             </span>
                             <span *ngIf="ability.status === '停止'" style="color: red">
                                 已停止

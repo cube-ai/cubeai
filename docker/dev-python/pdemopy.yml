@@ -1,6 +1,0 @@
-version: '2'
-services:
-    pdemopy-app:
-        image: pdemopy
-        environment:
-            - START_SLEEP=0

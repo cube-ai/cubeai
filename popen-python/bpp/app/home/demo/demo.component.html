@@ -1,0 +1,28 @@
+<my-pageheader></my-pageheader>
+
+<div style="margin: 20px 20px 50px 20px">
+    <mat-card style="margin-top: 20px; background-color: #f0f0f0">
+        <span  style="font-weight: bold; font-size: 28px">
+            应用示范
+        </span>
+    </mat-card>
+    <mat-card>
+        <div class="row">
+            <mat-card *ngFor="let ability of abilitys" class="pull-right" style="max-width: 200px; max-height: 270px; margin: 20px">
+                <mat-card-header style="height: 70px">
+                    <mat-card-title style="font-size: large">
+                        {{ability.solutionName}}
+                    </mat-card-title>
+                </mat-card-header>
+                <div  style="height: 200px">
+                    <a (click)="gotoDemo(ability.uuid)">
+                        <img mat-card-image src="{{ability.pictureUrl}}">
+                    </a>
+                </div>
+            </mat-card>
+        </div>
+    </mat-card>
+
+</div>
+
+

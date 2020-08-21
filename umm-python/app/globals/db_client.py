@@ -1,6 +1,6 @@
 import pymysql
 import tormysql
-from app.database import CREATE_TABLES
+from app.database import CREATE_TABLES, UPDATE_TABLES
 
 
 class DataBaseClient:
@@ -31,7 +31,8 @@ class DataBaseClient:
             )
         cursor = conn.cursor()
         CREATE_TABLES.create_tables(conn, cursor)
+        UPDATE_TABLES.update_tables(conn, cursor)
         cursor.close()
         conn.close()
-        self.init_pool()
 
+        self.init_pool()

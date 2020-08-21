@@ -1,3 +1,5 @@
+
+
 def create_tables(conn, cursor):
     create_table_solution(conn, cursor)
     create_table_artifact(conn, cursor)
@@ -11,6 +13,8 @@ def create_tables(conn, cursor):
     create_table_star(conn, cursor)
     create_table_credit(conn, cursor)
     create_table_credit_history(conn, cursor)
+    create_table_composite_solution(conn, cursor)
+    create_table_composite_deployment(conn, cursor)
 
 
 def create_table_solution(conn, cursor):
@@ -242,6 +246,68 @@ def create_table_credit_history(conn, cursor):
             current_credit      bigint,
             jhi_comment         varchar(255),
             modify_date         timestamp
+        );
+    '''
+    cursor.execute(sql)
+    conn.commit()
+
+
+def create_table_composite_solution(conn, cursor):
+    sql = '''
+        CREATE TABLE IF NOT EXISTS composite_solution (
+            id  bigint PRIMARY KEY  NOT NULL AUTO_INCREMENT,
+            uuid                varchar(255),
+            author_login        varchar(255),
+            author_name         varchar(255),
+            company             varchar(255),
+            name                varchar(255),
+            version             varchar(255),
+            summary             varchar(255),
+            tag_1               varchar(255),
+            tag_2               varchar(255),
+            tag_3               varchar(255),
+            subject_1           varchar(255),
+            subject_2           varchar(255),
+            subject_3           varchar(255),
+            display_order       bigint,
+            picture_url         longtext,
+            active              bit,
+            model_type          varchar(255),
+            toolkit_type        varchar(255),
+            star_count          bigint,
+            view_count          bigint,
+            download_count      bigint,
+            comment_count       bigint,
+            created_date        timestamp,
+            modified_date       timestamp
+        );
+    '''
+    cursor.execute(sql)
+    conn.commit()
+
+
+def create_table_composite_deployment(conn, cursor):
+    sql = '''
+        CREATE TABLE IF NOT EXISTS composite_deployment (
+            id  bigint PRIMARY KEY  NOT NULL AUTO_INCREMENT,
+            uuid                varchar(255),
+            deployer            varchar(255),
+            solution_uuid       varchar(255),
+            solution_name       varchar(255),
+            solution_author     varchar(255),
+            k_8_s_port          integer,
+            is_public           bit,
+            status              varchar(255),
+            created_date        timestamp,
+            modified_date       timestamp,
+            picture_url         longtext,
+            star_count          bigint,
+            call_count          bigint,
+            demo_url            varchar(512),
+            subject_1           varchar(255),
+            subject_2           varchar(255),
+            subject_3           varchar(255),
+            display_order       bigint
         );
     '''
     cursor.execute(sql)

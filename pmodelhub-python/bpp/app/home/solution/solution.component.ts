@@ -45,8 +45,7 @@ export class SolutionComponent implements OnInit, OnDestroy {
     deployedAbility: Ability;
     solution: Solution = null;
     description: Description = new Description();
-    metadataText: string;
-    protobufText: string;
+    ymlText: string;
     artifacts: Artifact[];
     documents: Document[];
     uploader: FileUploader;
@@ -158,8 +157,6 @@ export class SolutionComponent implements OnInit, OnDestroy {
                 );
 
                 this.loadDescription();
-                this.loadMetadataText();
-                this.loadProtobufText();
                 this.loadArtifactData();
                 this.loadDocumentData();
                 this.loadStar();
@@ -234,28 +231,21 @@ export class SolutionComponent implements OnInit, OnDestroy {
         );
     }
 
-    loadMetadataText() {
-        this.downloadService.getMetadataText(this.solution.uuid).subscribe(
-            (res) => {
-                this.metadataText = '\n' + JSON.stringify(JSON.parse(res.body['metadata']), null, 4);
-            }
-        );
-    }
-
-    loadProtobufText() {
-        this.downloadService.getProtobufText(this.solution.uuid).subscribe(
-            (res) => {
-                this.protobufText = res.body['protobuf'];
-            }
-        );
-    }
-
     loadArtifactData() {
         this.artifactService.query({
             solutionUuid: this.solution.uuid,
         }).subscribe(
             (res) => {
                 this.artifacts = res.body;
+                this.artifacts.forEach((artifact) => {
+                    if (artifact.type === '模型配置') {
+                        this.downloadService.download(artifact.url).subscribe(
+                            (res1) => {
+                                this.ymlText = res1.body;
+                            }
+                        );
+                    }
+                });
             }
         );
     }

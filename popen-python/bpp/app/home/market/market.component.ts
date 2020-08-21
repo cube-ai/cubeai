@@ -193,4 +193,8 @@ export class MarketComponent implements OnInit {
         }
     }
 
+    gotoDemos() {
+        this.router.navigate(['/demo']);
+    }
+
 }

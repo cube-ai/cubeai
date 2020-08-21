@@ -10,27 +10,12 @@ export class DownloadService {
 
     constructor(private http: HttpClient) { }
 
-    getMetadataText(solutionUuid: string): Observable<HttpResponse<any>> {
-        return this.http.get<any>(this.resourceUrl + '/artifact/metadata/' + solutionUuid,  { observe: 'response' });
-    }
-
-    getProtobufText(solutionUuid: string): Observable<HttpResponse<any>> {
-        return this.http.get<any>(this.resourceUrl + '/artifact/protobuf/' + solutionUuid,  { observe: 'response' });
-    }
-
-    getFileText(url: string): Observable<HttpResponse<any>> {
-        const options = createRequestOption({
-            url,
-        });
-        return this.http.get<any>(this.resourceUrl + '/get-file-text',  {params: options, observe: 'response'});
-    }
-
-    downloadFile(url: string): Observable<any> {
+    download(url: string): Observable<any> {
         const options = createRequestOption({
             url,
         });
 
-        return this.http.get(this.resourceUrl + '/download',  {params: options, observe: 'response', responseType: 'blob'} );
+        return this.http.get(this.resourceUrl + '/download',  {params: options, observe: 'response', responseType: 'text'} );
     }
 
 }

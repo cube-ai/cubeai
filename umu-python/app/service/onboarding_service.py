@@ -2,6 +2,10 @@ import json
 import subprocess
 import zipfile
 import docker
+import yaml
+
+from app.service.tosca.protobuf_generator import ProtobufGenerator
+from app.service.tosca import tgif_generator
 from app.utils import mytime
 from app.service import umm_client, uaa_client, message_service, nexus_client
 from app.domain.task import Task
@@ -11,17 +15,19 @@ from app.domain.artifact import Artifact
 from app.utils.file_tools import *
 from app.globals.globals import g
 from app.resources import dockerfiles
+import logging
+import platform
 
 
 def onboarding(task_uuid):
     tasks = umm_client.get_tasks(task_uuid, jwt=g.oauth_client.get_jwt())
-    if tasks is None:
+    if tasks is None or len(tasks) == 0:
         return
 
     task = Task()
-    task.__dict__= tasks[0]
+    task.__dict__ = tasks[0]
 
-    save_task_progress(task, "正在执行", 5, "启动模型导入...")
+    save_task_progress(task, '正在执行', 5, '启动模型导入...')
 
     try:
         user = uaa_client.get_user(task.userLogin, jwt=g.oauth_client.get_jwt())
@@ -155,6 +161,7 @@ def extract_modelfile(task, base_path):
     except:
         save_task_step_progress(task.uuid, '提取模型文件', '失败', 100, '解压缩zip文件失败。')
         return False
+
     file_zip.close()
     save_task_step_progress(task.uuid, '提取模型文件', '执行', 40, '解压缩zip文件。')
 
@@ -162,6 +169,11 @@ def extract_modelfile(task, base_path):
     save_task_step_progress(task.uuid, '提取模型文件', '执行', 60, '删除原始zip文件。')
     save_task_step_progress(task.uuid, '提取模型文件', '执行', 80, '获取文件列表。')
 
+    save_task_step_progress(task.uuid, '提取模型文件', '成功', 100, '完成文件验证并成功提取模型文件。')
+    return True
+
+
+def get_model_files(base_path):
     model_files = {}
     file_list = os.listdir(base_path)
     for filename in file_list:
@@ -172,83 +184,74 @@ def extract_modelfile(task, base_path):
             model_files['schemaFile'] = file_path
         if filename.endswith('.json'):
             model_files['metadataFile'] = file_path
-
-    if model_files.get('modelFile') is None or model_files.get('schemaFile') is None or model_files.get('metadataFile') is None:
-        save_task_step_progress(task.uuid, '提取模型文件', '失败', 100, 'zip文件中包含的模型文件不全。')
-        return False
-
-    save_task_step_progress(task.uuid, '提取模型文件', '成功', 100, '完成文件验证并成功提取模型文件。')
-    return True
+    return model_files
 
 
 def create_solution(task, solution, base_path):
-    save_task_step_progress(task.uuid, '创建模型对象', '执行', 20, '开始解析模型元数据...')
+    save_task_step_progress(task.uuid, '创建模型对象', '执行', 20, '开始解析模型配置文件...')
 
-    if not parse_metadata(solution, os.path.join(base_path, 'metadata.json')):
-        save_task_step_progress(task.uuid, '创建模型对象', '失败', 100, '解析模型元数据文件失败。')
-        return False
-
-    save_task_step_progress(task.uuid, '创建模型对象', '成功', 100, '完成模型元数据文件解析。')
-
-    return True
-
-
-def parse_metadata(solution, metadata_file):
     try:
-        with open(metadata_file, 'r') as file:
-            metadata_json = json.load(file)
-
-        solution.name = metadata_json.get('name', '未命名')
-        solution.version = metadata_json.get('modelVersion', 'v1.0.0')
+        with open(os.path.join(base_path, 'application.yml'), 'r', encoding='utf-8') as file:
+            yml = yaml.load(file, Loader=yaml.SafeLoader)
     except:
+        save_task_step_progress(task.uuid, '创建模型对象', '失败', 100, '解析模型配置文件失败。')
         return False
+
+    try:
+        solution.name = yml['model']['name']
+    except:
+        solution.name = '未命名'
+    try:
+        solution.version = yml['model']['version']
+    except:
+        solution.version = 'v0.0.1'
+
+    save_task_step_progress(task.uuid, '创建模型对象', '成功', 100, '完成模型配置文件解析。')
 
     return True
 
 
 def add_artifacts(task, solution, base_path):
-    model_file = os.path.join(base_path, 'model.zip')
-    metadata_file =  os.path.join(base_path, 'metadata.json')
-    schema_file = os.path.join(base_path, 'model.proto')
-
     save_task_step_progress(task.uuid, '添加artifact', '执行', 20, '开始添加artifact文件...')
 
-    if not add_artifact(solution, model_file, '模型程序'):
-        save_task_step_progress(task.uuid, '添加artifact', '失败', 100, '添加模型程序artifact失败。')
-        return False
-    save_task_step_progress(task.uuid, '添加artifact', '执行', 40,
-                            '成功添加模型镜像artifact文件：' + model_file[model_file.rfind('/') + 1:])
-
-    if not add_artifact(solution, schema_file, 'PROTOBUF文件'):
-        save_task_step_progress(task.uuid, '添加artifact', '失败', 100, '添加PROTOBUF artifact文件失败。')
-        return False
-    save_task_step_progress(task.uuid, '添加artifact', '执行', 70,
-                            '成功添加PROTOBUF artifact文件：' + schema_file[schema_file.rfind('/') + 1:])
-
-    if not add_artifact(solution, metadata_file, '元数据'):
-        save_task_step_progress(task.uuid, '添加artifact', '失败', 100, '添加元数据artifact文件失败。')
+    yml_file = os.path.join(base_path, 'application.yml')
+    if not add_artifact(solution, yml_file, '模型配置'):
+        save_task_step_progress(task.uuid, '添加artifact', '失败', 100, '添加模型配置artifact文件失败。')
         return False
     save_task_step_progress(task.uuid, '添加artifact', '执行', 90,
-                            '成功添加元数据artifact文件：' + metadata_file[metadata_file.rfind('/') + 1:])
+                            '成功添加模型配置文件：' + yml_file[yml_file.rfind('/') + 1:])
 
     save_task_step_progress(task.uuid, '添加artifact', '成功', 100, '完成artifact文件添加。')
 
     return True
 
 
+def add_artifact_data(solution, file_name, data, file_type):
+    short_url = '{}/{}/artifact/{}'.format(solution.authorLogin, solution.uuid, file_name)
+    long_url = nexus_client.upload_artifact_data(short_url, data)
+
+    if long_url is None:
+        return False
+    return create_artifact(solution, file_name, file_type, long_url, len(data))
+
+
 def add_artifact(solution, file, file_type):
-    short_url = '{}/{}/artifact/{}'.format(solution.authorLogin, solution.uuid, file[file.rfind('/') + 1:])
+    file_name = file[file.rfind('/') + 1:]
+    short_url = '{}/{}/artifact/{}'.format(solution.authorLogin, solution.uuid, file_name)
     long_url = nexus_client.upload_artifact(short_url, file)
 
     if long_url is None:
         return False
+    return create_artifact(solution, file_name, file_type, long_url, os.path.getsize(file))
 
+
+def create_artifact(solution, file_name, file_type, long_url, file_size):
     artifact = Artifact()
     artifact.solutionUuid = solution.uuid
-    artifact.name = file[file.rfind('/') + 1:]
+    artifact.name = file_name
     artifact.type = file_type
     artifact.url = long_url
-    artifact.fileSize = os.path.getsize(file)
+    artifact.fileSize = file_size
 
     try:
         umm_client.create_artifact(artifact, jwt=g.oauth_client.get_jwt())
@@ -259,7 +262,58 @@ def add_artifact(solution, file, file_type):
 
 
 def generate_TOSCA(task, solution, base_path):
-    save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 20, '开始生成TOSCA文件...')
+    save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 10, '开始生成TOSCA文件...')
+
+    if False:
+        model_files = get_model_files(base_path)
+        protobuf_generator = ProtobufGenerator()
+        try:
+            proto_json_str = protobuf_generator.create_proto_json(model_files.get('schemaFile'))
+        except Exception as e:
+            logging.error('error in createProtoJson, {}'.format(repr(e)))
+            return False
+        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 20, '将POTOBUF文件内容转换成JSON格式的TOSCA-SCHEMA字符串。')
+
+        model_files['protobufFile'] = proto_json_str
+        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 30, '将JSON格式的TOSCA-SCHEMA字符串写入临时文件。')
+
+        # 上传文件作为artifact到nexus服务器，并添加信息到数据库。
+        if not add_artifact_data(solution, 'protobuf.json', proto_json_str, 'TOSCA-SCHEMA'):
+            save_task_step_progress(task.uuid, '生成TOSCA文件', '失败',  100, '上传TOSCA-SCHEMA文件到NEXUS服务器，并向数据库中插入artifact记录失败。')
+            return False
+
+        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行',  40, '上传TOSCA-SCHEMA文件到NEXUS服务器，并向数据库中插入artifact记录。')
+        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行',  50, '开始生成TOSCA生成器输入文件（tgif）...')
+        file_name = model_files.get('metadataFile')
+        with open(file_name, 'r', encoding='utf-8') as file:
+            text_lines = file.readlines()
+            meatDataStr = ''
+            for line in text_lines:
+                meatDataStr += line
+                meatDataStr += '\n'
+
+        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 60, '从metadata文件读取JSON字符串。')
+
+        metaDataJson = json.loads(meatDataStr.replace('\t', ''))
+        protobufJson = json.loads(proto_json_str.replace('\t', ''))
+        try:
+            tgif = tgif_generator.populate_tgif(solution.version, metaDataJson, protobufJson)
+        except Exception as e:
+            logging.error('error in populateTgif, {}'.format(repr(e)))
+            return False
+        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 70, '基于metadata和proto文件内容生成tgif。')
+        tgif_json_string = json.dumps(tgif, ensure_ascii=False)
+        tgif_json_string = tgif_json_string.replace("[null]", "[]")
+        tgif_json_string = tgif_json_string.replace("null", "{}")
+
+        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 75, "将tgif转换成JSON格式。")
+
+        if not add_artifact_data(solution, 'tgif.json', tgif_json_string, 'TOSCA生成器输入文件'):
+            save_task_step_progress(task.uuid, '生成TOSCA文件', '失败', 100, '上传tgif文件到NEXUS服务器，并向数据库中插入artifact记录失败。')
+            return False
+        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 80, '上传tgif文件到NEXUS服务器，并向数据库中插入artifact记录。')
+        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 90, '成功生成TOSCA生成器输入文件（tgif）。')
+
     save_task_step_progress(task.uuid, '生成TOSCA文件', '成功', 100, '完成TOSCA文件生成。')
 
     return True
@@ -292,33 +346,20 @@ def generate_microservice_local(task, solution, base_path):
     image_id_local = '{}:{}'.format(solution.uuid, solution.version)
     image_id_remote = '{}/{}'.format(docker_server, image_id_local)
 
-    model_file = os.path.join(base_path, 'model.zip')
-    metadata_file =  os.path.join(base_path, 'metadata.json')
-    schema_file = os.path.join(base_path, 'model.proto')
     output_path = os.path.join(base_path, 'app')
     os.makedirs(output_path)
 
     save_task_step_progress(task.uuid, '创建微服务', '执行', 10, '开始创建微服务...')
-
     save_task_step_progress(task.uuid, '创建微服务', '执行', 15, '从模型文件中提取元数据...')
+
     try:
-        with open(metadata_file, 'r') as file:
-            metadata = json.load(file)
+        with open(os.path.join(base_path, 'application.yml'), 'r', encoding='utf-8') as file:
+            yml = yaml.load(file, Loader=yaml.SafeLoader)
     except:
-        save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '从模型文件中提取元数据失败。')
         return False
 
     try:
-        if metadata['runtime']['name'] != 'python':
-            save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '暂时不支持非Python运行环境。')
-            return False
-    except:
-        save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '元数据文件中无有效运行环境描述。')
-        return False
-
-    save_task_step_progress(task.uuid, '创建微服务', '执行', 20, '生成微服务Dockerfile文件...')
-    try:
-        python_version = metadata['runtime']['version']
+        python_version = str(yml['python']['version'])
     except:
         save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '元数据文件中无Python版本号。')
         return False
@@ -335,33 +376,17 @@ def generate_microservice_local(task, solution, base_path):
 
     dockerfile_text = dockerfile_text.replace(r'{DOCKER-SERVER}', docker_server)
     dockerfile_path = os.path.join(output_path, 'Dockerfile')
-    with open(dockerfile_path, 'w') as file:
+    with open(dockerfile_path, 'w', encoding='utf-8') as file:
         file.write(dockerfile_text)
 
-    save_task_step_progress(task.uuid, '创建微服务', '执行', 30, '生成微服务requirements文件...')
-    try:
-        requirements = metadata['runtime']['dependencies']['pip']['requirements']
-    except:
-        save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '元数据文件中无有效requirements。')
-        return False
+    save_task_step_progress(task.uuid, '创建微服务', '执行', 30, '准备微服务运行环境...')
+    if platform.system() == "Windows":
+        os.system('move {}\* {}'.format(base_path, output_path))
+        os.system('move {}\core {}'.format(base_path, output_path))
+    else:
+        os.system('mv {}/* {}'.format(base_path, output_path))
 
-    with open(os.path.join(output_path, 'requirements.txt'), 'w') as file:
-        for req in requirements:
-            line = req.get('name')
-            version = req.get('version')
-            if version:
-                line += '==' + version
-            file.write(line)
-            file.write('\n')
-
-    save_task_step_progress(task.uuid, '创建微服务', '执行', 40, '准备微服务运行环境...')
-    model_path = os.path.join(output_path, 'model')
-    os.makedirs(model_path)
-    shutil.move(model_file, model_path)
-    shutil.move(metadata_file, model_path)
-    shutil.move(schema_file, model_path)
-
-    save_task_step_progress(task.uuid, '创建微服务', '执行', 50, '生成微服务docker镜像...')
+    save_task_step_progress(task.uuid, '创建微服务', '执行', 40, '生成微服务docker镜像...')
     res = os.system('docker build -t {} {}'.format(image_id_local, output_path))
     if res != 0:
         save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '生成微服务docker镜像失败。')
@@ -425,33 +450,20 @@ def generate_microservice_remote(task, solution, base_path):
     image_id_local = '{}:{}'.format(solution.uuid, solution.version)
     image_id_remote = '{}/{}'.format(docker_server, image_id_local)
 
-    model_file = os.path.join(base_path, 'model.zip')
-    metadata_file =  os.path.join(base_path, 'metadata.json')
-    schema_file = os.path.join(base_path, 'model.proto')
     output_path = os.path.join(base_path, 'app')
     os.makedirs(output_path)
 
     save_task_step_progress(task.uuid, '创建微服务', '执行', 10, '开始创建微服务...')
-
     save_task_step_progress(task.uuid, '创建微服务', '执行', 15, '从模型文件中提取元数据...')
+
     try:
-        with open(metadata_file, 'r') as file:
-            metadata = json.load(file)
+        with open(os.path.join(base_path, 'application.yml'), 'r', encoding='utf-8') as file:
+            yml = yaml.load(file, Loader=yaml.SafeLoader)
     except:
-        save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '从模型文件中提取元数据失败。')
         return False
 
     try:
-        if metadata['runtime']['name'] != 'python':
-            save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '暂时不支持非Python运行环境。')
-            return False
-    except:
-        save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '元数据文件中无有效运行环境描述。')
-        return False
-
-    save_task_step_progress(task.uuid, '创建微服务', '执行', 20, '生成微服务Dockerfile文件...')
-    try:
-        python_version = metadata['runtime']['version']
+        python_version = yml['python']['version']
     except:
         save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '元数据文件中无Python版本号。')
         return False
@@ -468,33 +480,17 @@ def generate_microservice_remote(task, solution, base_path):
 
     dockerfile_text = dockerfile_text.replace(r'{DOCKER-SERVER}', docker_server)
     dockerfile_path = os.path.join(output_path, 'Dockerfile')
-    with open(dockerfile_path, 'w') as file:
+    with open(dockerfile_path, 'w', encoding='utf-8') as file:
         file.write(dockerfile_text)
 
-    save_task_step_progress(task.uuid, '创建微服务', '执行', 30, '生成微服务requirements文件...')
-    try:
-        requirements = metadata['runtime']['dependencies']['pip']['requirements']
-    except:
-        save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '元数据文件中无有效requirements。')
-        return False
+    save_task_step_progress(task.uuid, '创建微服务', '执行', 30, '准备微服务运行环境...')
+    if platform.system() == "Windows":
+        os.system('move {}\* {}'.format(base_path, output_path))
+        os.system('move {}\core {}'.format(base_path, output_path))
+    else:
+        os.system('mv {}/* {}'.format(base_path, output_path))
 
-    with open(os.path.join(output_path, 'requirements.txt'), 'w') as file:
-        for req in requirements:
-            line = req.get('name')
-            version = req.get('version')
-            if version:
-                line += '==' + version
-            file.write(line)
-            file.write('\n')
-
-    save_task_step_progress(task.uuid, '创建微服务', '执行', 40, '准备微服务运行环境...')
-    model_path = os.path.join(output_path, 'model')
-    os.makedirs(model_path)
-    shutil.move(model_file, model_path)
-    shutil.move(metadata_file, model_path)
-    shutil.move(schema_file, model_path)
-
-    save_task_step_progress(task.uuid, '创建微服务', '执行', 50, '生成微服务docker镜像...')
+    save_task_step_progress(task.uuid, '创建微服务', '执行', 40, '生成微服务docker镜像...')
     docker_cilent = docker.DockerClient('{}:{}'.format(docker_host, docker_port))
     docker_images = docker_cilent.images
     try:

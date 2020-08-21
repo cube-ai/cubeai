@@ -18,10 +18,21 @@ class LcmApi(tornado.web.RequestHandler):
         has_role = token.has_role('ROLE_OPERATOR')
 
         deployment = Deployment()
-        deployment.__dict__ = json.loads(str(self.request.body, encoding='utf-8'))
+        req = json.loads(str(self.request.body, encoding='utf-8'))
+        if action == 'change':
+            deployment.__dict__ = req['deployment']
+        else:
+            deployment.__dict__ = req
 
         if user_login is None or (not has_role and user_login != deployment.deployer):
             self.send_error(403)
+            return
+
+        if action == 'change':
+            if lcm_service.change(deployment, req['resource'], req['lcm']) is None:
+                self.send_error(500)
+                return
+            self.finish()
             return
 
         task = Task()
@@ -50,3 +61,28 @@ class LcmApi(tornado.web.RequestHandler):
         thread.start()
 
         self.finish()
+
+    async def get(self, action):
+        token = token_service.get_token(self.request)
+        user_login = token.username
+        has_role = token.has_role('ROLE_OPERATOR')
+        deployment_uuid = self.get_argument('uuid', None)
+        user = self.get_argument('user', None)
+
+        if user_login is None or (not has_role and user_login != user):
+            self.send_error(403)
+            return
+
+        if action == 'status':
+            res = await lcm_service.status(user, deployment_uuid)
+            res = res.__dict__
+        elif action == 'logs':
+            res = await lcm_service.logs(user, deployment_uuid)
+        else:
+            self.send_error(400)
+            return
+
+        if res is None:
+            self.send_error(403)
+            return
+        self.write(json.dumps(res))
