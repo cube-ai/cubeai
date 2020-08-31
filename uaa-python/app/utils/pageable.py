@@ -6,13 +6,13 @@ def gen_pageable(pageable):
 
     p = ''
     sort_list = pageable.get('sort')
-    if len(sort_list) > 0:
+    if sort_list and len(sort_list) > 0:
         p += 'order by'
         for sort in sort_list:
             sort = camel_to_lowercase(sort).replace(',', ' ')
             p += ' ' + sort + ','
         p = p[:-1]
-    if pageable.get('page') and pageable.get('size'):
+    if pageable.get('page') is not None and pageable.get('size') is not None:
         p += ' limit {}, {}'.format(int(pageable.get('page')) * int(pageable.get('size')), pageable.get('size'))
 
 

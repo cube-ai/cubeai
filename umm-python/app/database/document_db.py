@@ -1,8 +1,8 @@
-from app.globals.globals import g
+from app.global_data.global_data import g
 from app.domain.document import Document
 
 
-async def create_document(document):
+def create_document(document):
     sql = '''
         INSERT INTO document (
             solution_uuid,
@@ -23,19 +23,25 @@ async def create_document(document):
         document.modifiedDate,
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+        cursor.execute('SELECT last_insert_id() FROM star limit 1')
+        id = cursor.fetchone()[0]
+    conn.close()
+
+    return id
 
 
-async def get_documents(where):
+def get_documents(where):
     sql = 'SELECT * FROM document {}'.format(where)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     document_list = []
     for record in records:
@@ -46,13 +52,14 @@ async def get_documents(where):
     return document_list
 
 
-async def get_document(id):
+def get_document(id):
     sql = 'SELECT * FROM document WHERE id = "{}" limit 1'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     document_list = []
     for record in records:
@@ -63,10 +70,11 @@ async def get_document(id):
     return document_list[0]
 
 
-async def delete_document(id):
+def delete_document(id):
     sql = 'DELETE FROM document WHERE id = "{}"'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()

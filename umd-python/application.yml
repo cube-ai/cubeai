@@ -1,0 +1,16 @@
+serviceboot:
+  version: v2
+
+service:
+  cname: UMD
+  ename: umd
+  version: 2.3.0
+  port: 8103
+
+gateway:
+  is_gateway: no
+
+build:
+  image_name: umdpy
+  build_web: no
+  compile_python_to_so: no

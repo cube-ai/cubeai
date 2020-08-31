@@ -1,36 +1,38 @@
-from app.globals.globals import g
+from app.global_data.global_data import g
 from app.domain.solution import Solution
 from app.utils.pageable import gen_pageable
 
 
-async def get_solutions(where, pageable):
+def get_solutions(where, pageable):
     pageable = gen_pageable(pageable)
     sql = 'SELECT * FROM solution {} {}'.format(where, pageable)
     sql_total_count = 'SELECT COUNT(*) FROM solution {}'.format(where)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
-            solution_list = []
-            for record in records:
-                solution = Solution()
-                solution.from_record(record)
-                solution_list.append(solution.__dict__)
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+        solution_list = []
+        for record in records:
+            solution = Solution()
+            solution.from_record(record)
+            solution_list.append(solution.__dict__)
 
-            await cursor.execute(sql_total_count)
-            total_count = cursor.fetchone()
+        cursor.execute(sql_total_count)
+        total_count = cursor.fetchone()
+    conn.close()
 
     return total_count[0], solution_list
 
 
-async def get_solutions_by_uuid(uuid):
+def get_solutions_by_uuid(uuid):
     sql = 'SELECT * FROM solution WHERE uuid = "{}" limit 1'.format(uuid)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     solution_list = []
     for record in records:
@@ -41,13 +43,14 @@ async def get_solutions_by_uuid(uuid):
     return solution_list
 
 
-async def get_solution_by_id(id):
+def get_solution_by_id(id):
     sql = 'SELECT * FROM solution WHERE id = "{}" limit 1'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     solution_list = []
     for record in records:
@@ -58,7 +61,7 @@ async def get_solution_by_id(id):
     return solution_list[0]
 
 
-async def create_solution(solution):
+def create_solution(solution):
     sql = '''
         INSERT INTO solution (
             uuid,
@@ -95,13 +98,17 @@ async def create_solution(solution):
         solution.starCount
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+        cursor.execute('SELECT last_insert_id() FROM star limit 1')
+        id = cursor.fetchone()[0]
+    conn.close()
 
+    return id
 
-async def update_solution_baseinfo(solution):
+def update_solution_baseinfo(solution):
     sql = '''
         UPDATE solution SET 
             name = "{}",
@@ -129,13 +136,14 @@ async def update_solution_baseinfo(solution):
         solution.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_solution_name(solution):
+def update_solution_name(solution):
     sql = '''
         UPDATE solution SET 
             name = "{}",
@@ -147,13 +155,14 @@ async def update_solution_name(solution):
         solution.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_solution_picture_url(solution):
+def update_solution_picture_url(solution):
     sql = '''
         UPDATE solution SET 
             picture_url = "{}",
@@ -165,13 +174,14 @@ async def update_solution_picture_url(solution):
         solution.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_solution_active(solution):
+def update_solution_active(solution):
     sql = '''
         UPDATE solution SET 
             active = {},
@@ -183,13 +193,14 @@ async def update_solution_active(solution):
         solution.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_solution_admininfo(solution):
+def update_solution_admininfo(solution):
     sql = '''
         UPDATE solution SET 
             subject_1 = "{}",
@@ -207,13 +218,14 @@ async def update_solution_admininfo(solution):
         solution.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_solution_star_count(solution):
+def update_solution_star_count(solution):
     sql = '''
         UPDATE solution SET 
             star_count = "{}"
@@ -223,13 +235,14 @@ async def update_solution_star_count(solution):
         solution.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_solution_comment_count(solution):
+def update_solution_comment_count(solution):
     sql = '''
         UPDATE solution SET 
             comment_count = "{}"
@@ -239,13 +252,14 @@ async def update_solution_comment_count(solution):
         solution.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_solution_view_count(solution):
+def update_solution_view_count(solution):
     sql = '''
         UPDATE solution SET 
             view_count = "{}"
@@ -255,13 +269,14 @@ async def update_solution_view_count(solution):
         solution.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_solution_download_count(solution):
+def update_solution_download_count(solution):
     sql = '''
         UPDATE solution SET 
             download_count = "{}"
@@ -271,16 +286,18 @@ async def update_solution_download_count(solution):
         solution.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def delete_solution(id):
+def delete_solution(id):
     sql = 'DELETE FROM solution WHERE id = "{}"'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()

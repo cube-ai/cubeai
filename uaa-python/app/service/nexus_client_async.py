@@ -1,5 +1,5 @@
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
-from app.globals.globals import g
+from app.global_data.global_data import g
 
 
 async def upload_artifact(short_url, file_body):

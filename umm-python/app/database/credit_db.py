@@ -1,8 +1,8 @@
-from app.globals.globals import g
+from app.global_data.global_data import g
 from app.domain.credit import Credit
 
 
-async def create_credit(credit):
+def create_credit(credit):
     sql = '''
         INSERT INTO credit (
             user_login,
@@ -13,13 +13,14 @@ async def create_credit(credit):
         credit.credit
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_credit(credit):
+def update_credit(credit):
     sql = '''
         UPDATE credit SET 
             credit = "{}"
@@ -29,20 +30,22 @@ async def update_credit(credit):
         credit.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def get_credits(user_login=None):
+def get_credits(user_login=None):
     where = '' if user_login is None else 'WHERE user_login = "{}"'.format(user_login)
     sql = 'SELECT * FROM credit {}'.format(where)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     credit_list = []
     for record in records:
@@ -53,13 +56,14 @@ async def get_credits(user_login=None):
     return credit_list
 
 
-async def get_credit(id):
+def get_credit(id):
     sql = 'SELECT * FROM credit WHERE id = "{}" limit 1'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     credit_list = []
     for record in records:
@@ -70,13 +74,14 @@ async def get_credit(id):
     return credit_list[0]
 
 
-async def get_user_credit(user_login):
+def get_user_credit(user_login):
     sql = 'SELECT * FROM credit WHERE user_login = "{}" limit 1'.format(user_login)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     credit_list = []
     for record in records:

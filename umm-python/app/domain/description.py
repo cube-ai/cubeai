@@ -7,6 +7,6 @@ class Description:
 
     def from_record(self, record):
         self.id = record[0]
-        self.solution_uuid = record[1]
+        self.solutionUuid = record[1]
         self.authorLogin = record[2]
         self.content = record[3]

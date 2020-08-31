@@ -1,14 +1,17 @@
 from datetime import datetime
 
 
-def create_tables(conn, cursor):
-    create_table_user(conn, cursor)
-    create_table_authority(conn, cursor)
-    create_table_verify_code(conn, cursor)
-    create_table_message(conn, cursor)
-    create_table_article(conn, cursor)
-    create_table_attachment(conn, cursor)
-    create_table_application(conn, cursor)
+def create_tables(pool):
+    conn = pool.connection()
+    with conn.cursor() as cursor:
+        create_table_user(conn, cursor)
+        create_table_authority(conn, cursor)
+        create_table_verify_code(conn, cursor)
+        create_table_message(conn, cursor)
+        create_table_article(conn, cursor)
+        create_table_attachment(conn, cursor)
+        create_table_application(conn, cursor)
+    conn.close()
 
 
 def create_table_user(conn, cursor):

@@ -38,9 +38,11 @@ ppersonal前端基于Angular框架，使用TypeScript/HTML/CSS等语言开发。
 
 1. 前端开发环境准备
 
-    第一次从Github克隆本项目代码后，应先在本项目目录下执行如下命令以安装前端开发需要的Node依赖：
+    第一次从Github克隆本项目代码后，应先在本项目 webapp 目录下执行如下命令以安装前端开发需要的Node依赖：
 
+        cd webapp
         yarn install
+        cd ..
 
 2. 开发环境中运行ppersonal之前，需要先拉起项目依赖的后台docker，以及uaa微服务和gateway等微服务。
 
@@ -63,7 +65,9 @@ ppersonal前端基于Angular框架，使用TypeScript/HTML/CSS等语言开发。
 
 8. 每次前端代码改动后，在另一个terminal窗口中运行：
 
+        cd webapp
         yarn webpack:build 或者 yarn webpack:prod
+        cd ..
         
    来完成代码编译。
     

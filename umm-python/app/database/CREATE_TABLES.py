@@ -1,20 +1,23 @@
 
 
-def create_tables(conn, cursor):
-    create_table_solution(conn, cursor)
-    create_table_artifact(conn, cursor)
-    create_table_document(conn, cursor)
-    create_table_comment(conn, cursor)
-    create_table_composite_solution_map(conn, cursor)
-    create_table_task(conn, cursor)
-    create_table_task_step(conn, cursor)
-    create_table_description(conn, cursor)
-    create_table_deployment(conn, cursor)
-    create_table_star(conn, cursor)
-    create_table_credit(conn, cursor)
-    create_table_credit_history(conn, cursor)
-    create_table_composite_solution(conn, cursor)
-    create_table_composite_deployment(conn, cursor)
+def create_tables(pool):
+    conn = pool.connection()
+    with conn.cursor() as cursor:
+        create_table_solution(conn, cursor)
+        create_table_artifact(conn, cursor)
+        create_table_document(conn, cursor)
+        create_table_comment(conn, cursor)
+        create_table_composite_solution_map(conn, cursor)
+        create_table_task(conn, cursor)
+        create_table_task_step(conn, cursor)
+        create_table_description(conn, cursor)
+        create_table_deployment(conn, cursor)
+        create_table_star(conn, cursor)
+        create_table_credit(conn, cursor)
+        create_table_credit_history(conn, cursor)
+        create_table_composite_solution(conn, cursor)
+        create_table_composite_deployment(conn, cursor)
+    conn.close()
 
 
 def create_table_solution(conn, cursor):

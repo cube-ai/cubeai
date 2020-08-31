@@ -1,9 +1,9 @@
-from app.globals.globals import g
+from app.global_data.global_data import g
 from app.domain.task import Task
 from app.utils.pageable import gen_pageable
 
 
-async def create_task(task):
+def create_task(task):
     sql = '''
         INSERT INTO task (
             uuid,
@@ -30,13 +30,18 @@ async def create_task(task):
         task.startDate
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+        cursor.execute('SELECT last_insert_id() FROM task limit 1')
+        id = cursor.fetchone()[0]
+    conn.close()
+
+    return id
 
 
-async def update_task(task):
+def update_task(task):
     sql = '''
         UPDATE task SET 
             task_status = "{}",
@@ -52,40 +57,43 @@ async def update_task(task):
         task.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def get_tasks(where, pageable):
+def get_tasks(where, pageable):
     pageable = gen_pageable(pageable)
     sql = 'SELECT * FROM task {} {}'.format(where, pageable)
     sql_total_count = 'SELECT COUNT(*)  FROM task {}'.format(where)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
-            task_list = []
-            for record in records:
-                task = Task()
-                task.from_record(record)
-                task_list.append(task.__dict__)
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+        task_list = []
+        for record in records:
+            task = Task()
+            task.from_record(record)
+            task_list.append(task.__dict__)
 
-            await cursor.execute(sql_total_count)
-            total_count = cursor.fetchone()
+        cursor.execute(sql_total_count)
+        total_count = cursor.fetchone()
+    conn.close()
 
     return total_count[0], task_list
 
 
-async def get_task(id):
+def get_task(id):
     sql = 'SELECT * FROM task WHERE id = "{}" limit 1'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     task_list = []
     for record in records:
@@ -96,10 +104,11 @@ async def get_task(id):
     return task_list[0]
 
 
-async def delete_task(id):
+def delete_task(id):
     sql = 'DELETE FROM task WHERE id = "{}"'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()

@@ -1,7 +1,7 @@
 from app.domain.task_step import TaskStep
 from app.service import umm_client
 from app.utils import mytime
-from app.globals.globals import g
+from app.global_data.global_data import g
 
 
 def save_task_progress(task, taskStatus, taskProgress, description, endDate=None):
@@ -26,9 +26,4 @@ def save_task_step_progress(taskUuid, stepName, stepStatus, stepProgress, descri
 
 
 def deletes_task_steps(task_uuid, start_progress, end_progress):
-    body = {
-        'task_uuid': task_uuid,
-        'start_progress': start_progress,
-        'end_progress': end_progress,
-    }
-    umm_client.delete_task_steps(body, jwt=g.oauth_client.get_jwt())
+    umm_client.delete_task_steps(task_uuid, start_progress, end_progress, jwt=g.oauth_client.get_jwt())

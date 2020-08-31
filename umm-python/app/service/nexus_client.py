@@ -1,6 +1,6 @@
 import requests
 import base64
-from app.globals.globals import g
+from app.global_data.global_data import g
 import logging
 
 

@@ -1,2 +1,3 @@
-tornado==6.0.4
+# python==3.5.9
+serviceboot==0.1.2
 python-consul==1.1.0

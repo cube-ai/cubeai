@@ -1,0 +1,16 @@
+serviceboot:
+  version: v2
+
+service:
+  cname: CubeAI能力开放网关
+  ename: ability
+  version: 2.3.0
+  port: 8104
+
+gateway:
+  is_gateway: yes
+
+build:
+  image_name: abilitypy
+  build_web: no
+  compile_python_to_so: no

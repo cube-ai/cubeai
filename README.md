@@ -1,7 +1,7 @@
 
 [![](cubeai-logo.jpg)](https://cubeai.dimpt.com)
 
-CubeAI★智立方 v2.2.0
+CubeAI★智立方 v2.3.0
 
 版权所有 © 2019-2020 中国联通网络技术研究院
 
@@ -13,9 +13,11 @@ https://cubeai.dimpt.com
 
 [**CubeAI★智立方**](https://cubeai.dimpt.com) 是由中国联通网络技术研究院完全自主开发的开源AI平台，目前包括AI在线训练、自动化模型发布与部署、可视化AI能力开放等子平台和功能模块。其核心作用在于打通AI模型开发至实际生产应用之间的壁垒，加速AI创新和应用进程，促进AI应用从设计、开发直到部署、运营整个生命周期的自动化快速迭代和演进。
 
-CubeAI v2.1：采用Python开发并完全重构微服务框架，实现去Spring Cloud化，支持基于k8s和istio的云原生服务网格部署。
+CubeAI v2.3.0: 隆重推出原创性 Python 微服务框架 —— ServiceBoot，基于 ServiceBoot 框架对 CubeAI 代码进行整体重构。
 
-CubeAI v2.2：重构AI模型微服务框架，彻底实现去Acumos化。
+CubeAI v2.2.0：推出全新的AI模型微服务框架 —— cubeai_model_runner ，实现彻底的去Acumos化。
+
+CubeAI v2.1.0：采用Python开发并完全重构微服务框架，实现去Spring Cloud化，支持基于k8s和istio的云原生服务网格部署。
 
 ## 系统架构
 

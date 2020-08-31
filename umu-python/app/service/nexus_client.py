@@ -1,7 +1,7 @@
 import base64
 import requests
 from tornado.httpclient import HTTPRequest
-from app.globals.globals import g
+from app.global_data.global_data import g
 import logging
 
 

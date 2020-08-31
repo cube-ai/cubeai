@@ -1,0 +1,13 @@
+serviceboot:
+  version: v2
+
+service:
+  cname: CubeAI模型共享
+  ename: pmodelhub
+  version: 2.3.0
+  port: 8202
+
+build:
+  image_name: pmodelhubpy
+  build_web: yes
+  compile_python_to_so: no

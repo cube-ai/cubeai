@@ -1,36 +1,38 @@
 from app.domain.composite_deployment import CompositeDeployment
-from app.globals.globals import g
+from app.global_data.global_data import g
 from app.utils.pageable import gen_pageable
 
 
-async def get_deployments(where, pageable):
+def get_deployments(where, pageable):
     pageable = gen_pageable(pageable)
     sql = 'SELECT * FROM composite_deployment {} {}'.format(where, pageable)
     sql_total_count = 'SELECT COUNT(*)  FROM composite_deployment {}'.format(where)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
-            deployment_list = []
-            for record in records:
-                deployment = CompositeDeployment()
-                deployment.from_record(record)
-                deployment_list.append(deployment.__dict__)
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+        deployment_list = []
+        for record in records:
+            deployment = CompositeDeployment()
+            deployment.from_record(record)
+            deployment_list.append(deployment.__dict__)
 
-            await cursor.execute(sql_total_count)
-            total_count = cursor.fetchone()
+        cursor.execute(sql_total_count)
+        total_count = cursor.fetchone()
+    conn.close()
 
     return total_count[0], deployment_list
 
 
-async def get_deployments_by_uuid(uuid):
+def get_deployments_by_uuid(uuid):
     sql = 'SELECT * FROM composite_deployment WHERE uuid = "{}" limit 1'.format(uuid)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     deployment_list = []
     for record in records:
@@ -41,13 +43,14 @@ async def get_deployments_by_uuid(uuid):
     return deployment_list
 
 
-async def get_deployment_by_id(id):
+def get_deployment_by_id(id):
     sql = 'SELECT * FROM composite_deployment WHERE id = "{}" limit 1'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     deployment_list = []
     for record in records:
@@ -58,7 +61,7 @@ async def get_deployment_by_id(id):
     return deployment_list[0]
 
 
-async def create_deployment(deployment):
+def create_deployment(deployment):
     sql = '''
         INSERT INTO composite_deployment (
             uuid,
@@ -95,13 +98,14 @@ async def create_deployment(deployment):
         deployment.displayOrder
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_deployment_solutioninfo(deployment):
+def update_deployment_solutioninfo(deployment):
     sql = '''
         UPDATE composite_deployment SET 
             solution_name = "{}",
@@ -113,12 +117,13 @@ async def update_deployment_solutioninfo(deployment):
         deployment.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+    conn.close()
 
 
-async def update_deployment_admininfo(deployment):
+def update_deployment_admininfo(deployment):
     sql = '''
         UPDATE composite_deployment SET 
             subject_1 = "{}",
@@ -136,13 +141,14 @@ async def update_deployment_admininfo(deployment):
         deployment.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_deployment_demourl(deployment):
+def update_deployment_demourl(deployment):
     sql = '''
         UPDATE composite_deployment SET 
             demo_url = "{}"
@@ -152,13 +158,14 @@ async def update_deployment_demourl(deployment):
         deployment.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_deployment_status(deployment):
+def update_deployment_status(deployment):
     sql = '''
         UPDATE composite_deployment SET 
             status = "{}"
@@ -168,13 +175,14 @@ async def update_deployment_status(deployment):
         deployment.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_deployment_star_count(deployment):
+def update_deployment_star_count(deployment):
     sql = '''
         UPDATE composite_deployment SET 
             star_count = "{}"
@@ -184,13 +192,14 @@ async def update_deployment_star_count(deployment):
         deployment.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_deployment_call_count(deployment):
+def update_deployment_call_count(deployment):
     sql = '''
         UPDATE composite_deployment SET 
             call_count = "{}"
@@ -200,16 +209,18 @@ async def update_deployment_call_count(deployment):
         deployment.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def delete_deployment(id):
+def delete_deployment(id):
     sql = 'DELETE FROM composite_deployment WHERE id = "{}"'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()

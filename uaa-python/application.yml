@@ -1,0 +1,13 @@
+serviceboot:
+  version: v2
+
+service:
+  cname: 用户中心
+  ename: uaa
+  version: 2.3.0
+  port: 9999
+
+build:
+  image_name: uaapy
+  build_web: no
+  compile_python_to_so: no
