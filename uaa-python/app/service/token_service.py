@@ -1,6 +1,6 @@
 import python_jwt
 from jwcrypto import jwk
-from app.globals.globals import g
+from app.global_data.global_data import g
 
 
 class Token:

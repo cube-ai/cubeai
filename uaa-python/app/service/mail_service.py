@@ -1,7 +1,7 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.header import Header
-from app.globals.globals import g
+from app.global_data.global_data import g
 
 
 def send_mail(receiver, message):

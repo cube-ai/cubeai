@@ -1,4 +1,4 @@
-from app.main import main
+from serviceboot import serviceboot
 
 
-main()
+serviceboot.start()

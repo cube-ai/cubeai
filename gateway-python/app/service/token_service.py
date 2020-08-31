@@ -1,6 +1,6 @@
 import python_jwt
 from jwcrypto import jwk
-from app.globals.globals import g
+from app.global_data.global_data import g
 import logging
 
 
@@ -23,7 +23,7 @@ def get_token(request):
         logging.error('Cannot get public key from UAA')
         return token
 
-    authorization = request.headers.get('Authorization')
+    authorization = request['headers'].get('Authorization')  # 注意：此处取'headers'方式与其他微服务不同，因为request是自己构造的dict，而不是HTTPRequest类型
     if authorization is None:
         return token
 

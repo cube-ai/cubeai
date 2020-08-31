@@ -1,8 +1,8 @@
-from app.globals.globals import g
+from app.global_data.global_data import g
 from app.domain.description import Description
 
 
-async def create_description(description):
+def create_description(description):
     sql = '''
         INSERT INTO description (
             solution_uuid,
@@ -15,19 +15,21 @@ async def create_description(description):
         description.content
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def get_descriptions(solution_uuid):
+def get_descriptions(solution_uuid):
     sql = 'SELECT * FROM description WHERE solution_uuid = "{}"'.format(solution_uuid)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     description_list = []
     for record in records:
@@ -38,13 +40,14 @@ async def get_descriptions(solution_uuid):
     return description_list
 
 
-async def get_description(id):
+def get_description(id):
     sql = 'SELECT * FROM description WHERE id = "{}" limit 1'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     description_list = []
     for record in records:
@@ -55,7 +58,7 @@ async def get_description(id):
     return description_list[0]
 
 
-async def update_description_content(description):
+def update_description_content(description):
     sql = r'''
         UPDATE description SET 
             content = '{}'
@@ -65,18 +68,18 @@ async def update_description_content(description):
         description.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def delete_description(id):
+def delete_description(id):
     sql = 'DELETE FROM description WHERE id = "{}"'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
-
-
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()

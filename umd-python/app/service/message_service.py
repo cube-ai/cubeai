@@ -1,5 +1,5 @@
 from app.service import uaa_client
-from app.globals.globals import g
+from app.global_data.global_data import g
 
 
 def send_message(receiver, subject, content, url, urgent):

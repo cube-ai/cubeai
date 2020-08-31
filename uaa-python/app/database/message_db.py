@@ -1,9 +1,9 @@
-from app.globals.globals import g
+from app.global_data.global_data import g
 from app.domain.message import Message
 from app.utils.pageable import gen_pageable
 
 
-async def create_message(message):
+def create_message(message):
     sql = '''
         INSERT INTO message (
                 sender,
@@ -30,40 +30,47 @@ async def create_message(message):
         message.modifiedDate
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+        cursor.execute('SELECT last_insert_id() FROM message limit 1')
+        id = cursor.fetchone()[0]
+    conn.close()
+
+    return id
 
 
-async def get_messages(where, pageable):
+def get_messages(where, pageable):
     pageable = gen_pageable(pageable)
     sql = 'SELECT * FROM message {} {}'.format(where, pageable)
     sql_total_count = 'SELECT COUNT(*)  FROM message {}'.format(where)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
-            message_list = []
-            for record in records:
-                message = Message()
-                message.from_record(record)
-                message_list.append(message.__dict__)
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+        message_list = []
+        for record in records:
+            message = Message()
+            message.from_record(record)
+            message_list.append(message.__dict__)
 
-            await cursor.execute(sql_total_count)
-            total_count = cursor.fetchone()
+        cursor.execute(sql_total_count)
+        total_count = cursor.fetchone()
+    conn.close()
 
     return total_count[0], message_list
 
 
-async def find_one_by_id(id):
+def find_one_by_id(id):
     sql = 'SELECT * FROM message WHERE id = "{}" limit 1'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     message_list = []
     for record in records:
@@ -74,16 +81,17 @@ async def find_one_by_id(id):
     return message_list[0] if len(message_list) > 0 else None
 
 
-async def delete_message(id):
+def delete_message(id):
     sql = 'DELETE FROM message WHERE id = "{}"'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_message_viewed(id, viewed):
+def update_message_viewed(id, viewed):
     sql = '''
         UPDATE message SET 
             viewed = {}
@@ -93,13 +101,14 @@ async def update_message_viewed(id, viewed):
         id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_message_deleted(id, deleted):
+def update_message_deleted(id, deleted):
     sql = '''
         UPDATE message SET 
             deleted = {}
@@ -109,21 +118,23 @@ async def update_message_deleted(id, deleted):
         id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+        conn.close()
 
 
-async def get_unreaded_count(receiver, deleted):
+def get_unread_count(receiver, deleted):
     sql = 'SELECT COUNT(*)  FROM message WHERE receiver = "{}" and deleted = {} and viewed = 0'.format(
         receiver,
         1 if deleted else 0
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            count = cursor.fetchone()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        count = cursor.fetchone()
+    conn.close()
 
     return count[0]

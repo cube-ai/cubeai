@@ -1,9 +1,9 @@
-from app.globals.globals import g
+from app.global_data.global_data import g
 from app.domain.user import User
 from app.utils.pageable import gen_pageable
 
 
-async def create_user(user):
+def create_user(user):
     sql = '''
         INSERT INTO user (
                 login,
@@ -38,19 +38,25 @@ async def create_user(user):
         ','.join(user.authorities)
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+        cursor.execute('SELECT last_insert_id() FROM user limit 1')
+        id = cursor.fetchone()[0]
+    conn.close()
+
+    return id
 
 
-async def find_one_by_kv(key, value):
+def find_one_by_kv(key, value):
     sql = 'SELECT * FROM user WHERE {} = "{}" limit 1'.format(key, value)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     user_list = []
     for record in records:
@@ -61,7 +67,7 @@ async def find_one_by_kv(key, value):
     return user_list[0] if len(user_list) > 0 else None
 
 
-async def update_user_activation(user):
+def update_user_activation(user):
     sql = '''
         UPDATE user SET 
             activated = {},
@@ -73,13 +79,14 @@ async def update_user_activation(user):
         user.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_user_password_reset(user):
+def update_user_password_reset(user):
     sql = '''
         UPDATE user SET 
             password_hash = "{}",
@@ -93,13 +100,14 @@ async def update_user_password_reset(user):
         user.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def change_password(login, password):
+def change_password(login, password):
     sql = '''
         UPDATE user SET 
             password_hash = "{}"
@@ -109,13 +117,14 @@ async def change_password(login, password):
         login
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_user_base_info(user):
+def update_user_base_info(user):
     sql = '''
         UPDATE user SET 
             full_name = "{}",
@@ -131,13 +140,14 @@ async def update_user_base_info(user):
         user.login
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_user(user):
+def update_user(user):
     sql = '''
         UPDATE user SET 
             full_name = "{}",
@@ -159,64 +169,69 @@ async def update_user(user):
         user.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def delete_user_by_id(id):
+def delete_user_by_id(id):
     sql = 'DELETE FROM user WHERE id = "{}"'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def delete_user_by_login(login):
+def delete_user_by_login(login):
     sql = 'DELETE FROM user WHERE login = "{}"'.format(login)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def get_users(where, pageable):
+def get_users(where, pageable):
     pageable = gen_pageable(pageable)
     sql = 'SELECT * FROM user {} {}'.format(where, pageable)
     sql_total_count = 'SELECT COUNT(*)  FROM user {}'.format(where)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
-            user_list = []
-            for record in records:
-                user = User()
-                user.from_record(record)
-                user.remove_internal_values()
-                user_list.append(user.__dict__)
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+        user_list = []
+        for record in records:
+            user = User()
+            user.from_record(record)
+            user.remove_internal_values()
+            user_list.append(user.__dict__)
 
-            await cursor.execute(sql_total_count)
-            total_count = cursor.fetchone()
+        cursor.execute(sql_total_count)
+        total_count = cursor.fetchone()
+    conn.close()
 
     return total_count[0], user_list
 
 
-async def find_any_users(where):
+def find_any_users(where):
     sql = 'SELECT * FROM user {}'.format(where)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
-            user_list = []
-            for record in records:
-                user = User()
-                user.from_record(record)
-                user.remove_internal_values()
-                user_list.append(user)
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+        user_list = []
+        for record in records:
+            user = User()
+            user.from_record(record)
+            user.remove_internal_values()
+            user_list.append(user)
+    conn.close()
 
     return user_list

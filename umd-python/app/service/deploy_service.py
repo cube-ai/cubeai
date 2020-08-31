@@ -1,22 +1,55 @@
 import time
+import uuid
+import threading
 from app.utils import mytime
 from app.utils.file_tools import replace_special_char
-from app.service import umm_client, message_service
+from app.service import token_service, umm_client, message_service
 from app.service.task_service import save_task_progress, save_task_step_progress, deletes_task_steps
 from app.domain.task import Task
 from app.domain.solution import Solution
 from app.domain.deployment import Deployment
-from app.globals.globals import g
+from app.global_data.global_data import g
 
 
-def deploy(task_uuid, is_public):
-    tasks = umm_client.get_tasks(task_uuid, jwt=g.oauth_client.get_jwt())
-    if tasks is None:
-        return
+def deploy_model(**args):
+    http_request = args.get('http_request')
+    token = token_service.get_token(http_request)
+    user_login = token.username
+    if user_login is None:
+        raise Exception('403 Forbidden')
+
+    res =umm_client.get_solutions(args.get('solutionUuid'), token.jwt)
+    if res['status'] != 'ok':
+        raise Exception('500: 从umm获取模型对象失败')
+    solution = res['value']['results'][0]
+
+    is_public = args.get('public')
+    if solution.get('active') and not is_public:
+        raise Exception('403 Forbidden: 公开模型不能部署为私有')
 
     task = Task()
-    task.__dict__= tasks[0]
+    task.uuid = str(uuid.uuid4()).replace('-', '')
+    task.userLogin = user_login
+    task.taskName = solution.get('name')
+    task.taskType = '模型部署'
+    task.taskStatus = '等待调度'
+    task.taskProgress = 0
+    task.targetUuid = solution.get('uuid')  # 约定部署实例的targetUuid与solution的uuid一致
+    task.startDate = mytime.now()
 
+    res = umm_client.create_task(task, jwt=token.jwt)
+    if res['status'] != 'ok':
+        raise Exception('500: 向umm创建模型部署任务失败')
+
+    task.id = res['value']
+    thread = threading.Thread(target=deploy_thread, args=(task, is_public))
+    thread.setDaemon(True)
+    thread.start()
+
+    return task.uuid
+
+
+def deploy_thread(task, is_public):
     save_task_progress(task, "正在执行", 5, "启动模型部署...")
     save_task_step_progress(task.uuid, '模型部署', '执行', 5, '启动模型部署...')
 
@@ -81,11 +114,13 @@ def do_deploy(task, namespace, is_public):
 
 def create_deployment(task, namespace):
     save_task_step_progress(task.uuid, '模型部署', '执行', 20, '开始提取Docker镜像文件...')
-    artifacts = umm_client.get_artifacts(task.targetUuid, 'DOCKER镜像')
-    if len(artifacts) < 1:
+    res = umm_client.get_artifacts(task.targetUuid, 'DOCKER镜像')
+    if res['status'] != 'ok':
         save_task_step_progress(task.uuid, '模型部署', '失败', 100, 'Docker镜像不存在...')
         return False
-    image_url = artifacts[0].get('url')
+
+    artifact = res['value'][0]
+    image_url = artifact.get('url')
     save_task_step_progress(task.uuid, '模型部署', '执行', 30, '提取Docker镜像文件完成。')
 
     save_task_step_progress(task.uuid, '模型部署', '执行', 35, '开始创建Kubernetes部署对象...')
@@ -212,13 +247,17 @@ def create_service(task, namespace):
 def save_deployment(task, namespace, is_public):
     save_task_step_progress(task.uuid, '模型部署', '执行', 92, '开始保存模型部署对象...')
     try:
-        res = g.k8s_client.core_api.read_namespaced_service_status("service-" + task.uuid, namespace)
+        k8s_status = g.k8s_client.core_api.read_namespaced_service_status("service-" + task.uuid, namespace)
     except:
         save_task_step_progress(task.uuid, '模型部署', '失败', 100, '获取Kubernetes服务访问端口失败。')
         return False
 
+    res = umm_client.get_solutions(task.targetUuid)
+    if res['status'] != 'ok':
+        save_task_step_progress(task.uuid, '模型部署', '失败', 100, '从umm获取模型对象失败。')
+        return False
     solution = Solution()
-    solution.__dict__ = umm_client.get_solutions(task.targetUuid)[0]
+    solution.__dict__ = res['value']['results'][0]
     deployment = Deployment()
     deployment.uuid = task.uuid
     deployment.deployer = task.userLogin
@@ -226,13 +265,12 @@ def save_deployment(task, namespace, is_public):
     deployment.solutionName = task.taskName
     deployment.solutionAuthor = solution.authorLogin
     deployment.pictureUrl = solution.pictureUrl
-    deployment.k8sPort = res.spec.ports[0].node_port
+    deployment.k8sPort = k8s_status.spec.ports[0].node_port
     deployment.isPublic = is_public
     deployment.status = '运行'
 
-    try:
-        umm_client.create_deployment(deployment, jwt=g.oauth_client.get_jwt())
-    except:
+    res = umm_client.create_deployment(deployment, jwt=g.oauth_client.get_jwt())
+    if res['status'] != 'ok':
         save_task_step_progress(task.uuid, '模型部署', '失败', 100, '保存模型部署对象失败。')
 
     save_task_step_progress(task.uuid, '模型部署', '执行', 98, '保存模型部署对象完成。')

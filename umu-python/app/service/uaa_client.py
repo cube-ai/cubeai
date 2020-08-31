@@ -1,13 +1,25 @@
-import json
 from app.service.http_client import http_client
 
 
 service_name = 'uaa'
 
 
-def get_user(login, jwt):
-    return http_client('get', service_name, '/api/users/{}'.format(login), jwt=jwt)
+def find_user(login, jwt):
+    body = {
+        'action': 'find_user',
+        'args': {
+            'login': login,
+        }
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
 def send_message(message, jwt):
-    return http_client('post', service_name, '/api/messages/send', body=json.dumps(message), jwt=jwt)
+    body = {
+        'action': 'send_message',
+        'args': {
+            'message': message,
+        }
+    }
+    return http_client(service_name, body=body, jwt=jwt)
+

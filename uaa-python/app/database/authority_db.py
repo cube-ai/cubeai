@@ -1,37 +1,40 @@
-from app.globals.globals import g
+from app.global_data.global_data import g
 
 
-async def create_authority(name):
+def create_authority(name):
     sql = '''
         INSERT INTO authority (
                 name
         ) VALUES ("{}")
     '''.format(name)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def delete_authority(name):
+def delete_authority(name):
     sql = 'DELETE FROM authority WHERE name = "{}"'.format(name)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def get_authorities():
+def get_authorities():
     sql = 'SELECT name FROM authority'
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
-            authorities = []
-            for record in records:
-                 authorities.append(record[0])
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+        authorities = []
+        for record in records:
+            authorities.append(record[0])
+    conn.close()
 
     return authorities

@@ -1,6 +1,9 @@
-tornado==6.0.4
+# python==3.5.9
+serviceboot==0.1.2
+requests==2.24.0
 python-consul==1.1.0
 python_jwt==3.2.6
 pyyaml==5.3.1
 docker==4.2.1
-TorMySQL==0.4.2
+pymysql==0.9.3
+DBUtils==1.3

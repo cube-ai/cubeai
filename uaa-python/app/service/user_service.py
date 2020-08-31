@@ -1,109 +1,165 @@
-from datetime import datetime
+from app.domain.user import User
 from app.database import user_db
-from app.service import mail_service, passwd_service
+from app.service import passwd_service, token_service
 from app.utils import mytime
 
 
-async def activate_registration(key):
-    user = await user_db.find_one_by_kv('activation_key', key)
-    if user is None:
-        return False
+def create_user(**args):
+    token = token_service.get_token(args.get('http_request'))
+    user_login = token.username
+    has_role = token.has_role('ROLE_ADMIN')
+    if not has_role:
+        raise Exception('403 Forbidden')
 
-    user.activated = True
-    user.activationKey = ''
-    await user_db.update_user_activation(user)
-    return True
+    user = User()
+    user.__dict__ = args.get('user')
 
+    old = user_db.find_one_by_kv('login', user.login)
+    if old is not None:
+        raise Exception('400 已存在同名用户')
 
-async def complete_password_reset(new_password, key):
-    user = await user_db.find_one_by_kv('reset_key',key)
-    if user is None:
-        return False
+    old = user_db.find_one_by_kv('email', user.email)
+    if old is not None:
+        raise Exception('400 email已存在')
 
-    expire = datetime.strptime(user.resetDate, '%Y-%m-%dT%H:%M:%S').timestamp() + 172800  # 2 days
-    if datetime.now().timestamp() > expire:
-        return False
+    old = user_db.find_one_by_kv('phone', user.phone)
+    if old is not None:
+        raise Exception('400 phone已存在')
 
-    user.password = passwd_service.encode(new_password)
-    user.resetKey = ''
-    await user_db.update_user_password_reset(user)
-    return True
-
-
-async def request_password_reset(email):
-    user = await user_db.find_one_by_kv('email', email)
-    if user is None or not user.activated:
-        return None
-
-    user.resetKey = passwd_service.gen_random_key()
-    user.resetDate = mytime.now()
-    await user_db.update_user_password_reset(user)
-    return user.resetKey
-
-
-async def register_user(user):
-    user.password = passwd_service.encode(user.password)
-    user.activated = False
-    user.activationKey = passwd_service.gen_random_key()
-    user.imageUrl = ''
-    user.langKey = 'en'
-    user.createdBy = user.login
-    user.createdDate = mytime.now()
-    user.lastModifiedBy = user.login
-    user.lastModifiedDate = mytime.now()
-    user.authorities = ['ROLE_USER', ]  # 缺省所有用户都有ROLE_USER角色
-
-    await user_db.create_user(user)
-    if not mail_service.send_activation_email(user.email, user.activateUrlPrefix, user.activationKey):
-        await user_db.delete_user_by_login(user.login)
-        return False
-    else:
-        return True
-
-
-async def create_user(user):
     user.password = passwd_service.encode(user.password)
     user.activated = True
     user.imageUrl = ''
     user.langKey = 'en'
+    user.createdBy = user_login
     user.createdDate = mytime.now()
     user.lastModifiedBy = user.createdBy
     user.lastModifiedDate = mytime.now()
 
-    await user_db.create_user(user)
+    id = user_db.create_user(user)
+    return id
 
 
-async def update_user(user):
+def update_user(**args):
+    token = token_service.get_token(args.get('http_request'))
+    user_login = token.username
+    has_role = token.has_role('ROLE_ADMIN')
+    if not has_role:
+        raise Exception('403 Forbidden')
+
+    user = User()
+    user.__dict__ = args.get('user')
+
+    old = user_db.find_one_by_kv('email', user.email)
+    if old is not None and old.id != user.id:
+        raise Exception('400 email已存在')
+
+    old = user_db.find_one_by_kv('phone', user.phone)
+    if old is not None and old.id != user.id:
+        raise Exception('400 phone已存在')
+
+    user.lastModifiedBy = user_login
     user.lastModifiedDate = mytime.now()
-    await user_db.update_user(user)
+    user_db.update_user(user)
 
     if hasattr(user, 'password') and user.password:
-        await user_db.change_password(user.login, passwd_service.encode(user.password))
+        user_db.change_password(user.login, passwd_service.encode(user.password))
+
+    return 0
 
 
-async def get_user_by_id(id):
-    user = await user_db.find_one_by_kv('id', id)
+def get_users(**args):
+    http_request = args.get('http_request')
+    token = token_service.get_token(http_request)
+    has_role = token.has_role('ROLE_ADMIN')
+    if not has_role:
+        raise Exception('403 Forbidden')
+
+    pageable = {
+        'page': args.get('page'),
+        'size': args.get('size'),
+        'sort': args.get('sort'),
+    }
+
+    total, results = user_db.get_users('', pageable)
+    return {
+        'total': total,
+        'results': results,
+    }
+
+
+def find_user(login, http_request):
+    token = token_service.get_token(http_request)
+    user_login = token.username
+    has_role = token.has_role('ROLE_ADMIN')
+    if not has_role and not login == user_login and not user_login == 'internal':
+        raise Exception('403 Forbidden')
+
+    user = get_user_by_login(login)
+
+    if user is None:
+        raise Exception('404 user not found')
+
+    return user.__dict__
+
+
+def delete_user(login, http_request):
+    token = token_service.get_token(http_request)
+    has_role = token.has_role('ROLE_ADMIN')
+    if not has_role:
+        raise Exception('403 Forbidden')
+
+    user_db.delete_user_by_login(login)
+    return 0
+
+
+def get_login_exist(**args):
+    login = args.get('login')
+
+    if login.startswith('admin') or login.startswith('internal') or login.startswith('system') or login.startswith('root'):
+        return 1
+
+    user = get_user_by_login(login)
+    return 0 if user is None else 1
+
+
+def get_email_exist(**args):
+    email = args.get('email')
+
+    user = get_user_by_email(email)
+    return 0 if user is None else 1
+
+
+def get_phone_exist(**args):
+    phone = args.get('phone')
+
+    user = get_user_by_phone(phone)
+    return 0 if user is None else 1
+
+
+def get_user_by_id(id):
+    user = user_db.find_one_by_kv('id', id)
     if user is not None:
         user.remove_internal_values()
     return user
 
 
-async def get_user_by_login(login):
-    user = await user_db.find_one_by_kv('login', login)
+def get_user_by_login(login):
+    user = user_db.find_one_by_kv('login', login)
     if user is not None:
         user.remove_internal_values()
     return user
 
 
-async def get_user_by_email(email):
-    user = await user_db.find_one_by_kv('email', email)
+def get_user_by_email(email):
+    user = user_db.find_one_by_kv('email', email)
     if user is not None:
         user.remove_internal_values()
     return user
 
 
-async def get_user_by_phone(phone):
-    user = await user_db.find_one_by_kv('phone', phone)
+def get_user_by_phone(phone):
+    user = user_db.find_one_by_kv('phone', phone)
     if user is not None:
         user.remove_internal_values()
     return user
+

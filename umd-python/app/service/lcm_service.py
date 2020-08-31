@@ -1,110 +1,23 @@
-from app.utils import mytime
 from app.utils.file_tools import replace_special_char
-from app.service import umm_client
-from app.service.task_service import save_task_progress, save_task_step_progress
-from app.domain.task import Task
+from app.service import token_service, umm_client
+from app.domain.deployment import Deployment
 from app.domain.deployment_status import DeploymentStatus
-from app.globals.globals import g
+from app.global_data.global_data import g
 
 
-def stop(task_uuid, deployment):
-    tasks = umm_client.get_tasks(task_uuid, jwt=g.oauth_client.get_jwt())
-    if tasks is None:
-        return
-
-    task = Task()
-    task.__dict__= tasks[0]
-
-    save_task_progress(task, "正在执行", 10, "准备停止模型实例运行...")
-    save_task_step_progress(task.uuid, '实例停止', '执行', 10, '准备停止模型实例运行...')
+def get_deployment_status(**args):
+    username = args.get('username')
+    deployment_uuid = args.get('deploymentUuid')
+    token = token_service.get_token(args.get('http_request'))
+    has_role = token.has_role('ROLE_OPERATOR')
+    user_login = token.username
+    if user_login is None or (user_login != username and not has_role):
+        raise Exception('403 Forbidden')
 
     try:
-        namespace = 'ucumos-' + replace_special_char(task.userLogin)
-    except:
-        save_task_step_progress(task.uuid, '模型部署', '失败', 100, '构造用户namespace信息失败。')
-        save_task_progress(task, '失败', 100, '构造用户namespace信息失败。', mytime.now())
-        return
+        namespace = 'ucumos-' + replace_special_char(username)
+        res = g.k8s_client.apps_api.read_namespaced_deployment_status('deployment-' + deployment_uuid, namespace)
 
-    save_task_progress(task, "正在执行", 30, "访问Kubernetes命名空间...")
-    save_task_step_progress(task.uuid, '实例停止', '执行', 30, '访问Kubernetes命名空间...')
-    try:
-        g.k8s_client.core_api.read_namespace(namespace)
-    except:
-        save_task_progress(task, "失败", 100, "访问Kubernetes命名空间失败...")
-        save_task_step_progress(task.uuid, '实例停止', '失败', 100, '访问Kubernetes命名空间失败...')
-        return
-
-    save_task_progress(task, "正在执行", 50, "停止运行模型实例...")
-    save_task_step_progress(task.uuid, '实例停止', '执行', 50, '停止运行模型实例...')
-    try:
-        g.k8s_client.apps_api.delete_namespaced_deployment("deployment-" + deployment.uuid, namespace)
-        g.k8s_client.core_api.delete_namespaced_service("service-" + deployment.uuid, namespace)
-    except Exception as e:
-        pass
-
-    umm_client.update_deployment_status({
-        'id': deployment.id,
-        'status': '停止'
-    }, g.oauth_client.get_jwt())
-
-    save_task_progress(task, "成功", 100, "成功停止运行模型实例。")
-    save_task_step_progress(task.uuid, '成功', '执行', 100, '成功停止运行模型实例。')
-
-
-def change(deployment, resource, lcm):
-    try:
-        name = 'deployment-' + deployment.uuid
-        namespace = 'ucumos-' + replace_special_char(deployment.deployer)
-        body = {'spec': {'replicas': 1}}
-        new_status = '暂停'
-
-        if lcm == 'start':
-            new_status = '运行'
-        elif lcm == 'pause':
-            body = {'spec': {'replicas': 0}}
-        elif lcm == 'change':
-            data = DeploymentStatus()
-            data.__dict__ = resource
-            res = g.k8s_client.apps_api.read_namespaced_deployment_status(name, namespace)
-            body = {
-                'spec': {
-                    'replicas': data.replicas,
-                    'template': {
-                        'spec': {
-                            'containers': [
-                                {
-                                    "name": res.spec.template.spec.containers[0].name,
-                                    "resources": {
-                                        "requests": {
-                                            "cpu": data.requestsCpu,
-                                            "memory": data.requestsMem
-                                        },
-                                        "limits": {
-                                            "cpu": data.limitsCpu,
-                                            "memory": data.limitsMem
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        else:
-            return
-
-        res = g.k8s_client.apps_api.patch_namespaced_deployment(name, namespace, body)
-        if lcm == 'start' or lcm == 'pause':
-            umm_client.update_deployment_status({'id': deployment.id, 'status': new_status}, g.oauth_client.get_jwt())
-        return res
-    except:
-        return
-
-
-async def status(user, uuid):
-    try:
-        namespace = 'ucumos-' + replace_special_char(user)
-        res = g.k8s_client.apps_api.read_namespaced_deployment_status('deployment-' + uuid, namespace)
         deployment_status = DeploymentStatus()
         if res.status.replicas:
             deployment_status.replicas = res.status.replicas
@@ -114,22 +27,147 @@ async def status(user, uuid):
         deployment_status.limitsMem = res.spec.template.spec.containers[0].resources.limits["memory"]
         deployment_status.requestsCpu = res.spec.template.spec.containers[0].resources.requests["cpu"]
         deployment_status.requestsMem = res.spec.template.spec.containers[0].resources.requests["memory"]
-        return deployment_status
     except:
-        return
+        raise Exception('获取k8s状态失败')
+
+    return deployment_status.__dict__
 
 
-async def logs(user, uuid):
+def get_deployment_logs(**args):
+    username = args.get('username')
+    deployment_uuid = args.get('deploymentUuid')
+    token = token_service.get_token(args.get('http_request'))
+    has_role = token.has_role('ROLE_OPERATOR')
+    user_login = token.username
+    if user_login is None or (user_login != username and not has_role):
+        raise Exception('403 Forbidden')
+
     try:
-        namespace = 'ucumos-' + replace_special_char(user)
-        res = g.k8s_client.core_api.list_namespaced_pod(namespace, label_selector='ucumos=' + uuid)
-        result = ''
+        namespace = 'ucumos-' + replace_special_char(username)
+        res = g.k8s_client.core_api.list_namespaced_pod(namespace, label_selector='ucumos=' + deployment_uuid)
+
+        lines = []
         for pods in res.items:
             if pods.status.phase != 'Running':
                 continue
-            result += '[pod ' + pods.metadata.name[-15:] + ']:\n'
-            result += g.k8s_client.core_api.read_namespaced_pod_log(pods.metadata.name, namespace)
-            result += '\n'
-        return {'logs': result}
+            lines.append('[pod ' + pods.metadata.name[-15:] + ']:')
+            lines.append(g.k8s_client.core_api.read_namespaced_pod_log(pods.metadata.name, namespace))
     except:
-        return
+        raise Exception('获取k8s日志失败')
+
+    return '\n'.join(lines)
+
+
+def scale_deployment(**args):
+    deployment = Deployment()
+    deployment.__dict__ = args.get('deployment')
+    target_status = DeploymentStatus()
+    target_status.__dict__ = args.get('targetStatus')
+    token = token_service.get_token(args.get('http_request'))
+    has_role = token.has_role('ROLE_OPERATOR')
+    user_login = token.username
+    if user_login is None or (user_login != deployment.deployer and not has_role):
+        raise Exception('403 Forbidden')
+
+    try:
+        name = 'deployment-' + deployment.uuid
+        namespace = 'ucumos-' + replace_special_char(deployment.deployer)
+
+        old_status = g.k8s_client.apps_api.read_namespaced_deployment_status(name, namespace)
+        body = {
+            'spec': {
+                'replicas': target_status.replicas,
+                'template': {
+                    'spec': {
+                        'containers': [
+                            {
+                                "name": old_status.spec.template.spec.containers[0].name,
+                                "resources": {
+                                    "requests": {
+                                        "cpu": target_status.requestsCpu,
+                                        "memory": target_status.requestsMem
+                                    },
+                                    "limits": {
+                                        "cpu": target_status.limitsCpu,
+                                        "memory": target_status.limitsMem
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+        g.k8s_client.apps_api.patch_namespaced_deployment(name, namespace, body)
+    except:
+        raise Exception('k8s扩缩容失败')
+
+    return 0
+
+
+def pause_deployment(**args):
+    deployment = Deployment()
+    deployment.__dict__ = args.get('deployment')
+    token = token_service.get_token(args.get('http_request'))
+    has_role = token.has_role('ROLE_OPERATOR')
+    user_login = token.username
+    if user_login is None or (user_login != deployment.deployer and not has_role):
+        raise Exception('403 Forbidden')
+
+    try:
+        name = 'deployment-' + deployment.uuid
+        namespace = 'ucumos-' + replace_special_char(deployment.deployer)
+
+        body = {'spec': {'replicas': 0}}
+        g.k8s_client.apps_api.patch_namespaced_deployment(name, namespace, body)
+        umm_client.update_deployment_status(deployment.id, '暂停', g.oauth_client.get_jwt())
+    except:
+        raise Exception('暂停k8s实体失败')
+
+    return 0
+
+
+def restart_deployment(**args):
+    deployment = Deployment()
+    deployment.__dict__ = args.get('deployment')
+    token = token_service.get_token(args.get('http_request'))
+    has_role = token.has_role('ROLE_OPERATOR')
+    user_login = token.username
+    if user_login is None or (user_login != deployment.deployer and not has_role):
+        raise Exception('403 Forbidden')
+
+    try:
+        name = 'deployment-' + deployment.uuid
+        namespace = 'ucumos-' + replace_special_char(deployment.deployer)
+
+        body = {'spec': {'replicas': 1}}
+        g.k8s_client.apps_api.patch_namespaced_deployment(name, namespace, body)
+        umm_client.update_deployment_status(deployment.id, '运行', g.oauth_client.get_jwt())
+    except:
+        raise Exception('重启k8s实体失败')
+
+    return 0
+
+
+def stop_deployment(**args):
+    deployment = Deployment()
+    deployment.__dict__ = args.get('deployment')
+    token = token_service.get_token(args.get('http_request'))
+    has_role = token.has_role('ROLE_OPERATOR')
+    user_login = token.username
+    if user_login is None or (user_login != deployment.deployer and not has_role):
+        raise Exception('403 Forbidden')
+
+    try:
+        name = 'deployment-' + deployment.uuid
+        service = 'service-' + deployment.uuid
+        namespace = 'ucumos-' + replace_special_char(deployment.deployer)
+
+        g.k8s_client.apps_api.delete_namespaced_deployment(name, namespace)
+        g.k8s_client.core_api.delete_namespaced_service(service, namespace)
+
+        umm_client.update_deployment_status(deployment.id, '停止', g.oauth_client.get_jwt())
+    except:
+        raise Exception('停止k8s实体失败')
+
+    return 0

@@ -1,8 +1,8 @@
-from app.globals.globals import g
+from app.global_data.global_data import g
 from app.domain.composite_solution_map import CompositeSolutionMap
 
 
-async def create_composite_solution_map(composite_solution_map):
+def create_composite_solution_map(composite_solution_map):
     sql = '''
         INSERT INTO composite_solution_map (
             parent_uuid,
@@ -13,13 +13,14 @@ async def create_composite_solution_map(composite_solution_map):
         composite_solution_map.childUuid
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def update_composite_solution_map(composite_solution_map):
+def update_composite_solution_map(composite_solution_map):
     sql = '''
         UPDATE composite_solution_map SET 
             parent_uuid = "{}",
@@ -31,20 +32,22 @@ async def update_composite_solution_map(composite_solution_map):
         composite_solution_map.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def get_composite_solution_maps(parent_uuid=None):
+def get_composite_solution_maps(parent_uuid=None):
     where = '' if parent_uuid is None else 'WHERE parent_uuid = "{}"'.format(parent_uuid)
     sql = 'SELECT * FROM composite_solution_map {}'.format(where)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     composite_solution_map_list = []
     for record in records:
@@ -55,13 +58,14 @@ async def get_composite_solution_maps(parent_uuid=None):
     return composite_solution_map_list
 
 
-async def get_composite_solution_map(id):
+def get_composite_solution_map(id):
     sql = 'SELECT * FROM composite_solution_map WHERE id = "{}" limit 1'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     composite_solution_map_list = []
     for record in records:
@@ -72,11 +76,11 @@ async def get_composite_solution_map(id):
     return composite_solution_map_list[0]
 
 
-async def delete_composite_solution_map(id):
+def delete_composite_solution_map(id):
     sql = 'DELETE FROM composite_solution_map WHERE id = "{}"'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
-
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()

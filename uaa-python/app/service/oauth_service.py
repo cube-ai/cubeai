@@ -2,9 +2,64 @@ import base64
 import datetime
 import python_jwt
 from jwcrypto import jwk
-from app.globals.globals import g
+from app.global_data.global_data import g
 from app.database import user_db
 from app.service import passwd_service
+
+
+def get_public_key(**args):
+    return {
+        'alg': 'SHA256withRSA',
+        'value': str(g.config.public_key, encoding='utf-8')
+    }
+
+
+def get_token(**args):
+    http_request = args.get('http_request')
+    grant_type = args.get('grant_type')
+
+    if grant_type == 'client_credentials':
+        if not verify_basic_authorization(http_request.headers.get('Authorization'), 'internal'):
+            raise Exception('403 Forbidden')
+
+        result = gen_client_token()
+        if result is None:
+            raise Exception('400 bad request')
+
+        return result
+
+    if grant_type == 'password':
+        if not verify_basic_authorization(http_request.headers.get('Authorization'), 'web_app'):
+            raise Exception('403 Forbidden')
+
+        username = args.get('username')
+        password = args.get('password')
+
+        user = verify_user_password(username, password)
+        if user is None:
+            raise Exception('403 Forbidden')
+
+        result = gen_user_token(user)
+        if result is None:
+            raise Exception('400 bad request')
+
+        return result
+
+    if grant_type == 'refresh_token':
+        if not verify_basic_authorization(http_request.headers.get('Authorization'), 'web_app'):
+            raise Exception('403 Forbidden')
+
+        refresh_token = args.get('refresh_token')
+        if not refresh_token:
+            raise Exception('400 bad request')
+
+        result = gen_from_refresh_token(refresh_token)
+        if result is None:
+            raise Exception('400 bad request')
+
+        return result
+
+    raise Exception('400 bad request')
 
 
 def verify_basic_authorization(authorization, client_id):
@@ -61,17 +116,17 @@ def gen_client_token():
     return result
 
 
-async def verify_user_password(username, password):
+def verify_user_password(username, password):
 
-    user = await user_db.find_one_by_kv('login', username)
+    user = user_db.find_one_by_kv('login', username)
     if user is not None and passwd_service.verify_passwd(user.password, password):
         return user
 
-    user = await user_db.find_one_by_kv('email', username)
+    user = user_db.find_one_by_kv('email', username)
     if user is not None and passwd_service.verify_passwd(user.password, password):
         return user
 
-    user = await user_db.find_one_by_kv('phone', username)
+    user = user_db.find_one_by_kv('phone', username)
     if user is not None and passwd_service.verify_passwd(user.password, password):
         return user
 
@@ -79,13 +134,6 @@ async def verify_user_password(username, password):
 
 
 def gen_user_token(user):
-
-    # 用户不太可能5分钟内频繁登录退出再登录，所以这个缓存意义不大且耗费内存，去掉
-    # result = g.cached_user_tokens.get(user.login)
-    # if result is not None:
-    #     now = datetime.datetime.now().timestamp()
-    #     if now + 15 < result.get('exp'):
-    #         return result
 
     claims = {
         'user_name': user.login,
@@ -139,13 +187,10 @@ def gen_user_token(user):
         'jti': jwt_decoded[1].get('jti')
     }
 
-    # 用户不太可能5分钟内频繁登录退出再登录，所以这个缓存意义不大且耗费内存，去掉
-    # g.cached_user_tokens[user.login] = result
-
     return result
 
 
-async def gen_from_refresh_token(refresh_token):
+def gen_from_refresh_token(refresh_token):
 
     try:
         jwt_decoded = python_jwt.verify_jwt(
@@ -160,7 +205,7 @@ async def gen_from_refresh_token(refresh_token):
 
     user_name = jwt_decoded[1].get('user_name')
     # 用户的ROLE可能改变，所以refresh token时应该重新查询用户数据库，而不能直接用上次token中信息
-    user = await user_db.find_one_by_kv('login', user_name)
+    user = user_db.find_one_by_kv('login', user_name)
     if user is None:
         return None
 
@@ -215,7 +260,5 @@ async def gen_from_refresh_token(refresh_token):
         'expires_in': jwt_decoded[1].get('exp') - jwt_decoded[1].get('iat') - 1,
         'jti': jwt_decoded[1].get('jti')
     }
-
-    g.cached_user_tokens[claims.get('user_name')] = result
 
     return result

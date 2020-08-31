@@ -1,36 +1,38 @@
-from app.globals.globals import g
+from app.global_data.global_data import g
 from app.domain.article import Article
 from app.utils.pageable import gen_pageable
 
 
-async def get_articles(where, pageable):
+def get_articles(where, pageable):
     pageable = gen_pageable(pageable)
     sql = 'SELECT * FROM article {} {}'.format(where, pageable)
     sql_total_count = 'SELECT COUNT(*) FROM article {}'.format(where)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
-            article_list = []
-            for record in records:
-                article = Article()
-                article.from_record(record)
-                article_list.append(article.__dict__)
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+        article_list = []
+        for record in records:
+            article = Article()
+            article.from_record(record)
+            article_list.append(article.__dict__)
 
-            await cursor.execute(sql_total_count)
-            total_count = cursor.fetchone()
+        cursor.execute(sql_total_count)
+        total_count = cursor.fetchone()
+    conn.close()
 
     return total_count[0], article_list
 
 
-async def get_articles_by_uuid(uuid):
+def get_articles_by_uuid(uuid):
     sql = 'SELECT * FROM article WHERE uuid = "{}" limit 1'.format(uuid)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     article_list = []
     for record in records:
@@ -41,13 +43,14 @@ async def get_articles_by_uuid(uuid):
     return article_list
 
 
-async def get_article(id):
+def get_article(id):
     sql = 'SELECT * FROM article WHERE id = "{}" limit 1'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     article_list = []
     for record in records:
@@ -58,7 +61,7 @@ async def get_article(id):
     return article_list[0]
 
 
-async def create_article(article):
+def create_article(article):
     sql = '''
         INSERT INTO article (
             uuid,
@@ -97,13 +100,18 @@ async def create_article(article):
         article.modifiedDate
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+        cursor.execute('SELECT last_insert_id() FROM article limit 1')
+        id = cursor.fetchone()[0]
+    conn.close()
+
+    return id
 
 
-async def update_article(article):
+def update_article(article):
     sql = '''
         UPDATE article SET 
             uuid = '{}',
@@ -143,16 +151,18 @@ async def update_article(article):
         article.id
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
 
 
-async def delete_article(id):
+def delete_article(id):
     sql = 'DELETE FROM article WHERE id = "{}"'.format(id)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()

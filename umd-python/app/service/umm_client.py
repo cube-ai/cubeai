@@ -6,27 +6,55 @@ service_name = 'umm'
 
 
 def create_task(task, jwt):
-    return http_client('post', service_name, '/api/tasks', body=json.dumps(task.__dict__), jwt=jwt)
+    body = {
+        'action': 'create_task',
+        'args': {
+            'task': task.__dict__,
+        },
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
 def update_task(task, jwt):
-    return http_client('put', service_name, '/api/tasks', body=json.dumps(task.__dict__), jwt=jwt)
-
-
-def get_tasks(uuid, jwt):
-    return http_client('get', service_name, '/api/tasks?uuid={}'.format(uuid), jwt=jwt)
+    body = {
+        'action': 'update_task',
+        'args': {
+            'task': task.__dict__,
+        },
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
 def create_task_step(task_step, jwt):
-    return http_client('post', service_name, '/api/task-steps', body=json.dumps(task_step.__dict__), jwt=jwt)
+    body = {
+        'action': 'create_task_step',
+        'args': {
+            'task_step': task_step.__dict__,
+        },
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
-def delete_task_steps(body, jwt):
-    return http_client('put', service_name, '/api/task-steps', body=json.dumps(body), jwt=jwt)
+def delete_task_steps(task_uuid, start_progress, end_progress, jwt):
+    body = {
+        'action': 'delete_task_steps',
+        'args': {
+            'task_uuid': task_uuid,
+            'start_progress': start_progress,
+            'end_progress': end_progress,
+        },
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
 def get_solutions(uuid, jwt=None):
-    return http_client('get', service_name, '/api/solutions?uuid={}'.format(uuid), jwt=jwt)
+    body = {
+        'action': 'get_solutions',
+        'args': {
+            'uuid': uuid,
+        },
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
 def create_solution(solution, jwt):
@@ -41,12 +69,15 @@ def create_artifact(artifact, jwt):
     return http_client('post', service_name, '/api/artifacts', body=json.dumps(artifact.__dict__), jwt=jwt)
 
 
-def get_artifacts(solution_uuid, artifact_type, jwt=None):
-    return http_client('get', service_name, '/api/artifacts?solutionUuid={}&type={}'.format(solution_uuid, artifact_type), jwt=jwt)
-
-
-def get_all_artifacts(solution_uuid, jwt=None):
-    return http_client('get', service_name, '/api/artifacts?solutionUuid={}'.format(solution_uuid), jwt=jwt)
+def get_artifacts(solution_uuid, type, jwt=None):
+    body = {
+        'action': 'get_artifacts',
+        'args': {
+            'solutionUuid': solution_uuid,
+            'type': type,
+        },
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
 def delete_artifact(id, jwt):
@@ -66,8 +97,21 @@ def delete_document(id, jwt):
 
 
 def create_deployment(deployment, jwt):
-    return http_client('post', service_name, '/api/deployments', body=json.dumps(deployment.__dict__), jwt=jwt)
+    body = {
+        'action': 'create_deployment',
+        'args': {
+            'deployment': deployment.__dict__,
+        },
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
-def update_deployment_status(body, jwt):
-    return http_client('put', service_name, '/api/deployments/status', body=json.dumps(body), jwt=jwt)
+def update_deployment_status(deploymentId, status, jwt):
+    body = {
+        'action': 'update_deployment_status',
+        'args': {
+            'deploymentId': deploymentId,
+            'status': status,
+        },
+    }
+    return http_client(service_name, body=body, jwt=jwt)

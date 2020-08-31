@@ -1,4 +1,3 @@
-import json
 from app.service.http_client import http_client
 
 
@@ -6,55 +5,120 @@ service_name = 'umm'
 
 
 def create_task(task, jwt):
-    return http_client('post', service_name, '/api/tasks', body=json.dumps(task.__dict__), jwt=jwt)
+    body = {
+        'action': 'create_task',
+        'args': {
+            'task': task.__dict__,
+        }
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
 def update_task(task, jwt):
-    return http_client('put', service_name, '/api/tasks', body=json.dumps(task.__dict__), jwt=jwt)
-
-
-def get_tasks(uuid, jwt):
-    return http_client('get', service_name, '/api/tasks?uuid={}'.format(uuid), jwt=jwt)
+    body = {
+        'action': 'update_task',
+        'args': {
+            'task': task.__dict__,
+        }
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
 def create_task_step(task_step, jwt):
-    return http_client('post', service_name, '/api/task-steps', body=json.dumps(task_step.__dict__), jwt=jwt)
+    body = {
+        'action': 'create_task_step',
+        'args': {
+            'task_step': task_step.__dict__,
+        }
+    }
+    return http_client(service_name, body=body, jwt=jwt)
+
+
+def create_solution(solution, jwt):
+    body = {
+        'action': 'create_solution',
+        'args': {
+            'solution': solution.__dict__,
+        }
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
 def get_solutions(uuid, jwt=None):
-    return http_client('get', service_name, '/api/solutions?uuid={}'.format(uuid), jwt=jwt)
+    body = {
+        'action': 'get_solutions',
+        'args': {
+            'uuid': uuid,
+        }
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
-def create_solution(solution, jwt):
-    return http_client('post', service_name, '/api/solutions', body=json.dumps(solution.__dict__), jwt=jwt)
 
-
-def delete_solution(id, jwt):
-    return http_client('delete', service_name, '/api/solutions/{}'.format(id), jwt=jwt)
+def delete_solution(solutionId, jwt):
+    body = {
+        'action': 'delete_solution',
+        'args': {
+            'solutionId': solutionId,
+        }
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
 def create_artifact(artifact, jwt):
-    return http_client('post', service_name, '/api/artifacts', body=json.dumps(artifact.__dict__), jwt=jwt)
+    body = {
+        'action': 'create_artifact',
+        'args': {
+            'artifact': artifact.__dict__,
+        }
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
-def get_artifacts(solution_uuid, artifact_type, jwt=None):
-    return http_client('get', service_name, '/api/artifacts?solutionUuid={}&type={}'.format(solution_uuid, artifact_type), jwt=jwt)
+def get_artifacts(solution_uuid, jwt=None):
+    body = {
+        'action': 'get_artifacts',
+        'args': {
+            'solutionUuid': solution_uuid,
+        }
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
-def get_all_artifacts(solution_uuid, jwt=None):
-    return http_client('get', service_name, '/api/artifacts?solutionUuid={}'.format(solution_uuid), jwt=jwt)
-
-
-def delete_artifact(id, jwt):
-    return http_client('delete', service_name, '/api/artifacts/{}'.format(id), jwt=jwt)
+def delete_artifact(artifactId, jwt):
+    body = {
+        'action': 'delete_artifact',
+        'args': {
+            'artifactId': artifactId,
+        }
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
 def create_document(document, jwt):
-    return http_client('post', service_name, '/api/documents', body=json.dumps(document.__dict__), jwt=jwt)
+    body = {
+        'action': 'create_document',
+        'args': {
+            'document': document.__dict__,
+        }
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
-def get_document(id, jwt=None):
-    return http_client('get', service_name, '/api/documents/{}'.format(id), jwt=jwt)
+def find_document(documentId, jwt=None):
+    body = {
+        'action': 'find_document',
+        'args': {
+            'documentId': documentId,
+        }
+    }
+    return http_client(service_name, body=body, jwt=jwt)
 
 
-def delete_document(id, jwt):
-    return http_client('delete', service_name, '/api/documents/{}'.format(id), jwt=jwt)
+def delete_document(documentId, jwt):
+    body = {
+        'action': 'delete_document',
+        'args': {
+            'documentId': documentId,
+        }
+    }
+    return http_client(service_name, body=body, jwt=jwt)

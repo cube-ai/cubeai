@@ -1,8 +1,8 @@
-from app.globals.globals import g
+from app.global_data.global_data import g
 from app.domain.task_step import TaskStep
 
 
-async def create_task_step(task_step):
+def create_task_step(task_step):
     sql = '''
         INSERT INTO task_step (
             task_uuid,
@@ -21,19 +21,25 @@ async def create_task_step(task_step):
         task_step.stepDate,
     )
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+        cursor.execute('SELECT last_insert_id() FROM task_step limit 1')
+        id = cursor.fetchone()[0]
+    conn.close()
+
+    return id
 
 
-async def get_task_steps(where):
+def get_task_steps(where):
     sql = 'SELECT * FROM task_step {}'.format(where)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            records = cursor.fetchall()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        records = cursor.fetchall()
+    conn.close()
 
     task_step_list = []
     for record in records:
@@ -44,10 +50,11 @@ async def get_task_steps(where):
     return task_step_list
 
 
-async def delete_task_steps(task_uuid, start_progress, end_progress):
+def delete_task_steps(task_uuid, start_progress, end_progress):
     sql = 'DELETE FROM task_step WHERE task_uuid = "{}" and step_progress > "{}" and step_progress < "{}"'.format(task_uuid, start_progress, end_progress)
 
-    async with await g.db.pool.Connection() as conn:
-        async with conn.cursor() as cursor:
-            await cursor.execute(sql)
-            await conn.commit()
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()

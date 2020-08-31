@@ -1,10 +1,9 @@
 import json
 import requests
-from app.globals.globals import g
-import logging
+from app.global_data.global_data import g
 
 
-def http_client(method, service_name, api_route, body=None, jwt=None):
+def http_client(service_name, body=None, jwt=None):
     headers = {
         'Content-Type': 'application/json;charset=UTF-8',
         'Accept': '*/*',
@@ -14,26 +13,27 @@ def http_client(method, service_name, api_route, body=None, jwt=None):
         headers['Authorization'] = 'Bearer {}'.format(jwt)
 
     host = g.consul_client.resolve_service(service_name)
-    url = 'http://{}{}'.format(host, api_route)
+    url = 'http://{}/api/data'.format(host)
 
-    if method == 'get':
-        res = requests.get(url=url, headers=headers)
-    elif method == 'post':
-        res = requests.post(url=url, data=body, headers=headers)
-    elif method == 'put':
-        res = requests.put(url=url, data=body, headers=headers)
-    elif method == 'delete':
-        res = requests.delete(url=url, headers=headers)
-    else:
-        logging.info('No supported HTTP method')
-        res = None
+    try:
+        res = requests.post(url=url, json=body, headers=headers)
+    except:
+        return {
+            'status': 'err',
+            'value': 'HTTP访问失败!'
+        }
 
-    if res and res.status_code == 200:
-        try:
-            res = json.loads(res.text)
-        except:
-            res = res.text
-    else:
-        res = None
+    if res.status_code != 200:
+        return {
+            'status': 'err',
+            'value': res.text
+        }
 
-    return res
+    try:
+        # JSON数据，转化成JSON对象
+        result = json.loads(res.text, encoding='utf-8')
+    except:
+        # 非JSON数据（二进制字节流），直接返回
+        result = res.content
+
+    return result

@@ -1,47 +1,78 @@
 import json
-import subprocess
-import zipfile
-import docker
+import uuid
 import yaml
-
-from app.service.tosca.protobuf_generator import ProtobufGenerator
-from app.service.tosca import tgif_generator
+import docker
+import zipfile
+import subprocess
+import threading
+import platform
 from app.utils import mytime
-from app.service import umm_client, uaa_client, message_service, nexus_client
+from app.service import token_service, umm_client, uaa_client, message_service, nexus_client
 from app.domain.task import Task
 from app.domain.task_step import TaskStep
 from app.domain.solution import Solution
 from app.domain.artifact import Artifact
 from app.utils.file_tools import *
-from app.globals.globals import g
+from app.global_data.global_data import g
 from app.resources import dockerfiles
-import logging
-import platform
 
 
-def onboarding(task_uuid):
-    tasks = umm_client.get_tasks(task_uuid, jwt=g.oauth_client.get_jwt())
-    if tasks is None or len(tasks) == 0:
-        return
+def onboard_model(**args):
+    http_request = args.get('http_request')
+    token = token_service.get_token(http_request)
+    user_login = token.username
+    if not token.is_valid:
+        raise Exception('403 Forbidden')
+
+    task_uuid = str(uuid.uuid4()).replace('-', '')
+    file_obj = http_request.files.get('onboard_model')[0]
+    filename = file_obj.filename
+
+    user_home = os.path.expanduser('~')
+    base_path = user_home + '/tempfile/models/' + user_login + '/' + task_uuid
+    make_path(base_path)
+    del_path_files(base_path)
+
+    file_body = args.get('stream')
+    file_path = os.path.join(base_path, filename)
+    with open(file_path, 'wb') as f:
+        f.write(file_body)
 
     task = Task()
-    task.__dict__ = tasks[0]
+    task.uuid = task_uuid
+    task.userLogin = user_login
+    task.taskName = filename
+    task.taskType = '模型导入'
+    task.taskStatus = '等待调度'
+    task.taskProgress = 0
+    task.targetUuid = task_uuid
 
+    res = umm_client.create_task(task, jwt=token.jwt)
+    if res['status'] != 'ok':
+        raise Exception('500: 向umm创建模型导入任务失败')
+
+    task.id = res['value']
+    thread = threading.Thread(target=onboarding_thread, args=(task, base_path))
+    thread.setDaemon(True)
+    thread.start()
+
+    return task_uuid
+
+
+def onboarding_thread(task, base_path):
     save_task_progress(task, '正在执行', 5, '启动模型导入...')
 
-    try:
-        user = uaa_client.get_user(task.userLogin, jwt=g.oauth_client.get_jwt())
-    except:
+    res = uaa_client.find_user(task.userLogin, jwt=g.oauth_client.get_jwt())
+    if res['status'] != 'ok':
         save_task_progress(task, '失败', 100, '获取用户信息失败。', mytime.now())
         save_task_step_progress(task.uuid, '提取模型文件', '失败', 100, '获取用户信息失败。')
         return
 
+    user = res['value']
     solution = Solution()
     solution.uuid = task.targetUuid
     solution.authorLogin = task.userLogin
     solution.authorName = user.get('fullName')
-
-    base_path = os.path.expanduser('~') + '/tempfile/ucumosmodels/' + task.userLogin + '/' + task.uuid
 
     if do_onboarding(task, solution, base_path):
         message_service.send_message(
@@ -52,12 +83,12 @@ def onboarding(task_uuid):
             False
         )
     else:
-        revertback_onboarding(task_uuid, base_path)
+        revertback_onboarding(task.uuid, base_path)
         message_service.send_message(
             solution.authorLogin,
             '模型 ' + task.taskName + ' 导入失败',
             '你的模型 ' + task.taskName + ' 导入失败！\n\n请点击下方[目标页面]按钮查看任务执行情况...',
-            '/pmodelhub/#/task-onboarding/' + task_uuid + '/' + task.taskName,
+            '/pmodelhub/#/task-onboarding/' + task.uuid + '/' + task.taskName,
             False
         )
 
@@ -125,7 +156,11 @@ def do_onboarding(task, solution, base_path):
 def revertback_onboarding(solution_uuid, base_path):
     del_path(base_path)
 
-    artifact_list = umm_client.get_all_artifacts(solution_uuid, g.oauth_client.get_jwt())
+    res = umm_client.get_artifacts(solution_uuid, g.oauth_client.get_jwt())
+    if res['status'] != 'ok':
+        return
+
+    artifact_list = res['value']
     if artifact_list:
         for artifact in artifact_list:
             if artifact.get('type') == 'DOCKER镜像':
@@ -263,56 +298,6 @@ def create_artifact(solution, file_name, file_type, long_url, file_size):
 
 def generate_TOSCA(task, solution, base_path):
     save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 10, '开始生成TOSCA文件...')
-
-    if False:
-        model_files = get_model_files(base_path)
-        protobuf_generator = ProtobufGenerator()
-        try:
-            proto_json_str = protobuf_generator.create_proto_json(model_files.get('schemaFile'))
-        except Exception as e:
-            logging.error('error in createProtoJson, {}'.format(repr(e)))
-            return False
-        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 20, '将POTOBUF文件内容转换成JSON格式的TOSCA-SCHEMA字符串。')
-
-        model_files['protobufFile'] = proto_json_str
-        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 30, '将JSON格式的TOSCA-SCHEMA字符串写入临时文件。')
-
-        # 上传文件作为artifact到nexus服务器，并添加信息到数据库。
-        if not add_artifact_data(solution, 'protobuf.json', proto_json_str, 'TOSCA-SCHEMA'):
-            save_task_step_progress(task.uuid, '生成TOSCA文件', '失败',  100, '上传TOSCA-SCHEMA文件到NEXUS服务器，并向数据库中插入artifact记录失败。')
-            return False
-
-        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行',  40, '上传TOSCA-SCHEMA文件到NEXUS服务器，并向数据库中插入artifact记录。')
-        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行',  50, '开始生成TOSCA生成器输入文件（tgif）...')
-        file_name = model_files.get('metadataFile')
-        with open(file_name, 'r', encoding='utf-8') as file:
-            text_lines = file.readlines()
-            meatDataStr = ''
-            for line in text_lines:
-                meatDataStr += line
-                meatDataStr += '\n'
-
-        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 60, '从metadata文件读取JSON字符串。')
-
-        metaDataJson = json.loads(meatDataStr.replace('\t', ''))
-        protobufJson = json.loads(proto_json_str.replace('\t', ''))
-        try:
-            tgif = tgif_generator.populate_tgif(solution.version, metaDataJson, protobufJson)
-        except Exception as e:
-            logging.error('error in populateTgif, {}'.format(repr(e)))
-            return False
-        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 70, '基于metadata和proto文件内容生成tgif。')
-        tgif_json_string = json.dumps(tgif, ensure_ascii=False)
-        tgif_json_string = tgif_json_string.replace("[null]", "[]")
-        tgif_json_string = tgif_json_string.replace("null", "{}")
-
-        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 75, "将tgif转换成JSON格式。")
-
-        if not add_artifact_data(solution, 'tgif.json', tgif_json_string, 'TOSCA生成器输入文件'):
-            save_task_step_progress(task.uuid, '生成TOSCA文件', '失败', 100, '上传tgif文件到NEXUS服务器，并向数据库中插入artifact记录失败。')
-            return False
-        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 80, '上传tgif文件到NEXUS服务器，并向数据库中插入artifact记录。')
-        save_task_step_progress(task.uuid, '生成TOSCA文件', '执行', 90, '成功生成TOSCA生成器输入文件（tgif）。')
 
     save_task_step_progress(task.uuid, '生成TOSCA文件', '成功', 100, '完成TOSCA文件生成。')
 
