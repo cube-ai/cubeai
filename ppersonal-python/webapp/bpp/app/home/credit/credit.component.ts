@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {Principal, HttpService} from '../../shared';
+import {Principal} from '../../shared';
+import {UmmClient} from '../';
 import {Location} from '@angular/common';
 import {Credit} from '../model/credit.model';
 import {CreditHistory} from '../model/credit-history.model';
@@ -17,7 +18,7 @@ export class CreditComponent implements OnInit {
         private principal: Principal,
         private location: Location,
         private router: Router,
-        private http: HttpService,
+        private ummClient: UmmClient,
     ) {
     }
 
@@ -29,22 +30,14 @@ export class CreditComponent implements OnInit {
     }
 
     loadAll() {
-        const body = {
-            action: 'get_my_credit',
-            args: {},
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_my_credit({}).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.credit = res.body['value'];
 
-                    const body1 = {
-                        action: 'get_credit_history',
-                        args: {
-                            sort: ['id,desc'],
-                        },
-                    };
-                    this.http.post('umm', body1).subscribe(
+                    this.ummClient.get_credit_history({
+                        sort: ['id,desc'],
+                    }).subscribe(
                         (res1) => {
                             if (res1.body['status'] === 'ok') {
                                 this.creditHistoryList = res1.body['value']['results'];

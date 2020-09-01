@@ -1,5 +1,5 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {ConfirmService, SnackBarService, GlobalService, HttpService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
+import {ConfirmService, SnackBarService, GlobalService, UaaClient, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
 import {Application} from '../../shared/model/application.model';
 import {Router} from '@angular/router';
 import {Principal, User} from '../../shared';
@@ -32,7 +32,7 @@ export class ApplicationComponent implements OnInit {
         private principal: Principal,
         private confirmService: ConfirmService,
         private snackBarService: SnackBarService,
-        private http: HttpService,
+        private uaaClient: UaaClient,
     ) {
     }
 
@@ -54,11 +54,7 @@ export class ApplicationComponent implements OnInit {
         queryOptions['size'] = this.itemsPerPage;
         queryOptions['sort'] = this.sort();
 
-        const body = {
-            action: 'get_applications',
-            args: queryOptions,
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.get_applications(queryOptions).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.totalItems = res.body['value']['total'];
@@ -130,13 +126,9 @@ export class ApplicationComponent implements OnInit {
     deleteApplication(application: Application) {
         this.confirmService.ask('确定要删除该应用？').then((confirm) => {
             if (confirm) {
-                const body = {
-                    action: 'delete_application',
-                    args: {
-                        id: application.id,
-                    },
-                };
-                this.http.post('uaa', body).subscribe(
+                this.uaaClient.delete_application({
+                    id: application.id,
+                }).subscribe(
                     (res) => {
                         if (res.body['status'] === 'ok') {
                             this.refresh();

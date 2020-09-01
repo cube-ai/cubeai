@@ -14,7 +14,8 @@ import {
     MatPaginatorCn,
     GlobalService,
     Principal,
-    HttpService,
+    LoginService,
+    UaaClient,
 } from './';
 
 @NgModule({
@@ -37,7 +38,8 @@ import {
         ConfirmService,
         GlobalService,
         Principal,
-        HttpService,
+        LoginService,
+        UaaClient,
         {provide: MatPaginatorIntl, useClass: MatPaginatorCn},
     ],
     exports: [

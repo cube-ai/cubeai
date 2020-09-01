@@ -1,6 +1,6 @@
 import {Component, ViewChild, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
-import {HttpService} from '../shared';
+import {UaaClient} from '../shared';
 import {AppListComponent} from './appnav/app-list.component';
 
 @Component({
@@ -15,7 +15,7 @@ export class HomeComponent implements OnInit {
     homepagePartners = '';
 
     constructor(private router: Router,
-                private http: HttpService,
+                private uaaClient: UaaClient,
                 ) {
     }
 
@@ -30,14 +30,10 @@ export class HomeComponent implements OnInit {
     }
 
     loadHomePageAppList() {
-        const body = {
-            action: 'get_applications',
-            args: {
-                subject1: 'homepage',
-                with_picture: 0,
-            },
-        };
-        this.http.post('uaa', body).subscribe((res) => {
+        this.uaaClient.get_applications({
+            subject1: 'homepage',
+            with_picture: 0,
+        }).subscribe((res) => {
             const result = res.body;
             if (result['status'] === 'ok') {
                 const applications = result['value']['results'];
@@ -51,13 +47,9 @@ export class HomeComponent implements OnInit {
     }
 
     loadHomePageIntro() {
-        const body = {
-            action: 'get_articles',
-            args: {
-                subject1: 'homepage-intro',
-            },
-        };
-        this.http.post('uaa', body).subscribe((res) => {
+        this.uaaClient.get_articles({
+            subject1: 'homepage-intro',
+        }).subscribe((res) => {
             const result = res.body;
             if (result['status'] === 'ok') {
                 const articles = result['value']['results'];
@@ -69,13 +61,9 @@ export class HomeComponent implements OnInit {
     }
 
     loadHomePagePartners() {
-        const body = {
-            action: 'get_articles',
-            args: {
-                subject1: 'homepage-partners',
-            },
-        };
-        this.http.post('uaa', body).subscribe((res) => {
+        this.uaaClient.get_articles({
+            subject1: 'homepage-partners',
+        }).subscribe((res) => {
             const result = res.body;
             if (result['status'] === 'ok') {
                 const articles = result['value']['results'];

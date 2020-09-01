@@ -1,3 +1,4 @@
+export * from './service/umm_client.service';
 export * from './star/star.component';
 export * from './star/star.route';
 export * from './task/task.component';

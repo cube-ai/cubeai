@@ -5,6 +5,7 @@ import { FileUploadModule } from 'ng2-file-upload';
 import { PopoverModule, BsDropdownModule } from 'ngx-bootstrap';
 
 import {
+    UmmClient,
     HomeComponent,
     PageHeaderComponent,
     StarComponent,
@@ -36,6 +37,7 @@ import {
     entryComponents: [
     ],
     providers: [
+        UmmClient,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 

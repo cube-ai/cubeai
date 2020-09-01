@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
-import {User, HttpService} from '../../shared';
+import {User, UaaClient} from '../../shared';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {UniqueEmailValidator, UniqueLoginValidator, UniquePhoneValidator, passwordMatchValidator, passwordStrongValidator} from '../../shared/form-validators';
 
@@ -22,7 +22,7 @@ export class RegisterComponent implements OnInit {
     constructor(
         private location: Location,
         private formBuilder: FormBuilder,
-        private http: HttpService,
+        private uaaClient: UaaClient,
         private uniqueLoginValidator: UniqueLoginValidator,
         private uniqueEmailValidator: UniqueEmailValidator,
         private uniquePhoneValidator: UniquePhoneValidator,
@@ -69,13 +69,9 @@ export class RegisterComponent implements OnInit {
         this.user.langKey = 'en';
         this.user.activateUrlPrefix = location.protocol + '//' + location.host + '/#/activate/';
 
-        const body = {
-            action: 'register_user',
-            args: {
-                user: this.user,
-            },
-        };
-        this.http.post('uaa', body).subscribe((res) => {
+        this.uaaClient.register_user({
+            user: this.user,
+        }).subscribe((res) => {
             if (res.body['status'] === 'ok') {
                 this.status = 'success';
             } else {

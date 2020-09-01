@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ConfirmService, GlobalService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService} from '../../shared';
-import {Principal, User, HttpService} from '../../shared';
+import {Principal, User, UaaClient} from '../../shared';
 import {Message} from '../model/message.model';
 import {MessageEditComponent} from '../';
 import {MatDialog, MatPaginator, PageEvent} from '@angular/material';
@@ -32,7 +32,7 @@ export class SentComponent implements OnInit {
     constructor(
         public globalService: GlobalService,
         private dialog: MatDialog,
-        private http: HttpService,
+        private uaaClient: UaaClient,
         private principal: Principal,
         private confirmService: ConfirmService,
         private snackBarService: SnackBarService,
@@ -58,11 +58,7 @@ export class SentComponent implements OnInit {
         queryOptions['size'] = this.itemsPerPage;
         queryOptions['sort'] = this.sort();
 
-        const body = {
-            action: 'get_messages',
-            args: queryOptions,
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.get_messages(queryOptions).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.totalItems = res.body['value']['total'];

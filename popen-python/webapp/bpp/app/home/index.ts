@@ -1,3 +1,6 @@
+export * from './service/umm_client.service';
+export * from './service/umu_client.service';
+export * from './service/umd_client.service';
 export * from './market/market.component';
 export * from './market/market.route';
 export * from './personal/personal.component';

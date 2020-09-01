@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpService } from './http.service';
+import { UaaClient } from './uaa_client.service';
 import {User} from '..';
 
 @Injectable()
@@ -8,7 +8,7 @@ export class Principal {
     private currentAccount: User = null;
 
     constructor(
-        private http: HttpService,
+        private uaaClient: UaaClient,
     ) {}
 
     authenticate(currentAccount) {
@@ -75,11 +75,7 @@ export class Principal {
     }
 
     updateCurrentAccount(): Promise<User> {
-        const body = {
-            'action': 'get_current_account',
-            'args': {},
-        };
-        return this.http.post('uaa', body).toPromise().then((res) => {
+        return this.uaaClient.get_current_account({}).toPromise().then((res) => {
             const result = res.body;
             if (result['status'] === 'ok') {
                 const account: User = result['value'];

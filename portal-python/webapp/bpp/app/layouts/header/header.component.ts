@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
-import {Principal, SnackBarService, HttpService} from '../../shared';
+import {Principal, SnackBarService, LoginService, UaaClient} from '../../shared';
 
 @Component({
     selector: 'my-header',
@@ -20,7 +20,8 @@ export class HeaderComponent implements OnInit {
     constructor(
         private principal: Principal,
         private snackBarService: SnackBarService,
-        private http: HttpService,
+        private loginService: LoginService,
+        private uaaClient: UaaClient,
         private router: Router,
         public dialog: MatDialog,
     ) {
@@ -45,14 +46,10 @@ export class HeaderComponent implements OnInit {
 
     getNewMsgCount() {
         if (this.principal.getLogin()) {
-            const body = {
-                action: 'get_unread_message_count',
-                args: {
-                    receiver: this.principal.getLogin(),
-                    deleted: false,
-                },
-            };
-            this.http.post('uaa', body).subscribe((res) => {
+            this.uaaClient.get_unread_message_count({
+                receiver: this.principal.getLogin(),
+                deleted: false,
+            }).subscribe((res) => {
                 if (res.body['status'] === 'ok') {
                     this.newMsgCount = res.body['value'];
                 }
@@ -83,7 +80,7 @@ export class HeaderComponent implements OnInit {
 
     logout() {
         if (this.principal.isAuthenticated()) {
-            this.http.logout().subscribe(() => {
+            this.loginService.logout().subscribe(() => {
                 this.principal.authenticate(null);
                 this.navigateToHomepage();
             });

@@ -1,6 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatPaginator, PageEvent} from '@angular/material';
-import {Principal, HttpService, ConfirmService, SnackBarService, GlobalService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
+import {Principal, ConfirmService, SnackBarService, GlobalService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
+import {UmmClient} from '../';
 import {Ability} from '../model/ability.model';
 import {Star} from '../model/star.model';
 import {Router} from '@angular/router';
@@ -34,7 +35,7 @@ export class MarketComponent implements OnInit {
         private router: Router,
         private confirmService: ConfirmService,
         private snackBarService: SnackBarService,
-        private http: HttpService,
+        private ummClient: UmmClient,
     ) {
     }
 
@@ -49,13 +50,9 @@ export class MarketComponent implements OnInit {
 
     findStaredUuidList() {
         if (this.userLogin) {
-            const body = {
-                action: 'get_user_stared_uuid_list',
-                args: {
-                    'userLogin': this.userLogin,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_user_stared_uuid_list({
+                'userLogin': this.userLogin,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.staredAbilityUuidList = res.body['value'];
@@ -81,11 +78,7 @@ export class MarketComponent implements OnInit {
         queryOptions['size'] = this.itemsPerPage;
         queryOptions['sort'] = this.sort();
 
-        const body = {
-            action: 'get_deployments',
-            args: queryOptions,
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_deployments(queryOptions).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.totalItems = res.body['value']['total'];
@@ -142,22 +135,14 @@ export class MarketComponent implements OnInit {
         }
 
         if (this.isMyStar(ability)) {
-            const body = {
-                action: 'delete_star_by_target_uuid',
-                args: {
-                    targetUuid: ability.uuid,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.delete_star_by_target_uuid({
+                targetUuid: ability.uuid,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
-                        const body1 = {
-                            action: 'update_deployment_star_count',
-                            args: {
-                                deploymentId: ability.id,
-                            },
-                        };
-                        this.http.post('umm', body1).subscribe();
+                        this.ummClient.update_deployment_star_count({
+                            deploymentId: ability.id,
+                        }).subscribe();
                         ability.starCount --;
                         this.findStaredUuidList();
                     }
@@ -167,23 +152,14 @@ export class MarketComponent implements OnInit {
             const star = new Star();
             star.targetType = 'AI开放能力';
             star.targetUuid = ability.uuid;
-
-            const body = {
-                action: 'create_star',
-                args: {
-                    star,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.create_star({
+                star,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
-                        const body1 = {
-                            action: 'update_deployment_star_count',
-                            args: {
-                                deploymentId: ability.id,
-                            },
-                        };
-                        this.http.post('umm', body1).subscribe();
+                        this.ummClient.update_deployment_star_count({
+                            deploymentId: ability.id,
+                        }).subscribe();
                         ability.starCount ++;
                         this.findStaredUuidList();
                     }

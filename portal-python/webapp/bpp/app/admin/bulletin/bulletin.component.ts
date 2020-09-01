@@ -2,7 +2,7 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {ConfirmService, SnackBarService, GlobalService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
 import {Article} from '../../shared/model/article.model';
 import {Router} from '@angular/router';
-import {Principal, User, HttpService} from '../../shared';
+import {Principal, User, UaaClient} from '../../shared';
 import {MatPaginator, PageEvent} from '@angular/material';
 
 @Component({
@@ -32,7 +32,7 @@ export class BulletinComponent implements OnInit {
         private principal: Principal,
         private confirmService: ConfirmService,
         private snackBarService: SnackBarService,
-        private http: HttpService,
+        private uaaClient: UaaClient,
     ) {
     }
 
@@ -54,11 +54,7 @@ export class BulletinComponent implements OnInit {
         queryOptions['size'] = this.itemsPerPage;
         queryOptions['sort'] = this.sort();
 
-        const body = {
-            action: 'get_articles',
-            args: queryOptions,
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.get_articles(queryOptions).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.totalItems = res.body['value']['total'];
@@ -130,13 +126,9 @@ export class BulletinComponent implements OnInit {
     deleteArticle(article: Article) {
         this.confirmService.ask('确定要删除该文稿？').then((confirm) => {
             if (confirm) {
-                const body = {
-                    action: 'delete_article',
-                    args: {
-                        id: article.id,
-                    },
-                };
-                this.http.post('uaa', body).subscribe(
+                this.uaaClient.delete_article({
+                    id: article.id,
+                }).subscribe(
                     (res) => {
                         if (res.body['status'] === 'ok') {
                             this.refresh();

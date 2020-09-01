@@ -3,7 +3,8 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {MatDialog} from '@angular/material';
 import { Location } from '@angular/common';
 import { Subscription } from 'rxjs/Subscription';
-import {Principal, HttpService, ConfirmService, GlobalService, SnackBarService} from '../../shared';
+import {Principal, ConfirmService, GlobalService, SnackBarService} from '../../shared';
+import {UmmClient, UmuClient, UmdClient} from '../';
 import {Ability} from '../model/ability.model';
 import {Star} from '../model/star.model';
 import {DeploymentStatus} from '../model/deployment-status.model';
@@ -41,7 +42,9 @@ export class AbilityComponent implements OnInit, OnDestroy {
         private router: Router,
         private principal: Principal,
         private location: Location,
-        private http: HttpService,
+        private ummClient: UmmClient,
+        private umuClient: UmuClient,
+        private umdClient: UmdClient,
         private snackBarService: SnackBarService,
         private confirmService: ConfirmService,
     ) {
@@ -49,17 +52,13 @@ export class AbilityComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         if (this.isOperator) {
-            const body = {
-                action: 'update_deployment_admin_info',
-                args: {
-                    deploymentId: this.ability.id,
-                    subject1: this.ability.subject1,
-                    subject2: this.ability.subject2,
-                    subject3: this.ability.subject3,
-                    displayOrder: this.ability.displayOrder,
-                },
-            };
-            this.http.post('umm', body).subscribe();
+            this.ummClient.update_deployment_admin_info({
+                deploymentId: this.ability.id,
+                subject1: this.ability.subject1,
+                subject2: this.ability.subject2,
+                subject3: this.ability.subject3,
+                displayOrder: this.ability.displayOrder,
+            }).subscribe();
         }
 
         this.subscription.unsubscribe();
@@ -74,13 +73,9 @@ export class AbilityComponent implements OnInit, OnDestroy {
                 this.abilityUuid = params['abilityUuid'];
             });
 
-            const body = {
-                action: 'get_deployments',
-                args: {
-                    uuid: this.abilityUuid,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_deployments({
+                uuid: this.abilityUuid,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok' && res.body['value']['total'] > 0) {
                         this.ability = res.body['value']['results'][0];
@@ -93,13 +88,9 @@ export class AbilityComponent implements OnInit, OnDestroy {
                             this.startGetAbilityStatus();
                         }
 
-                        const body1 = {
-                            action: 'get_solutions',
-                            args: {
-                                uuid: this.ability.solutionUuid,
-                            },
-                        };
-                        this.http.post('umm', body1).subscribe((res1) => {
+                        this.ummClient.get_solutions({
+                            uuid: this.ability.solutionUuid,
+                        }).subscribe((res1) => {
                             if (res1.body['status'] === 'ok' && res.body['value']['total'] > 0) {
                                 this.ability.solution = res1.body['value']['results'][0];
                             }
@@ -121,14 +112,10 @@ export class AbilityComponent implements OnInit, OnDestroy {
 
     loadStar() {
         if (this.userLogin) {
-            const body = {
-                action: 'get_stars',
-                args: {
-                    userLogin: this.userLogin,
-                    targetUuid: this.abilityUuid,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_stars({
+                userLogin: this.userLogin,
+                targetUuid: this.abilityUuid,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         if (res.body['value']['total'] > 0) {
@@ -151,23 +138,15 @@ export class AbilityComponent implements OnInit, OnDestroy {
         }
 
         if (this.star) {
-            const body = {
-                action: 'delete_star',
-                args: {
-                    starId: this.star.id,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.delete_star({
+                starId: this.star.id,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.star = null;
-                        const body1 = {
-                            action: 'update_deployment_star_count',
-                            args: {
-                                deploymentId: this.ability.id,
-                            },
-                        };
-                        this.http.post('umm', body1).subscribe();
+                        this.ummClient.update_deployment_star_count({
+                            deploymentId: this.ability.id,
+                        }).subscribe();
                         this.ability.starCount--;
                     }
                 }
@@ -176,24 +155,15 @@ export class AbilityComponent implements OnInit, OnDestroy {
             const star = new Star();
             star.targetType = 'AI开放能力';
             star.targetUuid = this.abilityUuid;
-
-            const body = {
-                action: 'create_star',
-                args: {
-                    star,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.create_star({
+                star,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.loadStar();
-                        const body1 = {
-                            action: 'update_deployment_star_count',
-                            args: {
-                                deploymentId: this.ability.id,
-                            },
-                        };
-                        this.http.post('umm', body1).subscribe();
+                        this.ummClient.update_deployment_star_count({
+                            deploymentId: this.ability.id,
+                        }).subscribe();
                         this.ability.starCount++;
                     }
                 }
@@ -202,24 +172,15 @@ export class AbilityComponent implements OnInit, OnDestroy {
     }
 
     getExampleRequest() {
-        const body = {
-            action: 'get_documents',
-            args: {
-                solutionUuid: this.ability.solutionUuid,
-                name: 'api-example.txt',
-            },
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_documents({
+            solutionUuid: this.ability.solutionUuid,
+            name: 'api-example.txt',
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok' && res.body['value'].length > 0) {
-                    const url = res.body['value'][0].url;
-                    const body1 = {
-                        action: 'download_document',
-                        args: {
-                            url,
-                        },
-                    };
-                    this.http.post('umu', body1).subscribe(
+                    this.umuClient.download_document({
+                        url: res.body['value'][0].url,
+                    }).subscribe(
                         (res1) => {
                             this.examples = JSON.parse(res1.body['value'])['examples'];
                         }
@@ -271,14 +232,10 @@ export class AbilityComponent implements OnInit, OnDestroy {
     }
 
     scaleAbility() {
-        const body = {
-            action: 'scale_deployment',
-            args: {
-                deployment: this.ability,
-                targetStatus: this.resource,
-            },
-        };
-        this.http.post('umd', body).subscribe(
+        this.umdClient.scale_deployment({
+            deployment: this.ability,
+            targetStatus: this.resource,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.snackBarService.success('扩缩容命令已发出，请等待所有容器副本就绪...');
@@ -304,13 +261,9 @@ export class AbilityComponent implements OnInit, OnDestroy {
                 this.ability.status = '正在暂停...';
                 this.changing = false;
 
-                const body = {
-                    action: 'pause_deployment',
-                    args: {
-                        deployment: this.ability,
-                    },
-                };
-                this.http.post('umd', body).subscribe(
+                this.umdClient.pause_deployment({
+                    deployment: this.ability,
+                }).subscribe(
                     (res) => {
                         if (res.body['status'] === 'ok') {
                             this.snackBarService.success('停止命令已发出，请等待......');
@@ -337,13 +290,9 @@ export class AbilityComponent implements OnInit, OnDestroy {
                 this.ability.status = '正在启动...';
                 this.changing = false;
 
-                const body = {
-                    action: 'restart_deployment',
-                    args: {
-                        deployment: this.ability,
-                    },
-                };
-                this.http.post('umd', body).subscribe(
+                this.umdClient.restart_deployment({
+                    deployment: this.ability,
+                }).subscribe(
                     (res) => {
                         if (res.body['status'] === 'ok') {
                             this.snackBarService.success('启动命令已发出，请等待所有容器副本就绪...');
@@ -370,13 +319,9 @@ export class AbilityComponent implements OnInit, OnDestroy {
                 const oldStatus = this.ability.status;
                 this.ability.status = '正在停止...';
 
-                const body = {
-                    action: 'stop_deployment',
-                    args: {
-                        deployment: this.ability,
-                    },
-                };
-                this.http.post('umd', body).subscribe(
+                this.umdClient.stop_deployment({
+                    deployment: this.ability,
+                }).subscribe(
                     (res) => {
                         if (res.body['status'] === 'ok') {
                             this.snackBarService.success('停止命令已发出，请等待...');
@@ -411,14 +356,10 @@ export class AbilityComponent implements OnInit, OnDestroy {
             return;
         }
 
-        const body = {
-            action: 'get_deployment_status',
-            args: {
-                deploymentUuid: this.abilityUuid,
-                username: this.ability.deployer,
-            },
-        };
-        this.http.post('umd', body).subscribe(
+        this.umdClient.get_deployment_status({
+            deploymentUuid: this.abilityUuid,
+            username: this.ability.deployer,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.deploymentStatus = res.body['value'];
@@ -428,14 +369,10 @@ export class AbilityComponent implements OnInit, OnDestroy {
         );
 
         if (this.showPodLogs) {
-            const body1 = {
-                action: 'get_deployment_logs',
-                args: {
-                    deploymentUuid: this.abilityUuid,
-                    username: this.ability.deployer,
-                },
-            };
-            this.http.post('umd', body1).subscribe(
+            this.umdClient.get_deployment_logs({
+                deploymentUuid: this.abilityUuid,
+                username: this.ability.deployer,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.podLogs = res.body['value'];

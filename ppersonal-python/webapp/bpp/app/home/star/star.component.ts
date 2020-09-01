@@ -2,7 +2,8 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatPaginator, PageEvent} from '@angular/material';
 import { Subscription } from 'rxjs/Subscription';
 import {ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
-import {Principal, HttpService} from '../../shared';
+import {Principal} from '../../shared';
+import {UmmClient} from '../';
 import {Location} from '@angular/common';
 import {Star} from '../model/star.model';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -34,7 +35,7 @@ export class StarComponent implements OnInit {
         private location: Location,
         private route: ActivatedRoute,
         private router: Router,
-        private http: HttpService,
+        private ummClient: UmmClient,
     ) {
     }
 
@@ -61,11 +62,7 @@ export class StarComponent implements OnInit {
         queryOptions['size'] = this.itemsPerPage;
         queryOptions['sort'] = this.sort();
 
-        const body = {
-            action: 'get_stars',
-            args: queryOptions,
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_stars(queryOptions).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.totalItems = res.body['value']['total'];
@@ -73,13 +70,9 @@ export class StarComponent implements OnInit {
 
                     this.stars.forEach((star) => {
                         if (star.targetType === 'AI模型') {
-                            const body1 = {
-                                action: 'get_solutions',
-                                args: {
-                                    uuid: star.targetUuid,
-                                },
-                            };
-                            this.http.post('umm', body1).subscribe((res1) => {
+                            this.ummClient.get_solutions({
+                                uuid: star.targetUuid,
+                            }).subscribe((res1) => {
                                 if (res1.body['status'] === 'ok' && res1.body['value']['total'] > 0) {
                                     star.targetObject = res1.body['value']['results'][0];
                                 } else {
@@ -87,13 +80,9 @@ export class StarComponent implements OnInit {
                                 }
                             });
                         } else if (star.targetType === 'AI开放能力') {
-                            const body2 = {
-                                action: 'get_deployments',
-                                args: {
-                                    uuid: star.targetUuid,
-                                },
-                            };
-                            this.http.post('umm', body2).subscribe((res2) => {
+                            this.ummClient.get_deployments({
+                                uuid: star.targetUuid,
+                            }).subscribe((res2) => {
                                 if (res2.body['status'] === 'ok' && res2.body['value']['total'] > 0) {
                                     star.targetObject = res2.body['value']['results'][0];
                                 } else {

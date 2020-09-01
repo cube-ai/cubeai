@@ -1,6 +1,6 @@
 import { Component, OnInit, } from '@angular/core';
 import { Location } from '@angular/common';
-import {SnackBarService, Principal, HttpService, User} from '../../shared';
+import {SnackBarService, Principal, UaaClient, User} from '../../shared';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {UniqueEmailValidator, UniquePhoneValidator, passwordMatchValidator, passwordStrongValidator} from '../../shared/form-validators';
 
@@ -27,7 +27,7 @@ export class SettingsComponent implements OnInit {
         private snackBarService: SnackBarService,
         private uniqueEmailValidator: UniqueEmailValidator,
         private uniquePhoneValidator: UniquePhoneValidator,
-        private http: HttpService,
+        private uaaClient: UaaClient,
         private principal: Principal
     ) {
         this.formGroup1 = this.formBuilder.group({
@@ -74,13 +74,9 @@ export class SettingsComponent implements OnInit {
         this.email.setAsyncValidators([]);
         this.phone.setAsyncValidators([]);
 
-        const body = {
-            action: 'update_current_account',
-            args: {
-                user: this.user,
-            }
-        };
-        this.http.post('uaa', body).subscribe(() => {
+        this.uaaClient.update_current_account({
+            user: this.user,
+        }).subscribe(() => {
             this.principal.updateCurrentAccount().then(
                 () => {
                     this.refreshAccount();
@@ -105,13 +101,9 @@ export class SettingsComponent implements OnInit {
     }
 
     onChangePassword() {
-        const body = {
-            action: 'change_password',
-            args: {
-                password: this.password.value,
-            }
-        };
-        this.http.post('uaa', body).subscribe((res) => {
+        this.uaaClient.change_password({
+            password: this.password.value,
+        }).subscribe((res) => {
             if (res.body['status'] === 'ok') {
                 this.snackBarService.success('修改密码成功！');
             } else {

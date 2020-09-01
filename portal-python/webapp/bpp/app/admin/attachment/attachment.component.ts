@@ -1,5 +1,5 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {ConfirmService, SnackBarService, GlobalService, HttpService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
+import {ConfirmService, SnackBarService, GlobalService, UaaClient, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
 import {Attachment} from './attachment.model';
 import {Router} from '@angular/router';
 import {Principal, User} from '../../shared';
@@ -35,7 +35,7 @@ export class AttachmentComponent implements OnInit {
         private principal: Principal,
         private confirmService: ConfirmService,
         private snackBarService: SnackBarService,
-        private http: HttpService,
+        private uaaClient: UaaClient,
     ) {
     }
 
@@ -55,15 +55,11 @@ export class AttachmentComponent implements OnInit {
     }
 
     loadAll() {
-        const body = {
-            action: 'get_attachments',
-            args: {
-                page: this.page - 1,
-                size: this.itemsPerPage,
-                sort: this.sort(),
-            },
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.get_attachments({
+            page: this.page - 1,
+            size: this.itemsPerPage,
+            sort: this.sort(),
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.totalItems = res.body['value']['total'];
@@ -130,13 +126,9 @@ export class AttachmentComponent implements OnInit {
     deleteAttachment(attachment: Attachment) {
         this.confirmService.ask('确定要删除该附件？').then((confirm) => {
             if (confirm) {
-                const body = {
-                    action: 'delete_attachment',
-                    args: {
-                        id: attachment.id,
-                    },
-                };
-                this.http.post('uaa', body).subscribe(
+                this.uaaClient.delete_attachment({
+                    id: attachment.id,
+                }).subscribe(
                     (res) => {
                         if (res.body['status'] === 'ok') {
                             this.refresh();

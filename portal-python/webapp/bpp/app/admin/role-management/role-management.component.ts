@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {SnackBarService, ConfirmService, GlobalService, HttpService} from '../../shared';
+import {SnackBarService, ConfirmService, GlobalService, UaaClient} from '../../shared';
 
 @Component({
     templateUrl: './role-management.component.html',
@@ -15,7 +15,7 @@ export class RoleMgmtComponent implements OnInit {
 
     constructor(
         public globalService: GlobalService,
-        private http: HttpService,
+        private uaaClient: UaaClient,
         private snackBarService: SnackBarService,
         private confirmService: ConfirmService,
     ) {
@@ -30,11 +30,7 @@ export class RoleMgmtComponent implements OnInit {
     }
 
     refresh() {
-        const body = {
-            action: 'get_authorities',
-            args: {},
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.get_authorities({}).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.roles = res.body['value'];
@@ -58,13 +54,9 @@ export class RoleMgmtComponent implements OnInit {
             return;
         }
 
-        const body = {
-            action: 'create_authority',
-            args: {
-                authority: this.role,
-            },
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.create_authority({
+            authority: this.role,
+        }).subscribe(
             (res) => {
                 this.refresh();
             }
@@ -74,13 +66,9 @@ export class RoleMgmtComponent implements OnInit {
     deleteRole(role: string) {
         this.confirmService.ask('确定要删除该角色？').then((confirm) => {
             if (confirm) {
-                const body = {
-                    action: 'delete_authority',
-                    args: {
-                        authority: role,
-                    },
-                };
-                this.http.post('uaa', body).subscribe(
+                this.uaaClient.delete_authority({
+                    authority: role,
+                }).subscribe(
                     (res) => {
                         this.refresh();
                         if (res.body['status'] !== 'ok') {

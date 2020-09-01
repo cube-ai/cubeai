@@ -1,6 +1,6 @@
 import { Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {HttpService} from '../../shared';
+import {UaaClient} from '../../shared';
 
 @Component({
     templateUrl: './activate.component.html'
@@ -13,7 +13,7 @@ export class ActivateComponent implements OnInit {
     constructor(
         private router: Router,
         private route: ActivatedRoute,
-        private http: HttpService,
+        private uaaClient: UaaClient,
     ) {
     }
 
@@ -25,13 +25,9 @@ export class ActivateComponent implements OnInit {
     }
 
     activate() {
-        const body = {
-            action: 'activate_user',
-            args: {
-                key: this.activateKey,
-            },
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.activate_user({
+            key: this.activateKey,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.status = 'success';

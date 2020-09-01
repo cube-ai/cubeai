@@ -4,7 +4,7 @@ import {
 import {Injectable} from '@angular/core';
 import {catchError, map} from 'rxjs/internal/operators';
 import {Observable} from 'rxjs/Rx';
-import {HttpService} from './service/http.service';
+import {UaaClient} from './service/uaa_client.service';
 
 export function passwordMatchValidator(ctlAnother: AbstractControl): ValidatorFn {
     return (ctl: AbstractControl): ValidationErrors | null => {
@@ -39,7 +39,7 @@ export function listEmptyValidator(): ValidatorFn {
 @Injectable({ providedIn: 'root' })
 export class UniqueLoginValidator {
     constructor(
-        private http: HttpService,
+        private uaaClient: UaaClient,
     ) {}
 
     validate(except?: string): AsyncValidatorFn {
@@ -49,13 +49,9 @@ export class UniqueLoginValidator {
             } else if (except && ctrl.value === except) {
                 return Observable.of(null);
             } else {
-                const body = {
-                    action: 'get_login_exist',
-                    args: {
-                        login: ctrl.value,
-                    }
-                };
-                return this.http.post('uaa', body).pipe(
+                return this.uaaClient.get_login_exist({
+                    login: ctrl.value,
+                }).pipe(
                     map((res) => (res.body['status'] === 'ok' && res.body['value'] === 1 ? { unique: true } : null)),
                     catchError(() => null)
                 );
@@ -67,7 +63,7 @@ export class UniqueLoginValidator {
 @Injectable({ providedIn: 'root' })
 export class UniqueEmailValidator {
     constructor(
-        private http: HttpService,
+        private uaaClient: UaaClient,
     ) {}
 
     validate(except?: string): AsyncValidatorFn {
@@ -77,13 +73,9 @@ export class UniqueEmailValidator {
             } else if (except && ctrl.value === except) {
                 return Observable.of(null);
             } else {
-                const body = {
-                    action: 'get_email_exist',
-                    args: {
-                        email: ctrl.value,
-                    }
-                };
-                return this.http.post('uaa', body).pipe(
+                return this.uaaClient.get_email_exist({
+                    email: ctrl.value,
+                }).pipe(
                     map((res) => (res.body['status'] === 'ok' && res.body['value'] === 1 ? { unique: true } : null)),
                     catchError(() => null)
                 );
@@ -95,7 +87,7 @@ export class UniqueEmailValidator {
 @Injectable({ providedIn: 'root' })
 export class UniquePhoneValidator {
     constructor(
-        private http: HttpService,
+        private uaaClient: UaaClient,
     ) {}
 
     validate(except?: string): AsyncValidatorFn {
@@ -105,13 +97,9 @@ export class UniquePhoneValidator {
             } else if (except && ctrl.value === except) {
                 return Observable.of(null);
             } else {
-                const body = {
-                    action: 'get_phone_exist',
-                    args: {
-                        phone: ctrl.value,
-                    }
-                };
-                return this.http.post('uaa', body).pipe(
+                return this.uaaClient.get_phone_exist({
+                    phone: ctrl.value,
+                }).pipe(
                     map((res) => (res.body['status'] === 'ok' && res.body['value'] === 1 ? { unique: true } : null)),
                     catchError(() => null)
                 );
@@ -123,18 +111,14 @@ export class UniquePhoneValidator {
 @Injectable({ providedIn: 'root' })
 export class NoEmailValidator {
     constructor(
-        private http: HttpService,
+        private uaaClient: UaaClient,
     ) {}
 
     validate(): AsyncValidatorFn {
         return (ctrl: AbstractControl): Promise<ValidationErrors | null> | Observable<ValidationErrors | null> => {
-            const body = {
-                action: 'get_email_exist',
-                args: {
-                    email: ctrl.value,
-                }
-            };
-            return this.http.post('uaa', body).pipe(
+            return this.uaaClient.get_email_exist({
+                email: ctrl.value,
+            }).pipe(
                 map((res) => (res.body['status'] === 'ok' && res.body['value'] === 1 ? null : {noExist: true})),
                 catchError(() => null)
             );
@@ -145,18 +129,14 @@ export class NoEmailValidator {
 @Injectable({ providedIn: 'root' })
 export class NoLoginValidator {
     constructor(
-        private http: HttpService,
+        private uaaClient: UaaClient,
     ) {}
 
     validate(): AsyncValidatorFn {
         return (ctrl: AbstractControl): Promise<ValidationErrors | null> | Observable<ValidationErrors | null> => {
-            const body = {
-                action: 'get_login_exist',
-                args: {
-                    login: ctrl.value,
-                }
-            };
-            return this.http.post('uaa', body).pipe(
+            return this.uaaClient.get_login_exist({
+                login: ctrl.value,
+            }).pipe(
                 map((res) => (res.body['status'] === 'ok' && res.body['value'] === 1 ? null : {noExist: true})),
                 catchError(() => null)
             );

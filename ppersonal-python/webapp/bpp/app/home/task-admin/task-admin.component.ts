@@ -2,7 +2,8 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 import {MatPaginator, PageEvent} from '@angular/material';
 import {ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
-import {Principal, ConfirmService, HttpService} from '../../shared';
+import {Principal, ConfirmService} from '../../shared';
+import {UmmClient} from '../';
 import {Location} from '@angular/common';
 import {Task} from '../model/task.model';
 
@@ -28,7 +29,7 @@ export class TaskAdminComponent implements OnInit {
         private principal: Principal,
         private router: Router,
         private location: Location,
-        private http: HttpService,
+        private ummClient: UmmClient,
         private confirmService: ConfirmService,
     ) {
     }
@@ -55,11 +56,7 @@ export class TaskAdminComponent implements OnInit {
         queryOptions['size'] = this.itemsPerPage;
         queryOptions['sort'] = this.sort();
 
-        const body = {
-            action: 'get_tasks',
-            args: queryOptions,
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_tasks(queryOptions).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.totalItems = res.body['value']['total'];
@@ -116,13 +113,9 @@ export class TaskAdminComponent implements OnInit {
     deleteTask(id: number) {
         this.confirmService.ask('确定要删除该任务？').then((confirm) => {
             if (confirm) {
-                const body = {
-                    action: 'delete_task',
-                    args: {
-                        'taskId': id,
-                    },
-                };
-                this.http.post('umm', body).subscribe(() => {
+                this.ummClient.delete_task({
+                    'taskId': id,
+                }).subscribe(() => {
                     this.refresh();
                 });
             }

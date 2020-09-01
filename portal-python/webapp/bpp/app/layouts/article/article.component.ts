@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import { Location } from '@angular/common';
 import { Subscription } from 'rxjs/Subscription';
-import {Principal, SnackBarService, HttpService} from '../../shared';
+import {Principal, SnackBarService, UaaClient} from '../../shared';
 
 @Component({
     templateUrl: './article.component.html',
@@ -17,7 +17,7 @@ export class ArticleComponent implements OnInit, OnDestroy {
         private location: Location,
         private route: ActivatedRoute,
         private router: Router,
-        private http: HttpService,
+        private uaaClient: UaaClient,
         private snackBarService: SnackBarService,
     ) {
     }
@@ -32,13 +32,9 @@ export class ArticleComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.subscription = this.route.params.subscribe((params) => {
-            const body = {
-                action: 'get_articles',
-                args: {
-                    subject1: params['subject'],
-                },
-            };
-            this.http.post('uaa', body).subscribe((res) => {
+            this.uaaClient.get_articles({
+                subject1: params['subject'],
+            }).subscribe((res) => {
                 if (res.body['status'] === 'ok' && res.body['value']['total'] > 0) {
                     this.content = res.body['value']['results'][0].content;
                 } else {

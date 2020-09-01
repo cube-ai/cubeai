@@ -4,7 +4,7 @@ import { Location } from '@angular/common';
 import { Subscription } from 'rxjs/Subscription';
 import {Principal, User} from '../../shared';
 import {Application} from '../../shared/model/application.model';
-import {GlobalService, SnackBarService, HttpService} from '../../shared';
+import {GlobalService, SnackBarService, UaaClient} from '../../shared';
 import {FileUploader} from 'ng2-file-upload';
 import {v4 as uuid} from 'uuid';
 
@@ -28,7 +28,7 @@ export class AppdetailComponent implements OnInit {
                 private location: Location,
                 private route: ActivatedRoute,
                 private router: Router,
-                private http: HttpService,
+                private uaaClient: UaaClient,
                 private snackBarService: SnackBarService,
     ) {
     }
@@ -88,13 +88,9 @@ export class AppdetailComponent implements OnInit {
     }
 
     loadApplication() {
-        const body = {
-            action: 'find_application',
-            args: {
-                id: this.id,
-            },
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.find_application({
+            id: this.id,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.application = res.body['value'];
@@ -115,13 +111,9 @@ export class AppdetailComponent implements OnInit {
 
     saveApplication() {
         if (this.application.id) {
-            const body = {
-                action: 'update_application',
-                args: {
-                    application: this.application,
-                },
-            };
-            this.http.post('uaa', body).subscribe(
+            this.uaaClient.update_application({
+                application: this.application,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.goBack();
@@ -133,13 +125,9 @@ export class AppdetailComponent implements OnInit {
                 }
             );
         } else {
-            const body = {
-                action: 'create_application',
-                args: {
-                    application: this.application,
-                },
-            };
-            this.http.post('uaa', body).subscribe(
+            this.uaaClient.create_application({
+                application: this.application,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.goBack();
@@ -154,14 +142,10 @@ export class AppdetailComponent implements OnInit {
     }
 
     getRandomPicture() {
-        const body = {
-            action: 'get_random_picture',
-            args: {
-                width: 300,
-                height: 300,
-            }
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.get_random_picture({
+            width: 300,
+            height: 300,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.application.pictureUrl = res.body['value'];
