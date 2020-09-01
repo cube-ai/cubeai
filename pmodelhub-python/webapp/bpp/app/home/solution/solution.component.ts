@@ -3,7 +3,8 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {MatDialog, MatPaginator, PageEvent} from '@angular/material';
 import { Location } from '@angular/common';
 import { Subscription } from 'rxjs/Subscription';
-import {Principal, ConfirmService, SnackBarService, GlobalService, HttpService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
+import {Principal, ConfirmService, SnackBarService, GlobalService, UaaClient, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
+import {UmmClient, UmuClient} from '../';
 import {Solution} from '../model/solution.model';
 import {Artifact} from '../model/artifact.model';
 import {Document} from '../model/document.model';
@@ -64,7 +65,9 @@ export class SolutionComponent implements OnInit, OnDestroy {
         private router: Router,
         private principal: Principal,
         private location: Location,
-        private http: HttpService,
+        private uaaClient: UaaClient,
+        private ummClient: UmmClient,
+        private umuClient: UmuClient,
         private snackBarService: SnackBarService,
         private confirmService: ConfirmService,
     ) {
@@ -92,13 +95,9 @@ export class SolutionComponent implements OnInit, OnDestroy {
     }
 
     loadAll() {
-        const body = {
-            action: 'get_solutions',
-            args: {
-                uuid: this.solutionUuid,
-            },
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_solutions({
+            uuid: this.solutionUuid,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     if (res.body['value']['total'] < 1) {
@@ -117,48 +116,32 @@ export class SolutionComponent implements OnInit, OnDestroy {
                     }
 
                     if (!this.solution.pictureUrl) {
-                        const body1 = {
-                            action: 'get_random_picture',
-                            args: {
-                                width: 200,
-                                height: 200,
-                            }
-                        };
-                        this.http.post('uaa', body1).subscribe(
+                        this.uaaClient.get_random_picture({
+                            width: 200,
+                            height: 200,
+                        }).subscribe(
                             (res1) => {
                                 if (res1.body['status'] === 'ok') {
                                     this.solution.pictureUrl = res1.body['value'];
-                                    const body2 = {
-                                        action: 'update_solution_picture_url',
-                                        args: {
-                                            solutionId: this.solution.id,
-                                            pictureUrl: this.solution.pictureUrl,
-                                        },
-                                    };
-                                    this.http.post('umm', body2).subscribe();
+                                    this.ummClient.update_solution_picture_url({
+                                        solutionId: this.solution.id,
+                                        pictureUrl: this.solution.pictureUrl,
+                                    }).subscribe();
                                 }
                             }
                         );
                     }
 
-                    const body3 = {
-                        action: 'update_solution_view_count',
-                        args: {
-                            solutionId: this.solution.id,
-                        },
-                    };
-                    this.http.post('umm', body3).subscribe();
+                    this.ummClient.update_solution_view_count({
+                        solutionId: this.solution.id,
+                    }).subscribe();
                     this.solution.viewCount ++;
 
-                    const body4 = {
-                        action: 'get_deployments',
-                        args: {
-                            isPublic: this.solution.active,
-                            solutionUuid: this.solutionUuid,
-                            status: '运行',
-                        },
-                    };
-                    this.http.post('umm', body4).subscribe(
+                    this.ummClient.get_deployments({
+                        isPublic: this.solution.active,
+                        solutionUuid: this.solutionUuid,
+                        status: '运行',
+                    }).subscribe(
                         (res4) => {
                             if (res4.body['status'] === 'ok' && res4.body['value']['total'] > 0) {
                                 this.deployedAbility = res4.body['value']['results'][0];
@@ -232,13 +215,9 @@ export class SolutionComponent implements OnInit, OnDestroy {
     }
 
     loadDescription() {
-        const body = {
-            action: 'find_description',
-            args: {
-                solutionUuid: this.solution.uuid,
-            },
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.find_description({
+            solutionUuid: this.solution.uuid,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.description = res.body['value'];
@@ -248,25 +227,17 @@ export class SolutionComponent implements OnInit, OnDestroy {
     }
 
     loadArtifactData() {
-        const body = {
-            action: 'get_artifacts',
-            args: {
-                solutionUuid: this.solution.uuid,
-            },
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_artifacts({
+            solutionUuid: this.solution.uuid,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.artifacts = res.body['value'];
                     this.artifacts.forEach((artifact) => {
                         if (artifact.type === '模型配置') {
-                            const body1 = {
-                                action: 'download_document',
-                                args: {
-                                    url: artifact.url,
-                                },
-                            };
-                            this.http.post('umu', body1).subscribe(
+                            this.umuClient.download_document({
+                                url: artifact.url,
+                            }).subscribe(
                                 (res1) => {
                                     if (res1.body['status'] === 'ok') {
                                         this.ymlText = res1.body['value'];
@@ -281,13 +252,9 @@ export class SolutionComponent implements OnInit, OnDestroy {
     }
 
     loadDocumentData() {
-        const body = {
-            action: 'get_documents',
-            args: {
-                solutionUuid: this.solution.uuid,
-            },
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_documents({
+            solutionUuid: this.solution.uuid,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.documents = res.body['value'];
@@ -298,14 +265,10 @@ export class SolutionComponent implements OnInit, OnDestroy {
 
     loadStar() {
         if (this.userLogin) {
-            const body = {
-                action: 'get_stars',
-                args: {
-                    userLogin: this.userLogin,
-                    targetUuid: this.solutionUuid,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_stars({
+                userLogin: this.userLogin,
+                targetUuid: this.solutionUuid,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         if (res.body['value']['total'] > 0) {
@@ -335,25 +298,17 @@ export class SolutionComponent implements OnInit, OnDestroy {
         link.click();
         document.body.removeChild(link);
 
-        const body = {
-            action: 'update_solution_download_count',
-            args: {
-                solutionId: this.solution.id,
-            },
-        };
-        this.http.post('umm', body).subscribe();
+        this.ummClient.update_solution_download_count({
+            solutionId: this.solution.id,
+        }).subscribe();
     }
 
     deleteDocument(document: Document) {
         this.confirmService.ask('确定要删除该文档？').then((confirm) => {
             if (confirm) {
-                const body = {
-                    action: 'delete_document',
-                    args: {
-                        documentId: document.id,
-                    },
-                };
-                this.http.post('umu', body).subscribe(
+                this.umuClient.delete_document({
+                    documentId: document.id,
+                }).subscribe(
                     () => {
                         this.loadDocumentData();
                     }
@@ -372,13 +327,9 @@ export class SolutionComponent implements OnInit, OnDestroy {
         oInput.style.display = 'none';
         this.snackBarService.info('拉取并运行docker镜像的命令已复制到剪贴板...');
 
-        const body = {
-            action: 'update_solution_download_count',
-            args: {
-                solutionId: this.solution.id,
-            },
-        };
-        this.http.post('umm', body).subscribe();
+        this.ummClient.update_solution_download_count({
+            solutionId: this.solution.id,
+        }).subscribe();
     }
 
     enterEdit() {
@@ -386,66 +337,46 @@ export class SolutionComponent implements OnInit, OnDestroy {
     }
 
     saveAndQuitEdit() {
-        const body = {
-            action: 'update_solution_baseinfo',
-            args: {
-                solutionId: this.solution.id,
-                name: this.solution.name,
-                company: this.solution.company,
-                version: this.solution.version,
-                summary: this.solution.summary,
-                tag1: this.solution.tag1,
-                tag2: this.solution.tag2,
-                tag3: this.solution.tag3,
-                modelType: this.solution.modelType,
-                toolkitType: this.solution.toolkitType,
-            },
-        };
-        this.http.post('umm', body).subscribe((res) => {
+        this.ummClient.update_solution_baseinfo({
+            solutionId: this.solution.id,
+            name: this.solution.name,
+            company: this.solution.company,
+            version: this.solution.version,
+            summary: this.solution.summary,
+            tag1: this.solution.tag1,
+            tag2: this.solution.tag2,
+            tag3: this.solution.tag3,
+            modelType: this.solution.modelType,
+            toolkitType: this.solution.toolkitType,
+        }).subscribe((res) => {
             if (res.body['status'] === 'ok') {
                 if (this.isManager) {
-                    const body1 = {
-                        action: 'update_solution_admininfo',
-                        args: {
-                            solutionId: this.solution.id,
-                            subject1: this.solution.subject1,
-                            subject2: this.solution.subject2,
-                            subject3: this.solution.subject3,
-                            displayOrder: this.solution.displayOrder,
-                        },
-                    };
-                    this.http.post('umm', body1).subscribe();
+                    this.ummClient.update_solution_admininfo({
+                        solutionId: this.solution.id,
+                        subject1: this.solution.subject1,
+                        subject2: this.solution.subject2,
+                        subject3: this.solution.subject3,
+                        displayOrder: this.solution.displayOrder,
+                    }).subscribe();
                 }
 
-                const body2 = {
-                    action: 'update_deployment_solution_info',
-                    args: {
-                        deploymentId: this.deployedAbility.id,
-                    },
-                };
-                this.http.post('umm', body2).subscribe();
+                this.ummClient.update_deployment_solution_info({
+                    deploymentId: this.deployedAbility.id,
+                }).subscribe();
             }
         });
 
-        const body3 = {
-            action: 'update_description',
-            args: {
-                descriptionId: this.description.id,
-                content: this.description.content,
-            },
-        };
-        this.http.post('umm', body3).subscribe();
+        this.ummClient.update_description({
+            descriptionId: this.description.id,
+            content: this.description.content,
+        }).subscribe();
 
         this.isEditing = false;
     }
 
     setSolutionPublic(isPublic: boolean) {
         if (!isPublic) {
-            const body = {
-                action: 'get_my_credit',
-                args: {},
-            };
-            this.http.post('umm', body).subscribe((res) => {
+            this.ummClient.get_my_credit({}).subscribe((res) => {
                 if (res.body['status'] === 'ok') {
                     const credit = res.body['value'].credit;
                     if (credit < 20) {
@@ -455,14 +386,10 @@ export class SolutionComponent implements OnInit, OnDestroy {
                         this.confirmService.ask('模型设为私有将消耗20积分，你现有' + credit + '积分，是否继续？').then((confirm) => {
                             if (confirm) {
                                 this.solution.active = isPublic;
-                                const body1 = {
-                                    action: 'update_solution_active',
-                                    args: {
-                                        solutionId: this.solution.id,
-                                        active: isPublic,
-                                    },
-                                };
-                                this.http.post('umm', body1).subscribe();
+                                this.ummClient.update_solution_active({
+                                    solutionId: this.solution.id,
+                                    active: isPublic,
+                                }).subscribe();
                             }
                         });
                     }
@@ -471,14 +398,10 @@ export class SolutionComponent implements OnInit, OnDestroy {
             });
         } else {
             this.solution.active = isPublic;
-            const body = {
-                action: 'update_solution_active',
-                args: {
-                    solutionId: this.solution.id,
-                    active: isPublic,
-                },
-            };
-            this.http.post('umm', body).subscribe();
+            this.ummClient.update_solution_active({
+                solutionId: this.solution.id,
+                active: isPublic,
+            }).subscribe();
         }
     }
 
@@ -486,13 +409,9 @@ export class SolutionComponent implements OnInit, OnDestroy {
         if (this.readyToDelete && this.deleteConfirmText === this.solution.name) {
             this.confirmService.ask('确定要删除模型：' + this.solution.name + '？').then((confirm) => {
                 if (confirm) {
-                    const body = {
-                        action: 'delete_solution',
-                        args: {
-                            solutionId: this.solution.id,
-                        },
-                    };
-                    this.http.post('umm', body).subscribe((res) => {
+                    this.ummClient.delete_solution({
+                        solutionId: this.solution.id,
+                    }).subscribe((res) => {
                         if (res.body['status'] === 'ok') {
                             this.snackBarService.info('成功删除模型...');
                             this.goBack();
@@ -516,23 +435,15 @@ export class SolutionComponent implements OnInit, OnDestroy {
         }
 
         if (this.star) {
-            const body = {
-                action: 'delete_star',
-                args: {
-                    starId: this.star.id,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.delete_star({
+                starId: this.star.id,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.star = null;
-                        const body1 = {
-                            action: 'update_solution_star_count',
-                            args: {
-                                solutionId: this.solution.id,
-                            },
-                        };
-                        this.http.post('umm', body1).subscribe();
+                        this.ummClient.update_solution_star_count({
+                            solutionId: this.solution.id,
+                        }).subscribe();
                         this.solution.starCount--;
                     }
                 }
@@ -541,24 +452,15 @@ export class SolutionComponent implements OnInit, OnDestroy {
             const star = new Star();
             star.targetType = 'AI模型';
             star.targetUuid = this.solutionUuid;
-
-            const body = {
-                action: 'create_star',
-                args: {
-                    star,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.create_star({
+                star,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.loadStar();
-                        const body1 = {
-                            action: 'update_solution_star_count',
-                            args: {
-                                solutionId: this.solution.id,
-                            },
-                        };
-                        this.http.post('umm', body1).subscribe();
+                        this.ummClient.update_solution_star_count({
+                            solutionId: this.solution.id,
+                        }).subscribe();
                         this.solution.starCount++;
                     }
                 }
@@ -581,22 +483,14 @@ export class SolutionComponent implements OnInit, OnDestroy {
         dialogRef.afterClosed().subscribe((pictureDataUrl) => {
             if (pictureDataUrl) {
                 this.solution.pictureUrl = pictureDataUrl;
-                const body = {
-                    action: 'update_solution_picture_url',
-                    args: {
-                        solutionId: this.solution.id,
-                        pictureUrl: pictureDataUrl,
-                    },
-                };
-                this.http.post('umm', body).subscribe((res) => {
+                this.ummClient.update_solution_picture_url({
+                    solutionId: this.solution.id,
+                    pictureUrl: pictureDataUrl,
+                }).subscribe((res) => {
                     if (res.body['status'] === 'ok') {
-                        const body2 = {
-                            action: 'update_deployment_solution_info',
-                            args: {
-                                deploymentId: this.deployedAbility.id,
-                            },
-                        };
-                        this.http.post('umm', body2).subscribe();
+                        this.ummClient.update_deployment_solution_info({
+                            deploymentId: this.deployedAbility.id,
+                        }).subscribe();
                     }
                 });
             }
@@ -604,17 +498,13 @@ export class SolutionComponent implements OnInit, OnDestroy {
     }
 
     loadComments() {
-        const body = {
-            action: 'get_comments',
-            args: {
-                solutionUuid: this.solution.uuid,
-                parentUuid: '0',
-                page: this.page - 1,
-                size: this.itemsPerPage,
-                sort: ['id,desc'],
-            },
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_comments({
+            solutionUuid: this.solution.uuid,
+            parentUuid: '0',
+            page: this.page - 1,
+            size: this.itemsPerPage,
+            sort: ['id,desc'],
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.totalItems = res.body['value']['total'];
@@ -652,24 +542,16 @@ export class SolutionComponent implements OnInit, OnDestroy {
         comment.commentText = this.commentText;
         comment.level = level;
 
-        const body = {
-            action: 'create_comment',
-            args: {
-                comment,
-            },
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.create_comment({
+            comment,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.loadComments();
                     this.commentText = '';
-                    const body1 = {
-                        action: 'update_solution_comment_count',
-                        args: {
-                            solutionId: this.solution.id,
-                        },
-                    };
-                    this.http.post('umm', body1).subscribe();
+                    this.ummClient.update_solution_comment_count({
+                        solutionId: this.solution.id,
+                    }).subscribe();
                     this.solution.commentCount++;
                 }
             }
@@ -684,26 +566,18 @@ export class SolutionComponent implements OnInit, OnDestroy {
         comment.commentText = parentComment.replyText;
         comment.level = parentComment.level + 1;
 
-        const body = {
-            action: 'create_comment',
-            args: {
-                comment,
-            },
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.create_comment({
+            comment,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.loadReplyComments(parentComment);
                     parentComment.viewReply = true;
                     parentComment.replyText = '';
                     this.toggleReplyComment(parentComment);
-                    const body1 = {
-                        action: 'update_solution_comment_count',
-                        args: {
-                            solutionId: this.solution.id,
-                        },
-                    };
-                    this.http.post('umm', body1).subscribe();
+                    this.ummClient.update_solution_comment_count({
+                        solutionId: this.solution.id,
+                    }).subscribe();
                     this.solution.commentCount++;
                 }
             }
@@ -719,15 +593,11 @@ export class SolutionComponent implements OnInit, OnDestroy {
     }
 
     loadReplyComments(comment: Comment) {
-        const body = {
-            action: 'get_comments',
-            args: {
-                solutionUuid: this.solution.uuid,
-                parentUuid: comment.uuid,
-                sort: ['id,desc'],
-            },
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_comments({
+            solutionUuid: this.solution.uuid,
+            parentUuid: comment.uuid,
+            sort: ['id,desc'],
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     comment.replyComments = res.body['value']['results'];
@@ -751,23 +621,15 @@ export class SolutionComponent implements OnInit, OnDestroy {
     deleteComment(comment: Comment) {
         this.confirmService.ask('确定要删帖？').then((confirm) => {
             if (confirm) {
-                const body = {
-                    action: 'delete_comment',
-                    args: {
-                        commentId: comment.id,
-                    },
-                };
-                this.http.post('umm', body).subscribe(
+                this.ummClient.delete_comment({
+                    commentId: comment.id,
+                }).subscribe(
                     (res) => {
                         if (res.body['status'] === 'ok') {
                             this.loadComments();
-                            const body1 = {
-                                action: 'update_solution_comment_count',
-                                args: {
-                                    solutionId: this.solution.id,
-                                },
-                            };
-                            this.http.post('umm', body1).subscribe();
+                            this.ummClient.update_solution_comment_count({
+                                solutionId: this.solution.id,
+                            }).subscribe();
                             this.solution.commentCount--;
                         }
                     }
@@ -779,23 +641,15 @@ export class SolutionComponent implements OnInit, OnDestroy {
     deleteReply(reply: Comment, parent: Comment) {
         this.confirmService.ask('确定要删帖？').then((confirm) => {
             if (confirm) {
-                const body = {
-                    action: 'delete_comment',
-                    args: {
-                        commentId: reply.id,
-                    },
-                };
-                this.http.post('umm', body).subscribe(
+                this.ummClient.delete_comment({
+                    commentId: reply.id,
+                }).subscribe(
                     (res) => {
                         if (res.body['status'] === 'ok') {
                             this.loadReplyComments(parent);
-                            const body1 = {
-                                action: 'update_solution_comment_count',
-                                args: {
-                                    solutionId: this.solution.id,
-                                },
-                            };
-                            this.http.post('umm', body1).subscribe();
+                            this.ummClient.update_solution_comment_count({
+                                solutionId: this.solution.id,
+                            }).subscribe();
                             this.solution.commentCount--;
                         }
                     }

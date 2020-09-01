@@ -4,7 +4,7 @@ import { Location } from '@angular/common';
 import { Subscription } from 'rxjs/Subscription';
 import {Principal, User} from '../../shared';
 import {Article} from '../../shared/model/article.model';
-import {GlobalService, SnackBarService, HttpService} from '../../shared';
+import {GlobalService, SnackBarService, UaaClient} from '../../shared';
 import {v4 as uuid} from 'uuid';
 
 @Component({
@@ -29,7 +29,7 @@ export class ArticleComponent implements OnInit {
         private location: Location,
         private route: ActivatedRoute,
         private router: Router,
-        private http: HttpService,
+        private uaaClient: UaaClient,
         private snackBarService: SnackBarService,
     ) {
     }
@@ -68,13 +68,9 @@ export class ArticleComponent implements OnInit {
     }
 
     loadArticle() {
-        const body = {
-            action: 'find_article',
-            args: {
-                id: this.id,
-            },
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.find_article({
+            id: this.id,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.article = res.body['value'];
@@ -103,13 +99,9 @@ export class ArticleComponent implements OnInit {
     saveArticle() {
         if (this.article.id) {
             this.article.modifiedDate = new Date();
-            const body = {
-                action: 'update_article',
-                args: {
-                    article: this.article,
-                },
-            };
-            this.http.post('uaa', body).subscribe(
+            this.uaaClient.update_article({
+                article: this.article,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.goBack();
@@ -121,13 +113,9 @@ export class ArticleComponent implements OnInit {
                 }
             );
         } else {
-            const body = {
-                action: 'create_article',
-                args: {
-                    article: this.article,
-                },
-            };
-            this.http.post('uaa', body).subscribe(
+            this.uaaClient.create_article({
+                article: this.article,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.goBack();

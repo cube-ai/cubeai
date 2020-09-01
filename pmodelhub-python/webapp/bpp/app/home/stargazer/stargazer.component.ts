@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Star} from '../model/star.model';
-import {HttpService} from '../../shared';
+import {UmmClient} from '../';
 import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
@@ -15,7 +15,7 @@ export class StargazerComponent implements OnInit {
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private http: HttpService,
+        private ummClient: UmmClient,
     ) {
     }
 
@@ -28,14 +28,10 @@ export class StargazerComponent implements OnInit {
     }
 
     loadAll() {
-        const body = {
-            action: 'get_stars',
-            args: {
-                targetUuid: this.solutionUuid,
-                sort: ['id,desc'],
-            },
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_stars({
+            targetUuid: this.solutionUuid,
+            sort: ['id,desc'],
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.stars = res.body['value']['results'];

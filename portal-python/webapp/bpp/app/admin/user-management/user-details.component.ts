@@ -2,7 +2,7 @@ import {Component, OnInit, Inject} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import {UniqueEmailValidator, UniqueLoginValidator, UniquePhoneValidator} from '../../shared/form-validators';
-import {SnackBarService, Principal, User, HttpService} from '../../shared';
+import {SnackBarService, Principal, User, UaaClient} from '../../shared';
 
 export class Authority {
     name: string;
@@ -41,7 +41,7 @@ export class UserDetailsComponent implements OnInit {
                 public dialogRef: MatDialogRef<UserDetailsComponent>,
                 @Inject(MAT_DIALOG_DATA) public data: any,
                 private principal: Principal,
-                private http: HttpService,
+                private uaaClient: UaaClient,
                 private snackBarService: SnackBarService,
                 private uniqueLoginValidator: UniqueLoginValidator,
                 private uniqueEmailValidator: UniqueEmailValidator,
@@ -73,12 +73,7 @@ export class UserDetailsComponent implements OnInit {
 
     ngOnInit() {
         this.authorities = [];
-
-        const body1 = {
-            action: 'get_authorities',
-            args: {},
-        };
-        this.http.post('uaa', body1).subscribe(
+        this.uaaClient.get_authorities({}).subscribe(
             (res1) => {
                 if (res1.body['status'] === 'ok') {
                     res1.body['value'].forEach((authorityName) => {
@@ -111,13 +106,9 @@ export class UserDetailsComponent implements OnInit {
                             this.createNew = false;
                             this.editUser = true;
                             this.viewUser = false;
-                            const body2 = {
-                                action: 'find_user',
-                                args: {
-                                    login: this.data.login,
-                                },
-                            };
-                            this.http.post('uaa', body2).subscribe((res2) => {
+                            this.uaaClient.find_user({
+                                login: this.data.login,
+                            }).subscribe((res2) => {
                                 if (res2.body['status'] === 'ok') {
                                     this.user = res2.body['value'];
                                     this.login.setValue(this.user.login);
@@ -142,13 +133,9 @@ export class UserDetailsComponent implements OnInit {
                             this.editUser = false;
                             this.viewUser = true;
                             this.formGroup.disable();
-                            const body3 = {
-                                action: 'find_user',
-                                args: {
-                                    login: this.data.login,
-                                },
-                            };
-                            this.http.post('uaa', body3).subscribe((res3) => {
+                            this.uaaClient.find_user({
+                                login: this.data.login,
+                            }).subscribe((res3) => {
                                 if (res3.body['status'] === 'ok') {
                                     this.user = res3.body['value'];
                                     this.login.setValue(this.user.login);
@@ -198,13 +185,9 @@ export class UserDetailsComponent implements OnInit {
         });
 
         if (this.createNew) {
-            const body = {
-                action: 'create_user',
-                args: {
-                    user: this.user,
-                },
-            };
-            this.http.post('uaa', body).subscribe((res) => {
+            this.uaaClient.create_user({
+                user: this.user,
+            }).subscribe((res) => {
                 if (res.body['status'] === 'ok') {
                     this.data.caller.refresh(true);
                     this.principal.updateCurrentAccount().then();
@@ -217,13 +200,9 @@ export class UserDetailsComponent implements OnInit {
                 this.snackBarService.error('创建新用户失败！');
             });
         } else {
-            const body = {
-                action: 'update_user',
-                args: {
-                    user: this.user,
-                },
-            };
-            this.http.post('uaa', body).subscribe((res) => {
+            this.uaaClient.update_user({
+                user: this.user,
+            }).subscribe((res) => {
                 if (res.body['status'] === 'ok') {
                     this.data.caller.refresh(false);
                     this.principal.updateCurrentAccount().then();

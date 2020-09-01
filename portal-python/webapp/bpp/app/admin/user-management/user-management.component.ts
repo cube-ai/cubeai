@@ -3,7 +3,7 @@ import {MatDialog, MatPaginator, PageEvent} from '@angular/material';
 import { UserDetailsComponent } from './user-details.component';
 import {UserPasswordComponent} from './user-password.component';
 import {ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService, ConfirmService, GlobalService} from '../../shared';
-import {Principal, User, HttpService} from '../../shared';
+import {Principal, User, UaaClient} from '../../shared';
 
 @Component({
     selector: 'my-user-mgmt',
@@ -31,7 +31,7 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
     constructor(
         public globalService: GlobalService,
         private dialog: MatDialog,
-        private http: HttpService,
+        private uaaClient: UaaClient,
         private principal: Principal,
         private snackBarService: SnackBarService,
         private confirmService: ConfirmService,
@@ -72,14 +72,9 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
         }
 
         user.activated = isActivated;
-
-        const body = {
-            action: 'update_user',
-            args: {
-                user,
-            },
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.update_user({
+            user,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.loadAll();
@@ -88,15 +83,11 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
     }
 
     loadAll() {
-        const body = {
-            action: 'get_users',
-            args: {
-                page: this.page - 1,
-                size: this.itemsPerPage,
-                sort: this.sort()
-            },
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.get_users({
+            page: this.page - 1,
+            size: this.itemsPerPage,
+            sort: this.sort()
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.onSuccess(res.body['value']);
@@ -187,13 +178,9 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
     deleteUser(login: string) {
         this.confirmService.ask('确认删除该用户？').then((confirm) => {
             if (confirm) {
-                const body = {
-                    action: 'delete_user',
-                    args: {
-                        login,
-                    },
-                };
-                this.http.post('uaa', body).subscribe((res) => {
+                this.uaaClient.delete_user({
+                    login,
+                }).subscribe((res) => {
                     if (res.body['status'] === 'ok') {
                         this.refresh();
                         this.snackBarService.success('删除用户成功！');

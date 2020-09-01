@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {Principal, HttpService} from '../../shared';
+import {Principal} from '../../shared';
+import {UmmClient} from '../';
 import {Location} from '@angular/common';
 import {Credit} from '../model/credit.model';
 import {Router} from '@angular/router';
@@ -14,7 +15,7 @@ export class CreditAdminComponent implements OnInit {
         private principal: Principal,
         private location: Location,
         private router: Router,
-        private http: HttpService,
+        private ummClient: UmmClient,
     ) {
     }
 
@@ -29,11 +30,7 @@ export class CreditAdminComponent implements OnInit {
     }
 
     loadAll() {
-        const body = {
-            action: 'get_credits',
-            args: {},
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_credits({}).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.credits = res.body['value'];

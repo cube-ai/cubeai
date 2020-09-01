@@ -3,7 +3,7 @@ import { Location } from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormControl, Validators} from '@angular/forms';
 import {NoEmailValidator, passwordMatchValidator, passwordStrongValidator} from '../../shared/form-validators';
-import {GlobalService, SnackBarService, HttpService} from '../../shared';
+import {GlobalService, SnackBarService, UaaClient} from '../../shared';
 
 @Component({
     selector: 'my-password-reset',
@@ -30,7 +30,7 @@ export class PasswordResetComponent implements OnInit, OnDestroy {
         private noEmailValidator: NoEmailValidator,
         private snackBarService: SnackBarService,
         private globalService: GlobalService,
-        private http: HttpService,
+        private uaaClient: UaaClient,
     ) {
         this.email = new FormControl('', {
             validators: [Validators.required, Validators.email, Validators.maxLength(50),
@@ -72,17 +72,12 @@ export class PasswordResetComponent implements OnInit, OnDestroy {
             this.snackBarService.error('重置密码过于频繁！请等待30秒以后再试...');
             return;
         }
-
-        const body = {
-            action: 'password_reset_init',
-            args: {
-                email: this.email.value,
-                verifyId: this.verifyId,
-                verifyCode: this.myCode.value,
-                resetUrlPrefix: location.protocol + '//' + location.host + '/#/passwordreset/'
-            },
-        };
-        this.http.post('uaa', body).subscribe((res) => {
+        this.uaaClient.password_reset_init({
+            email: this.email.value,
+            verifyId: this.verifyId,
+            verifyCode: this.myCode.value,
+            resetUrlPrefix: location.protocol + '//' + location.host + '/#/passwordreset/'
+        }).subscribe((res) => {
             if (res.body['status'] === 'ok') {
                 this.status = 'find_success';
                 this.globalService.lastResetPasswordTime = new Date();
@@ -95,14 +90,10 @@ export class PasswordResetComponent implements OnInit, OnDestroy {
     }
 
     resetPassword() {
-        const body = {
-            action: 'password_reset_finish',
-            args: {
-                key: this.resetKey,
-                newPassword: this.password.value,
-            },
-        };
-        this.http.post('uaa', body).subscribe((res) => {
+        this.uaaClient.password_reset_finish({
+            key: this.resetKey,
+            newPassword: this.password.value,
+        }).subscribe((res) => {
             if (res.body['status'] === 'ok') {
                 this.status = 'reset_success';
             } else {
@@ -114,11 +105,7 @@ export class PasswordResetComponent implements OnInit, OnDestroy {
     }
 
     getVerifyCode() {
-        const body = {
-            action: 'get_verify_code',
-            args: {},
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.get_verify_code({}).subscribe(
             (res) => {
                 const result = res.body;
                 if (result['status'] === 'ok') {

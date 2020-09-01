@@ -1,7 +1,7 @@
 import {Component, OnInit, Inject} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
 import {FormBuilder, FormGroup, Validators } from '@angular/forms';
-import {SnackBarService, HttpService} from '../../shared';
+import {SnackBarService, UaaClient} from '../../shared';
 import {Message} from '../model/message.model';
 import {MessageDraft} from '../model/massage-draft.model';
 import {listEmptyValidator} from '../../shared/form-validators';
@@ -30,7 +30,7 @@ export class MessageEditComponent implements OnInit {
                 public dialogRef: MatDialogRef<MessageEditComponent>,
                 private router: Router,
                 @Inject(MAT_DIALOG_DATA) public data: any,
-                private http: HttpService,
+                private uaaClient: UaaClient,
                 private snackBarService: SnackBarService,
     ) {
         this.formGroup = this.formBuilder.group({
@@ -80,13 +80,9 @@ export class MessageEditComponent implements OnInit {
         messageDraft.message = message;
         messageDraft.receivers = this.receiverList.value;
 
-        const body = {
-            action: 'send_multicast_message',
-            args: {
-                draft: messageDraft,
-            },
-        };
-        this.http.post('uaa', body).subscribe();
+        this.uaaClient.send_multicast_message({
+            draft: messageDraft,
+        }).subscribe();
         this.onClose();
     }
 
@@ -98,13 +94,9 @@ export class MessageEditComponent implements OnInit {
                 return;
             }
 
-            const body = {
-                action: 'get_login_exist',
-                args: {
-                    login: receiver,
-                },
-            };
-            this.http.post('uaa', body).subscribe(
+            this.uaaClient.get_login_exist({
+                login: receiver,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok' && res.body['value'] === 1) {
                         this.receiverList.value.push(receiver);

@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatDialog, MatPaginator, PageEvent} from '@angular/material';
 import {ConfirmService, GlobalService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService} from '../../shared';
-import {Principal, User, HttpService} from '../../shared';
+import {Principal, User, UaaClient} from '../../shared';
 import {Message} from '../model/message.model';
 import {MessageEditComponent} from '..';
 
@@ -34,7 +34,7 @@ export class InboxComponent implements OnInit {
         public globalService: GlobalService,
         private dialog: MatDialog,
         private principal: Principal,
-        private http: HttpService,
+        private uaaClient: UaaClient,
         private confirmService: ConfirmService,
         private snackBarService: SnackBarService,
     ) {
@@ -60,11 +60,7 @@ export class InboxComponent implements OnInit {
         queryOptions['size'] = this.itemsPerPage;
         queryOptions['sort'] = this.sort();
 
-        const body = {
-            action: 'get_messages',
-            args: queryOptions,
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.get_messages(queryOptions).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.totalItems = res.body['value']['total'];
@@ -116,14 +112,10 @@ export class InboxComponent implements OnInit {
         if (!message.viewed) {
             message.viewed = true;
 
-            const body = {
-                action: 'mark_message_viewed',
-                args: {
-                    id: message.id,
-                    viewed: message.viewed,
-                },
-            };
-            this.http.post('uaa', body).subscribe(
+            this.uaaClient.mark_message_viewed({
+                id: message.id,
+                viewed: message.viewed,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.unreadCount --;
@@ -137,14 +129,10 @@ export class InboxComponent implements OnInit {
         if (message.viewed) {
             message.viewed = false;
 
-            const body = {
-                action: 'mark_message_viewed',
-                args: {
-                    id: message.id,
-                    viewed: message.viewed,
-                },
-            };
-            this.http.post('uaa', body).subscribe(
+            this.uaaClient.mark_message_viewed({
+                id: message.id,
+                viewed: message.viewed,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.unreadCount ++;
@@ -158,14 +146,10 @@ export class InboxComponent implements OnInit {
         if (!message.deleted) {
             message.deleted = true;
 
-            const body = {
-                action: 'mark_message_deleted',
-                args: {
-                    id: message.id,
-                    deleted: message.deleted,
-                },
-            };
-            this.http.post('uaa', body).subscribe(
+            this.uaaClient.mark_message_deleted({
+                id: message.id,
+                deleted: message.deleted,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.refresh();
@@ -197,14 +181,10 @@ export class InboxComponent implements OnInit {
     }
 
     getUnreadCount() {
-        const body = {
-            action: 'get_unread_message_count',
-            args: {
-                receiver: this.currentUser.login,
-                deleted: false,
-            },
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.get_unread_message_count({
+            receiver: this.currentUser.login,
+            deleted: false,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.unreadCount = res.body['value'];

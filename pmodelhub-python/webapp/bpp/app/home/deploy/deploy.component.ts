@@ -1,8 +1,8 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 import {ActivatedRoute, Router} from '@angular/router';
-import {GlobalService, SnackBarService, HttpService} from '../../shared';
-import {Principal} from '../../shared';
+import {Principal, GlobalService, SnackBarService} from '../../shared';
+import {UmmClient} from '../';
 import {CookieService} from 'ngx-cookie';
 import {v4 as uuid} from 'uuid';
 import {Task} from '../model/task.model';
@@ -41,7 +41,7 @@ export class DeployComponent implements OnInit, OnDestroy {
         private route: ActivatedRoute,
         private location: Location,
         private principal: Principal,
-        private http: HttpService,
+        private ummClient: UmmClient,
         private cookieService: CookieService,
         private snackBarService: SnackBarService,
     ) {
@@ -71,26 +71,17 @@ export class DeployComponent implements OnInit, OnDestroy {
         });
 
         if (this.openMode === 'deploy') {
-            const body = {
-                action: 'get_solutions',
-                args: {
-                    'uuid': tempUuid,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_solutions({
+                'uuid': tempUuid,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok' && res.body['value']['total'] > 0) {
                         this.solution = res.body['value']['results'][0];
                         this.deployMode = this.solution.active ? 'public' : 'private';
-
-                        const body1 = {
-                            action: 'get_artifacts',
-                            args: {
-                                solutionUuid: this.solution.uuid,
-                                type: 'DOCKER镜像',
-                            },
-                        };
-                        this.http.post('umm', body1).subscribe(
+                        this.ummClient.get_artifacts({
+                            solutionUuid: this.solution.uuid,
+                            type: 'DOCKER镜像',
+                        }).subscribe(
                             (res1) => {
                                 if (res1.body['status'] === 'ok' && res1.body['value'].length > 0) {
                                     this.dockerImgUrl = res1.body['value'][0].url;
@@ -105,13 +96,9 @@ export class DeployComponent implements OnInit, OnDestroy {
         } else if (this.openMode === 'view') {
             this.deployTo = 'cubeai';
             this.taskUuid = tempUuid;
-            const body = {
-                action: 'get_tasks',
-                args: {
+            this.ummClient.get_tasks({
                     uuid: this.taskUuid,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+                }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok' && res.body['value']['total'] > 0) {
                         this.task = res.body['value']['results'][0];
@@ -135,15 +122,11 @@ export class DeployComponent implements OnInit, OnDestroy {
 
     deploySolution() {
         if (this.deployMode === 'public') {
-            const body = {
-                action: 'get_deployments',
-                args: {
-                    isPublic: true,
-                    status: '运行',
-                    solutionUuid: this.solution.uuid,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_deployments({
+                isPublic: true,
+                status: '运行',
+                solutionUuid: this.solution.uuid,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok' && res.body['value']['total'] > 0) {
                         this.snackBarService.info('CubeAI开放能力平台中已存在该模型的部署实例，请勿重复部署！');
@@ -155,15 +138,11 @@ export class DeployComponent implements OnInit, OnDestroy {
                 }
             );
         } else if (this.deployMode === 'private') {
-            const body = {
-                action: 'get_deployments',
-                args: {
-                    isPublic: false,
-                    status: '运行',
-                    deployer: this.userLogin,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_deployments({
+                isPublic: false,
+                status: '运行',
+                deployer: this.userLogin,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok' && res.body['value']['total'] > 0) {
                         if (res.body['value']['total'] > 4) {
@@ -188,14 +167,10 @@ export class DeployComponent implements OnInit, OnDestroy {
     }
 
     doDeploySolution() {
-        const body = {
-            action: 'deploy_model',
-            args: {
-                solutionUuid: this.solution.uuid,
-                public: this.deployMode === 'public',
-            },
-        };
-        this.http.post('umd', body).subscribe(
+        this.ummClient.deploy_model({
+            solutionUuid: this.solution.uuid,
+            public: this.deployMode === 'public',
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.taskUuid = res.body['value'];
@@ -224,15 +199,11 @@ export class DeployComponent implements OnInit, OnDestroy {
         }
 
         if (this.progressDeploy < 100) {
-            const body = {
-                action: 'get_task_steps',
-                args: {
-                    lastId: this.lastId,
-                    taskUuid: this.taskUuid,
-                    stepName: '模型部署',
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_task_steps({
+                lastId: this.lastId,
+                taskUuid: this.taskUuid,
+                stepName: '模型部署',
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         const taskSteps: TaskStep[] = res.body['value'];

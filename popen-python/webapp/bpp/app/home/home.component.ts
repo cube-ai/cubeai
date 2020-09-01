@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
-import {Principal, HttpService} from '../shared';
+import {Principal, UaaClient} from '../shared';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
@@ -15,7 +15,7 @@ export class HomeComponent implements OnInit {
         private router: Router,
         private principal: Principal,
         private sanitizer: DomSanitizer,
-        private http: HttpService,
+        private uaaClient: UaaClient,
     ) {}
 
     ngOnInit() {
@@ -43,14 +43,10 @@ export class HomeComponent implements OnInit {
             ];
 
             this.apps.forEach((app) => {
-                const body = {
-                    action: 'get_random_picture',
-                    args: {
-                        width: 30,
-                        height: 30,
-                    }
-                };
-                this.http.post('uaa', body).subscribe(
+                this.uaaClient.get_random_picture({
+                    width: 30,
+                    height: 30,
+                }).subscribe(
                     (res) => {
                         if (res.body['status'] === 'ok') {
                             app.picture = this.sanitizer.bypassSecurityTrustStyle(`url(${res.body['value']})`);

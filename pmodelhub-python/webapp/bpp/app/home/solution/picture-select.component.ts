@@ -1,7 +1,7 @@
 import {Component, OnInit, Inject} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
 import {FileUploader} from 'ng2-file-upload';
-import {SnackBarService, HttpService} from '../../shared';
+import {SnackBarService, UaaClient} from '../../shared';
 
 @Component({
     templateUrl: './picture-select.component.html',
@@ -19,7 +19,7 @@ export class PictureSelectComponent implements OnInit {
         public dialogRef: MatDialogRef<PictureSelectComponent>,
         @Inject(MAT_DIALOG_DATA) public data: any,
         private snackBarService: SnackBarService,
-        private http: HttpService,
+        private uaaClient: UaaClient,
     ) {
     }
 
@@ -70,14 +70,10 @@ export class PictureSelectComponent implements OnInit {
     }
 
     getRandomPicture() {
-        const body = {
-            action: 'get_random_picture',
-            args: {
-                width: 200,
-                height: 200,
-            }
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.get_random_picture({
+            width: 200,
+            height: 200,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.selectedImgDataUrl = res.body['value'];

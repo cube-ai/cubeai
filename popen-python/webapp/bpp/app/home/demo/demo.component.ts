@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import { Location } from '@angular/common';
 import {Ability} from '../model/ability.model';
-import {HttpService} from '../../shared';
+import {UmmClient} from '../';
 
 @Component({
     templateUrl: './demo.component.html',
@@ -16,7 +16,7 @@ export class DemoComponent implements OnInit {
 
     constructor(
         private location: Location,
-        private http: HttpService,
+        private ummClient: UmmClient,
     ) {
     }
 
@@ -34,11 +34,7 @@ export class DemoComponent implements OnInit {
             queryOptions['filter'] = this.filter;
         }
 
-        const body = {
-            action: 'get_deployments',
-            args: queryOptions,
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_deployments(queryOptions).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.abilitys = res.body['value']['results'];

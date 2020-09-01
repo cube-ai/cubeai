@@ -2,7 +2,8 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 import {MatPaginator, PageEvent} from '@angular/material';
 import {ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
-import {Principal, HttpService} from '../../shared';
+import {Principal} from '../../shared';
+import {UmmClient} from '../';
 import {Task} from '../model/task.model';
 
 @Component({
@@ -26,7 +27,7 @@ export class TaskComponent implements OnInit {
     constructor(
         private principal: Principal,
         private router: Router,
-        private http: HttpService,
+        private ummClient: UmmClient,
     ) {
     }
 
@@ -50,11 +51,7 @@ export class TaskComponent implements OnInit {
         queryOptions['size'] = this.itemsPerPage;
         queryOptions['sort'] = this.sort();
 
-        const body = {
-            action: 'get_tasks',
-            args: queryOptions,
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_tasks(queryOptions).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.totalItems = res.body['value']['total'];

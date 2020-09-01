@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild, ElementRef, OnDestroy} from '@angular/core';
 import { Location } from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Principal, HttpService} from '../../shared';
+import {Principal, LoginService, UaaClient} from '../../shared';
 
 @Component({
     templateUrl: './login.component.html'
@@ -26,7 +26,8 @@ export class LoginComponent implements OnInit, OnDestroy {
         private router: Router,
         private route: ActivatedRoute,
         private principal: Principal,
-        private http: HttpService,
+        private loginSevice: LoginService,
+        private uaaClient: UaaClient,
     ) {
     }
 
@@ -52,7 +53,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
 
     login() {
-        this.http.login({
+        this.loginSevice.login({
             username: this.username,
             password: this.password,
             rememberMe: this.rememberMe,
@@ -88,11 +89,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
 
     getVerifyCode() {
-        const body = {
-            action: 'get_verify_code',
-            args: {},
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.get_verify_code({}).subscribe(
             (res) => {
                 const result = res.body;
                 if (result['status'] === 'ok') {

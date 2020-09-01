@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatDialog, MatPaginator, PageEvent} from '@angular/material';
-import {ConfirmService, GlobalService, SnackBarService, HttpService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
+import {ConfirmService, GlobalService, SnackBarService, UaaClient, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
 import {Principal, User} from '../../shared';
 import {Message} from '../model/message.model';
 import {MessageEditComponent} from '../';
@@ -34,7 +34,7 @@ export class DeletedComponent implements OnInit {
         public globalService: GlobalService,
         private dialog: MatDialog,
         private principal: Principal,
-        private http: HttpService,
+        private uaaClient: UaaClient,
         private confirmService: ConfirmService,
         private snackBarService: SnackBarService,
     ) {
@@ -60,11 +60,7 @@ export class DeletedComponent implements OnInit {
         queryOptions['size'] = this.itemsPerPage;
         queryOptions['sort'] = this.sort();
 
-        const body = {
-            action: 'get_messages',
-            args: queryOptions,
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.get_messages(queryOptions).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.totalItems = res.body['value']['total'];
@@ -118,14 +114,10 @@ export class DeletedComponent implements OnInit {
         if (!message.viewed) {
             message.viewed = true;
 
-            const body = {
-                action: 'mark_message_viewed',
-                args: {
-                    id: message.id,
-                    viewed: message.viewed,
-                },
-            };
-            this.http.post('uaa', body).subscribe(
+            this.uaaClient.mark_message_viewed( {
+                id: message.id,
+                viewed: message.viewed,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.unreadCount --;
@@ -139,14 +131,10 @@ export class DeletedComponent implements OnInit {
         if (message.viewed) {
             message.viewed = false;
 
-            const body = {
-                action: 'mark_message_viewed',
-                args: {
-                    id: message.id,
-                    viewed: message.viewed,
-                },
-            };
-            this.http.post('uaa', body).subscribe(
+            this.uaaClient.mark_message_viewed({
+                id: message.id,
+                viewed: message.viewed,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.unreadCount ++;
@@ -160,14 +148,10 @@ export class DeletedComponent implements OnInit {
         if (message.deleted) {
             message.deleted = false;
 
-            const body = {
-                action: 'mark_message_deleted',
-                args: {
-                    id: message.id,
-                    deleted: message.deleted,
-                },
-            };
-            this.http.post('uaa', body).subscribe(
+            this.uaaClient.mark_message_deleted({
+                id: message.id,
+                deleted: message.deleted,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.refresh();
@@ -178,13 +162,9 @@ export class DeletedComponent implements OnInit {
     }
 
     deleteMessage(message) {
-        const body = {
-            action: 'delete_message',
-            args: {
-                id: message.id,
-            },
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.delete_message({
+            id: message.id,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.refresh();
@@ -205,14 +185,10 @@ export class DeletedComponent implements OnInit {
     }
 
     getUnreadCount() {
-        const body = {
-            action: 'get_unread_message_count',
-            args: {
-                receiver: this.currentUser.login,
-                deleted: true,
-            },
-        };
-        this.http.post('uaa', body).subscribe(
+        this.uaaClient.get_unread_message_count({
+            receiver: this.currentUser.login,
+            deleted: true,
+        }).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.unreadCount = res.body['value'];

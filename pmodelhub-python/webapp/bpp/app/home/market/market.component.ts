@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatPaginator, PageEvent} from '@angular/material';
-import {ConfirmService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS, SnackBarService, GlobalService, HttpService} from '../../shared';
-import {Principal} from '../../shared';
+import {Principal, GlobalService, ITEMS_PER_PAGE, PAGE_SIZE_OPTIONS} from '../../shared';
+import {UmmClient} from '../';
 import {Solution} from '../model/solution.model';
 import {Star} from '../model/star.model';
 import {Router} from '@angular/router';
@@ -31,9 +31,7 @@ export class MarketComponent implements OnInit {
         private globalService: GlobalService,
         private principal: Principal,
         private router: Router,
-        private confirmService: ConfirmService,
-        private snackBarService: SnackBarService,
-        private http: HttpService,
+        private ummClient: UmmClient,
     ) {
     }
 
@@ -47,13 +45,9 @@ export class MarketComponent implements OnInit {
 
     findStaredUuidList() {
         if (this.userLogin) {
-            const body = {
-                action: 'get_user_stared_uuid_list',
-                args: {
-                    'userLogin': this.userLogin,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_user_stared_uuid_list({
+                'userLogin': this.userLogin,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         this.staredSolutionUuidList = res.body['value'];
@@ -75,11 +69,7 @@ export class MarketComponent implements OnInit {
         queryOptions['size'] = this.itemsPerPage;
         queryOptions['sort'] = this.sort();
 
-        const body = {
-            action: 'get_solutions',
-            args: queryOptions,
-        };
-        this.http.post('umm', body).subscribe(
+        this.ummClient.get_solutions(queryOptions).subscribe(
             (res) => {
                 if (res.body['status'] === 'ok') {
                     this.totalItems = res.body['value']['total'];
@@ -140,22 +130,14 @@ export class MarketComponent implements OnInit {
         }
 
         if (this.isMyStar(solution)) {
-            const body = {
-                action: 'delete_star_by_target_uuid',
-                args: {
-                    targetUuid: solution.uuid,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.delete_star_by_target_uuid({
+                targetUuid: solution.uuid,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
-                        const body1 = {
-                            action: 'update_solution_star_count',
-                            args: {
-                                solutionId: solution.id,
-                            },
-                        };
-                        this.http.post('umm', body1).subscribe();
+                        this.ummClient.update_solution_star_count({
+                            solutionId: solution.id,
+                        }).subscribe();
                         solution.starCount --;
                         this.findStaredUuidList();
                     }
@@ -165,23 +147,14 @@ export class MarketComponent implements OnInit {
             const star = new Star();
             star.targetType = 'AI模型';
             star.targetUuid = solution.uuid;
-
-            const body = {
-                action: 'create_star',
-                args: {
-                    star,
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.create_star({
+                star,
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
-                        const body1 = {
-                            action: 'update_solution_star_count',
-                            args: {
-                                solutionId: solution.id,
-                            },
-                        };
-                        this.http.post('umm', body1).subscribe();
+                        this.ummClient.update_solution_star_count({
+                            solutionId: solution.id,
+                        }).subscribe();
                         solution.starCount ++;
                         this.findStaredUuidList();
                     }

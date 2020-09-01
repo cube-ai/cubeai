@@ -6,6 +6,8 @@ import { PopoverModule, BsDropdownModule } from 'ngx-bootstrap';
 import { UEditorModule } from 'ngx-ueditor';
 
 import {
+    UmmClient,
+    UmuClient,
     HomeComponent,
     PageHeaderComponent,
     SolutionComponent,
@@ -53,6 +55,8 @@ import {
         PictureSelectComponent,
     ],
     providers: [
+        UmmClient,
+        UmuClient,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 

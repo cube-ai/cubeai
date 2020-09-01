@@ -1,9 +1,8 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
-import { Location } from '@angular/common';
-import {SnackBarService} from '../../shared';
-import {Principal, HttpService} from '../../shared';
+import {Principal} from '../../shared';
+import {UmmClient} from '../';
 import {TaskStep} from '../model/task-step.model';
 
 @Component({
@@ -49,7 +48,7 @@ export class TaskOnboardingComponent implements OnInit, OnDestroy {
         private router: Router,
         private route: ActivatedRoute,
         private principal: Principal,
-        private http: HttpService,
+        private ummClient: UmmClient,
     ) {
     }
 
@@ -72,15 +71,11 @@ export class TaskOnboardingComponent implements OnInit, OnDestroy {
         });
 
         if (this.progressExtractModelFile === 100) {
-            const body = {
-                action: 'get_task_steps',
-                args: {
-                    lastId: this.lastId,
-                    taskUuid: this.taskUuid,
-                    stepName: '提取模型文件',
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_task_steps({
+                lastId: this.lastId,
+                taskUuid: this.taskUuid,
+                stepName: '提取模型文件',
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         const taskSteps: TaskStep[] = res.body['value'];
@@ -97,15 +92,11 @@ export class TaskOnboardingComponent implements OnInit, OnDestroy {
         }
 
         if (this.progressCreateSolution === 100) {
-            const body = {
-                action: 'get_task_steps',
-                args: {
-                    lastId: this.lastId,
-                    taskUuid: this.taskUuid,
-                    stepName: '创建模型对象',
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_task_steps({
+                lastId: this.lastId,
+                taskUuid: this.taskUuid,
+                stepName: '创建模型对象',
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         const taskSteps: TaskStep[] = res.body['value'];
@@ -122,15 +113,11 @@ export class TaskOnboardingComponent implements OnInit, OnDestroy {
         }
 
         if (this.progressAddArtifact === 100) {
-            const body = {
-                action: 'get_task_steps',
-                args: {
-                    lastId: this.lastId,
-                    taskUuid: this.taskUuid,
-                    stepName: '添加artifact',
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_task_steps({
+                lastId: this.lastId,
+                taskUuid: this.taskUuid,
+                stepName: '添加artifact',
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         const taskSteps: TaskStep[] = res.body['value'];
@@ -147,15 +134,11 @@ export class TaskOnboardingComponent implements OnInit, OnDestroy {
         }
 
         if (this.progressCreateTosca === 100) {
-            const body = {
-                action: 'get_task_steps',
-                args: {
-                    lastId: this.lastId,
-                    taskUuid: this.taskUuid,
-                    stepName: '生成TOSCA文件',
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_task_steps({
+                lastId: this.lastId,
+                taskUuid: this.taskUuid,
+                stepName: '生成TOSCA文件',
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         const taskSteps: TaskStep[] = res.body['value'];
@@ -172,15 +155,11 @@ export class TaskOnboardingComponent implements OnInit, OnDestroy {
         }
 
         if (this.progressGenerateMicroService === 100) {
-            const body = {
-                action: 'get_task_steps',
-                args: {
-                    lastId: this.lastId,
-                    taskUuid: this.taskUuid,
-                    stepName: '创建微服务',
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_task_steps({
+                lastId: this.lastId,
+                taskUuid: this.taskUuid,
+                stepName: '创建微服务',
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         const taskSteps: TaskStep[] = res.body['value'];
@@ -215,15 +194,11 @@ export class TaskOnboardingComponent implements OnInit, OnDestroy {
         }
 
         if (this.progressExtractModelFile < 100) {
-            const body = {
-                action: 'get_task_steps',
-                args: {
-                    lastId: this.lastId,
-                    taskUuid: this.taskUuid,
-                    stepName: '提取模型文件',
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_task_steps({
+                lastId: this.lastId,
+                taskUuid: this.taskUuid,
+                stepName: '提取模型文件',
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         const taskSteps: TaskStep[] = res.body['value'];
@@ -240,15 +215,11 @@ export class TaskOnboardingComponent implements OnInit, OnDestroy {
                 }
             );
         } else if (this.progressExtractModelFile === 100 && this.statusExtractModelFile === '成功' && this.progressCreateSolution < 100) {
-            const body = {
-                action: 'get_task_steps',
-                args: {
-                    lastId: this.lastId,
-                    taskUuid: this.taskUuid,
-                    stepName: '创建模型对象',
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_task_steps({
+                lastId: this.lastId,
+                taskUuid: this.taskUuid,
+                stepName: '创建模型对象',
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         const taskSteps: TaskStep[] = res.body['value'];
@@ -265,15 +236,11 @@ export class TaskOnboardingComponent implements OnInit, OnDestroy {
                 }
             );
         } else if (this.progressCreateSolution === 100 && this.statusCreateSolution === '成功' && this.progressAddArtifact < 100) {
-            const body = {
-                action: 'get_task_steps',
-                args: {
-                    lastId: this.lastId,
-                    taskUuid: this.taskUuid,
-                    stepName: '添加artifact',
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_task_steps({
+                lastId: this.lastId,
+                taskUuid: this.taskUuid,
+                stepName: '添加artifact',
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         const taskSteps: TaskStep[] = res.body['value'];
@@ -290,15 +257,11 @@ export class TaskOnboardingComponent implements OnInit, OnDestroy {
                 }
             );
         } else if (this.progressAddArtifact === 100 && this.statusAddArtifact === '成功' && this.progressCreateTosca < 100) {
-            const body = {
-                action: 'get_task_steps',
-                args: {
-                    lastId: this.lastId,
-                    taskUuid: this.taskUuid,
-                    stepName: '生成TOSCA文件',
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_task_steps({
+                lastId: this.lastId,
+                taskUuid: this.taskUuid,
+                stepName: '生成TOSCA文件',
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         const taskSteps: TaskStep[] = res.body['value'];
@@ -315,15 +278,11 @@ export class TaskOnboardingComponent implements OnInit, OnDestroy {
                 }
             );
         } else if (this.progressCreateTosca === 100 && this.statusCreateTosca === '成功' && this.progressGenerateMicroService < 100) {
-            const body = {
-                action: 'get_task_steps',
-                args: {
-                    lastId: this.lastId,
-                    taskUuid: this.taskUuid,
-                    stepName: '创建微服务',
-                },
-            };
-            this.http.post('umm', body).subscribe(
+            this.ummClient.get_task_steps({
+                lastId: this.lastId,
+                taskUuid: this.taskUuid,
+                stepName: '创建微服务',
+            }).subscribe(
                 (res) => {
                     if (res.body['status'] === 'ok') {
                         const taskSteps: TaskStep[] = res.body['value'];
