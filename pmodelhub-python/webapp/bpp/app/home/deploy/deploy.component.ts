@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Principal, GlobalService, SnackBarService} from '../../shared';
-import {UmmClient} from '../';
+import {UmmClient, UmdClient} from '../';
 import {CookieService} from 'ngx-cookie';
 import {v4 as uuid} from 'uuid';
 import {Task} from '../model/task.model';
@@ -42,6 +42,7 @@ export class DeployComponent implements OnInit, OnDestroy {
         private location: Location,
         private principal: Principal,
         private ummClient: UmmClient,
+        private umdClient: UmdClient,
         private cookieService: CookieService,
         private snackBarService: SnackBarService,
     ) {
@@ -167,7 +168,7 @@ export class DeployComponent implements OnInit, OnDestroy {
     }
 
     doDeploySolution() {
-        this.ummClient.deploy_model({
+        this.umdClient.deploy_model({
             solutionUuid: this.solution.uuid,
             public: this.deployMode === 'public',
         }).subscribe(

@@ -8,6 +8,7 @@ import { UEditorModule } from 'ngx-ueditor';
 import {
     UmmClient,
     UmuClient,
+    UmdClient,
     HomeComponent,
     PageHeaderComponent,
     SolutionComponent,
@@ -57,6 +58,7 @@ import {
     providers: [
         UmmClient,
         UmuClient,
+        UmdClient,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 

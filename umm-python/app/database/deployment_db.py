@@ -124,6 +124,7 @@ def update_deployment_solutioninfo(deployment):
     conn = g.db.pool.connection()
     with conn.cursor() as cursor:
         cursor.execute(sql)
+        conn.commit()
     conn.close()
 
 

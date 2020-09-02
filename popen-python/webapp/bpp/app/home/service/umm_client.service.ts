@@ -12,14 +12,6 @@ export class UmmClient {
         private http: HttpClient,
     ) {}
 
-    deploy_model(args): Observable<HttpResponse<any>> {
-        const body = {
-            action: 'deploy_model',
-            args,
-        };
-        return this.http.post<any>(this.url, body, { observe: 'response' });
-    }
-
     get_solutions(args): Observable<HttpResponse<any>> {
         const body = {
             action: 'get_solutions',
