@@ -5,7 +5,9 @@ service:
   cname: CubeAI模型共享
   ename: pmodelhub
   version: 2.3.0
-  port: 8202
+  port:
+    dev: 8202
+    prod: 80
 
 build:
   image_name: pmodelhubpy

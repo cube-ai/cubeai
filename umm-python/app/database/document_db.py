@@ -27,7 +27,7 @@ def create_document(document):
     with conn.cursor() as cursor:
         cursor.execute(sql)
         conn.commit()
-        cursor.execute('SELECT last_insert_id() FROM star limit 1')
+        cursor.execute('SELECT last_insert_id() FROM document limit 1')
         id = cursor.fetchone()[0]
     conn.close()
 

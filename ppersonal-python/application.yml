@@ -5,7 +5,9 @@ service:
   cname: CubeAI个人中心
   ename: ppersonal
   version: 2.3.0
-  port: 8203
+  port:
+    dev: 8203
+    prod: 80
 
 build:
   image_name: ppersonalpy

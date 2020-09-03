@@ -3,6 +3,6 @@ services:
     gatewaypy-app:
         image: gatewaypy
         ports:
-            - 8080:8080
+            - 8080:80
         environment:
             - START_SLEEP=0

@@ -5,7 +5,6 @@ import docker
 import zipfile
 import subprocess
 import threading
-import platform
 from app.utils import mytime
 from app.service import token_service, umm_client, uaa_client, message_service, nexus_client
 from app.domain.task import Task
@@ -15,6 +14,7 @@ from app.domain.artifact import Artifact
 from app.utils.file_tools import *
 from app.global_data.global_data import g
 from app.resources import dockerfiles
+import logging
 
 
 def onboard_model(**args):
@@ -331,9 +331,6 @@ def generate_microservice_local(task, solution, base_path):
     image_id_local = '{}:{}'.format(solution.uuid, solution.version)
     image_id_remote = '{}/{}'.format(docker_server, image_id_local)
 
-    output_path = os.path.join(base_path, 'app')
-    os.makedirs(output_path)
-
     save_task_step_progress(task.uuid, '创建微服务', '执行', 10, '开始创建微服务...')
     save_task_step_progress(task.uuid, '创建微服务', '执行', 15, '从模型文件中提取元数据...')
 
@@ -360,19 +357,13 @@ def generate_microservice_local(task, solution, base_path):
         return False
 
     dockerfile_text = dockerfile_text.replace(r'{DOCKER-SERVER}', docker_server)
-    dockerfile_path = os.path.join(output_path, 'Dockerfile')
+    dockerfile_path = os.path.join(base_path, 'Dockerfile')
     with open(dockerfile_path, 'w', encoding='utf-8') as file:
         file.write(dockerfile_text)
 
     save_task_step_progress(task.uuid, '创建微服务', '执行', 30, '准备微服务运行环境...')
-    if platform.system() == "Windows":
-        os.system('move {}\* {}'.format(base_path, output_path))
-        os.system('move {}\core {}'.format(base_path, output_path))
-    else:
-        os.system('mv {}/* {}'.format(base_path, output_path))
-
     save_task_step_progress(task.uuid, '创建微服务', '执行', 40, '生成微服务docker镜像...')
-    res = os.system('docker build -t {} {}'.format(image_id_local, output_path))
+    res = os.system('docker build -t {} {}'.format(image_id_local, base_path))
     if res != 0:
         save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '生成微服务docker镜像失败。')
         return False
@@ -435,9 +426,6 @@ def generate_microservice_remote(task, solution, base_path):
     image_id_local = '{}:{}'.format(solution.uuid, solution.version)
     image_id_remote = '{}/{}'.format(docker_server, image_id_local)
 
-    output_path = os.path.join(base_path, 'app')
-    os.makedirs(output_path)
-
     save_task_step_progress(task.uuid, '创建微服务', '执行', 10, '开始创建微服务...')
     save_task_step_progress(task.uuid, '创建微服务', '执行', 15, '从模型文件中提取元数据...')
 
@@ -464,23 +452,18 @@ def generate_microservice_remote(task, solution, base_path):
         return False
 
     dockerfile_text = dockerfile_text.replace(r'{DOCKER-SERVER}', docker_server)
-    dockerfile_path = os.path.join(output_path, 'Dockerfile')
+    dockerfile_path = os.path.join(base_path, 'Dockerfile')
     with open(dockerfile_path, 'w', encoding='utf-8') as file:
         file.write(dockerfile_text)
 
     save_task_step_progress(task.uuid, '创建微服务', '执行', 30, '准备微服务运行环境...')
-    if platform.system() == "Windows":
-        os.system('move {}\* {}'.format(base_path, output_path))
-        os.system('move {}\core {}'.format(base_path, output_path))
-    else:
-        os.system('mv {}/* {}'.format(base_path, output_path))
-
     save_task_step_progress(task.uuid, '创建微服务', '执行', 40, '生成微服务docker镜像...')
     docker_cilent = docker.DockerClient('{}:{}'.format(docker_host, docker_port))
     docker_images = docker_cilent.images
     try:
-        docker_images.build(tag=image_id_local, path=output_path, rm=True)
+        docker_images.build(tag=image_id_local, path=base_path, rm=True)
     except Exception as e:
+        logging.error(str(e))
         save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '生成微服务docker镜像失败。')
         return False
 
@@ -491,6 +474,7 @@ def generate_microservice_remote(task, solution, base_path):
     try:
         image_obj.tag(image_id_remote)
     except Exception as e:
+        logging.error(str(e))
         save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '生成微服务docker镜像失败。')
         try:
             docker_images.remove(image_id_local)
@@ -502,6 +486,7 @@ def generate_microservice_remote(task, solution, base_path):
     try:
         docker_images.push(image_id_remote, auth_config={'username': username, 'password': password})
     except Exception as e:
+        logging.error(str(e))
         save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '生成微服务docker镜像失败。')
         try:
             docker_images.remove(image_id_remote)

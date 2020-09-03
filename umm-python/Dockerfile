@@ -4,6 +4,7 @@ WORKDIR /serviceboot
 ADD . /serviceboot
 # RUN pip3 install -i https://pypi.douban.com/simple/ -r requirements.txt
 RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
-CMD echo "The application will start in ${START_SLEEP}s..." && \
+CMD echo "10.100.26.126 cubeai.dimpt.com" >> /etc/hosts && \
+    echo "The application will start in ${START_SLEEP}s..." && \
     sleep ${START_SLEEP} && \
     serviceboot

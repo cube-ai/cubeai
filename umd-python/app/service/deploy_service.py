@@ -153,12 +153,12 @@ def create_deployment(task, namespace):
                         },
                         'resources': {
                             'requests': {
-                                'memory': '2Gi',
-                                'cpu': '2'
+                                'memory': '1Gi',
+                                'cpu': '0.5'
                             },
                             'limits': {
-                                'memory': '15Gi',
-                                'cpu': '15'
+                                'memory': '8Gi',
+                                'cpu': '2'
                             }
                         }
                     }]

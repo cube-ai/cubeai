@@ -5,7 +5,9 @@ service:
   cname: UMU
   ename: umu
   version: 2.3.0
-  port: 8101
+  port:
+    dev: 8101
+    prod: 80
 
 gateway:
   is_gateway: no

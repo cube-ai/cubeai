@@ -5,7 +5,9 @@ service:
   cname: CubeAI能力开放网关
   ename: ability
   version: 2.3.0
-  port: 8104
+  port:
+    dev: 8104
+    prod: 80
 
 gateway:
   is_gateway: yes

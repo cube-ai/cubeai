@@ -27,7 +27,7 @@ def create_solution(**args):
     solution.createdDate = mytime.now()
     solution.modifiedDate = mytime.now()
 
-    solution_id =solution_db.create_solution(solution)
+    solution_id = solution_db.create_solution(solution)
 
     # 为solution创建描述，其uuid设为与solution的uuid一致。 ----huolongshe
     # description表只能在这里创建
@@ -319,4 +319,3 @@ def delete_solution(**args):
 
     solution_db.delete_solution(solution.id)
     return 0
-

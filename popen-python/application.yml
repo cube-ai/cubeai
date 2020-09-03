@@ -5,7 +5,9 @@ service:
   cname: CubeAI能力开放
   ename: popen
   version: 2.3.0
-  port: 8204
+  port:
+    dev: 8204
+    prod: 80
 
 build:
   image_name: popenpy

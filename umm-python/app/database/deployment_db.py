@@ -102,7 +102,7 @@ def create_deployment(deployment):
     with conn.cursor() as cursor:
         cursor.execute(sql)
         conn.commit()
-        cursor.execute('SELECT last_insert_id() FROM artifact limit 1')
+        cursor.execute('SELECT last_insert_id() FROM deployment limit 1')
         id = cursor.fetchone()[0]
     conn.close()
 

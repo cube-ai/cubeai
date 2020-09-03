@@ -5,7 +5,9 @@ service:
   cname: UMM
   ename: umm
   version: 2.3.0
-  port: 8102
+  port:
+    dev: 8102
+    prod: 80
 
 gateway:
   is_gateway: no
