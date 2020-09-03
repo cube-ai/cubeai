@@ -5,7 +5,9 @@ service:
   cname: UMD
   ename: umd
   version: 2.3.0
-  port: 8103
+  port:
+    dev: 8103
+    prod: 80
 
 gateway:
   is_gateway: no

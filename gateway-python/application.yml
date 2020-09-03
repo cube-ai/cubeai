@@ -5,7 +5,9 @@ service:
   cname: API网关
   ename: gateway
   version: 2.3.0
-  port: 8080
+  port:
+    dev: 8080
+    prod: 80
 
 gateway:
   is_gateway: yes
