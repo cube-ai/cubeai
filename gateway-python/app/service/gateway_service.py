@@ -5,25 +5,6 @@ from app.service import token_service
 from app.global_data.global_data import g
 
 
-def get_web_file(prev_request):
-    next_request, new_access_token, new_refresh_token = gen_next_request(prev_request)
-    if next_request is None:
-        raise Exception('500 server unavailable')
-
-    value = {
-        'response': None,
-        'new_access_token': None,
-        'new_refresh_token': None,
-    }
-    if new_access_token is not None and new_refresh_token is not None:
-        value['new_access_token'] = new_access_token
-        value['new_refresh_token'] = new_refresh_token
-
-    value['response'] = requests.get(url=next_request['url'], headers=next_request['headers'])
-
-    return value
-
-
 def forward_request(prev_request):
     if not check_allow_forward(prev_request):
         raise Exception('500 server unavailable')

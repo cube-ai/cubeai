@@ -10,9 +10,6 @@ class AppCore(object):
         if not g.init_success:
             raise Exception('初始化加载 global_data 失败！')
 
-    def get_web_file(self, prev_request):
-        return gateway_service.get_web_file(prev_request)
-
     def forward_request(self, prev_request):
         return gateway_service.forward_request(prev_request)
 
