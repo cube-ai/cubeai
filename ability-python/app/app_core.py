@@ -12,7 +12,3 @@ class AppCore(object):
 
     def forward_request(self, prev_request):
         return ability_service.forward_request(prev_request)
-
-    def get_web_file(self, prev_request):
-        return ability_service.get_web_file(prev_request)
-
