@@ -1,6 +1,0 @@
-version: '2'
-services:
-    portalpy-app:
-        image: portalpy
-        environment:
-            - START_SLEEP=0
