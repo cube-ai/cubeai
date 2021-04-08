@@ -1,9 +1,0 @@
-version: '2'
-services:
-    consul:
-        image: consul:0.9.3
-        ports:
-            - 8500:8500
-        command: consul agent -dev -ui -client 0.0.0.0 -log-level err
-
-
