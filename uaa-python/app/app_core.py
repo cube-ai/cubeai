@@ -3,7 +3,7 @@ from apscheduler.schedulers.tornado import TornadoScheduler
 from app.global_data.global_data import g
 from app.service import scheduler_service, oauth_service, verify_code_service, message_service, special_service
 from app.service import account_service, user_service, authority_service
-from app.service import article_service, application_service, random_picture_service, attachment_service
+from app.service import article_service, application_service, random_picture_service, random_avatar_service, attachment_service
 
 
 class AppCore(object):
@@ -94,6 +94,9 @@ class AppCore(object):
 
     def get_random_picture(self, **args):
         return random_picture_service.get_random_picture(**args)
+
+    def get_random_avatar(self, **args):
+        return random_avatar_service.get_random_avatar(**args)
     
     def create_application(self, **args):
         return application_service.create_application(**args)

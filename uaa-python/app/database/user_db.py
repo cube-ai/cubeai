@@ -156,7 +156,8 @@ def update_user(user):
             activated = {},
             last_modified_by = "{}",
             last_modified_date = "{}",
-            authorities = "{}"
+            authorities = "{}",
+            image_url = "{}"
         WHERE id = {}
     '''.format(
         user.fullName,
@@ -166,6 +167,7 @@ def update_user(user):
         user.lastModifiedBy,
         user.lastModifiedDate,
         ','.join(user.authorities),
+        user.imageUrl,
         user.id
     )
 

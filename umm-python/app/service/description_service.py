@@ -26,7 +26,7 @@ def update_description(**args):
     if user_login != description.authorLogin and not has_role:
         raise Exception('403 Forbidden')
 
-    description.content = args.get('content')
+    description.content = args.get('content').replace("'", '"')
     description_db.update_description_content(description)
     return 0
 

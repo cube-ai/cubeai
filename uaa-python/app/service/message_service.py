@@ -1,4 +1,5 @@
 import json
+from app.global_data.global_data import g
 from app.service import token_service
 from app.domain.message import Message
 from app.database import message_db
@@ -46,9 +47,9 @@ def get_messages(**args):
 
     where = ''
     if where1:
-        where += 'and {}'.format(where1)
+        where += 'and ({})'.format(where1)
     if where2:
-        where += 'and {}'.format(where2)
+        where += 'and ({})'.format(where2)
     if where:
         where = where[4:]
 
@@ -106,6 +107,7 @@ def send_message(message, http_request):
     message.createdDate = mytime.now()
     message.modifiedDate = mytime.now()
     id = message_db.create_message(message)
+    send_unread_message_count(message.receiver)
 
     return id
 
@@ -129,6 +131,7 @@ def send_multicast_message(draft, http_request):
     for receiver in receivers:
         message.receiver = receiver
         message_db.create_message(message)
+        send_unread_message_count(receiver)
 
     return 0
 
@@ -148,6 +151,7 @@ def mark_message_viewed(**args):
         raise Exception('403 Forbidden')
 
     message_db.update_message_viewed(id, viewed)
+    send_unread_message_count(message.receiver)
     return 0
 
 
@@ -167,6 +171,7 @@ def mark_message_deleted(**args):
         raise Exception('403 Forbidden')
 
     message_db.update_message_deleted(id, deleted)
+    send_unread_message_count(message.receiver)
     return 0
 
 
@@ -176,3 +181,17 @@ def get_unread_message_count(**args):
 
     count = message_db.get_unread_count(receiver, deleted)
     return count
+
+
+def send_unread_message_count(receiver):
+    count = message_db.get_unread_count(receiver, deleted=False)
+
+    msg = {
+        'type': 'data',
+        'topic': 'message_' + receiver,
+        'content': {
+            'unread_msgs': count,
+        },
+    }
+
+    g.websocket.send(json.dumps(msg))

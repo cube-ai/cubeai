@@ -240,6 +240,10 @@ def create_solution(task, solution, base_path):
         solution.version = yml['model']['version']
     except:
         solution.version = 'v0.0.1'
+    try:
+        solution.hasWeb = yml['build']['build_web']
+    except:
+        solution.hasWeb = False
 
     save_task_step_progress(task.uuid, '创建模型对象', '成功', 100, '完成模型配置文件解析。')
 
@@ -352,6 +356,10 @@ def generate_microservice_local(task, solution, base_path):
         dockerfile_text = dockerfiles.python36
     elif python_version.startswith('3.7'):
         dockerfile_text = dockerfiles.python37
+    elif python_version.startswith('3.8'):
+        dockerfile_text = dockerfiles.python38
+    elif python_version.startswith('3.9'):
+        dockerfile_text = dockerfiles.python39
     else:
         save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '元数据文件中Python版本号无效。')
         return False
@@ -378,7 +386,7 @@ def generate_microservice_local(task, solution, base_path):
         os.system('docker image rm {}'.format(image_id_local))
         return False
 
-    save_task_step_progress(task.uuid, '创建微服务', '执行', 75, '登录镜像仓库...')
+    save_task_step_progress(task.uuid, '创建微服务', '执行', 72, '登录镜像仓库...')
     res = os.system('docker login -u {} -p {} {}'.format(username, password, docker_server))
     if res != 0:
         save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '登录镜像仓库失败。')
@@ -386,7 +394,7 @@ def generate_microservice_local(task, solution, base_path):
         os.system('docker image rm {}'.format(image_id_local))
         return False
 
-    save_task_step_progress(task.uuid, '创建微服务', '执行', 80, '推送docker至镜像仓库...')
+    save_task_step_progress(task.uuid, '创建微服务', '执行', 75, '推送docker至镜像仓库...')
     res = os.system('docker push {}'.format(image_id_remote))
     if res != 0:
         save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '推送docker至镜像仓库失败。')
@@ -394,7 +402,7 @@ def generate_microservice_local(task, solution, base_path):
         os.system('docker image rm {}'.format(image_id_local))
         return False
 
-    save_task_step_progress(task.uuid, '创建微服务', '执行', 85, '删除本地docker镜像...')
+    save_task_step_progress(task.uuid, '创建微服务', '执行', 88, '删除本地docker镜像...')
     os.system('docker image rm {}'.format(image_id_remote))
     os.system('docker image rm {}'.format(image_id_local))
 
@@ -447,6 +455,10 @@ def generate_microservice_remote(task, solution, base_path):
         dockerfile_text = dockerfiles.python36
     elif python_version.startswith('3.7'):
         dockerfile_text = dockerfiles.python37
+    elif python_version.startswith('3.8'):
+        dockerfile_text = dockerfiles.python38
+    elif python_version.startswith('3.9'):
+        dockerfile_text = dockerfiles.python39
     else:
         save_task_step_progress(task.uuid, '创建微服务', '失败', 100, '元数据文件中Python版本号无效。')
         return False

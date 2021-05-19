@@ -4,10 +4,9 @@ import threading
 from app.utils import mytime
 from app.utils.file_tools import replace_special_char
 from app.service import token_service, umm_client, message_service
-from app.service.task_service import save_task_progress, save_task_step_progress, deletes_task_steps
+from app.service.task_service import save_task_progress, save_task_step_progress
 from app.domain.task import Task
 from app.domain.solution import Solution
-from app.domain.deployment import Deployment
 from app.global_data.global_data import g
 
 
@@ -22,10 +21,6 @@ def deploy_model(**args):
     if res['status'] != 'ok':
         raise Exception('500: 从umm获取模型对象失败')
     solution = res['value']['results'][0]
-
-    is_public = args.get('public')
-    if solution.get('active') and not is_public:
-        raise Exception('403 Forbidden: 公开模型不能部署为私有')
 
     task = Task()
     task.uuid = str(uuid.uuid4()).replace('-', '')
@@ -42,14 +37,14 @@ def deploy_model(**args):
         raise Exception('500: 向umm创建模型部署任务失败')
 
     task.id = res['value']
-    thread = threading.Thread(target=deploy_thread, args=(task, is_public))
+    thread = threading.Thread(target=deploy_thread, args=(task,))
     thread.setDaemon(True)
     thread.start()
 
     return task.uuid
 
 
-def deploy_thread(task, is_public):
+def deploy_thread(task,):
     save_task_progress(task, "正在执行", 5, "启动模型部署...")
     save_task_step_progress(task.uuid, '模型部署', '执行', 5, '启动模型部署...')
 
@@ -60,10 +55,10 @@ def deploy_thread(task, is_public):
         save_task_progress(task, '失败', 100, '获取用户信息失败。', mytime.now())
         return
 
-    if do_deploy(task, namespace, is_public):
+    if do_deploy(task, namespace):
         complete = '完成'
     else:
-        delete_deploy(task.uuid, namespace)
+        delete_deploy(task.targetUuid, namespace)
         complete = '失败'
 
     message_service.send_message(
@@ -75,7 +70,7 @@ def deploy_thread(task, is_public):
     )
 
 
-def do_deploy(task, namespace, is_public):
+def do_deploy(task, namespace):
     save_task_step_progress(task.uuid, '模型部署', '执行', 10, '开始创建namespace...')
     try:
         g.k8s_client.core_api.read_namespace(namespace)
@@ -104,7 +99,7 @@ def do_deploy(task, namespace, is_public):
         return False
     save_task_progress(task, '正在执行', 90, '创建Kubernetes服务对象成功。')
 
-    if not save_deployment(task, namespace, is_public):
+    if not save_deployment(task, namespace):
         save_task_progress(task, '失败', 100, '保存模型部署对象失败...', mytime.now())
         return False
     save_task_progress(task, '成功', 100, '成功完成模型部署。')
@@ -129,36 +124,37 @@ def create_deployment(task, namespace):
         'kind': 'Deployment',
         'metadata': {
             'namespace': namespace,
-            'name': 'deployment-' + task.uuid
+            'name': 'deployment-' + task.targetUuid
         },
         'spec': {
             'replicas': 1,
             'selector': {
                 'matchLabels': {
-                    'ucumos': task.uuid
+                    'ucumos': task.targetUuid
                 }
             },
             'template': {
                 'metadata': {
                     'labels': {
-                        'ucumos': task.uuid
+                        'ucumos': task.targetUuid
                     }
                 },
                 'spec': {
                     'containers': [{
                         'name': task.targetUuid,
                         'image': image_url,
+                        'imagePullPolicy': 'Always',
                         'port': {
                             'containerPort': 3330
                         },
                         'resources': {
                             'requests': {
-                                'memory': '1Gi',
-                                'cpu': '0.5'
+                                'memory': '2Gi',
+                                'cpu': '1'
                             },
                             'limits': {
-                                'memory': '8Gi',
-                                'cpu': '2'
+                                'memory': '15Gi',
+                                'cpu': '8'
                             }
                         }
                     }]
@@ -175,10 +171,10 @@ def create_deployment(task, namespace):
     error_count = 0
     ok_count = 0
     ok = False
-    progress = 40
+    save_task_step_progress(task.uuid, '模型部署', '执行', 40, '正在创建Kubernetes部署对象...')
     for i in range(1800):
         try:
-            res = g.k8s_client.apps_api.read_namespaced_deployment_status("deployment-" + task.uuid, namespace)
+            res = g.k8s_client.apps_api.read_namespaced_deployment_status("deployment-" + task.targetUuid, namespace)
             available = res.status.available_replicas
             ready = res.status.ready_replicas
             replicas = res.status.replicas
@@ -198,13 +194,7 @@ def create_deployment(task, namespace):
                 ok = False
                 break
 
-        save_task_step_progress(task.uuid, '模型部署', '执行', progress, '正在创建Kubernetes部署对象...')
-        progress += 1
-        if progress > 79:
-            progress = 40
         time.sleep(1)
-
-    deletes_task_steps(task.uuid, 40, 80)
 
     if ok:
         save_task_step_progress(task.uuid, '模型部署', '执行', 80, '创建Kubernetes部署对象完成。')
@@ -221,12 +211,12 @@ def create_service(task, namespace):
         'kind': 'Service',
         'metadata': {
             'namespace': namespace,
-            'name': 'service-' + task.uuid
+            'name': 'service-' + task.targetUuid
         },
         'spec': {
             'type': 'NodePort',
             'selector': {
-                'ucumos': task.uuid
+                'ucumos': task.targetUuid
             },
             'ports': [{
                 'port': 3330,
@@ -244,10 +234,10 @@ def create_service(task, namespace):
     return True
 
 
-def save_deployment(task, namespace, is_public):
+def save_deployment(task, namespace):
     save_task_step_progress(task.uuid, '模型部署', '执行', 92, '开始保存模型部署对象...')
     try:
-        k8s_status = g.k8s_client.core_api.read_namespaced_service_status("service-" + task.uuid, namespace)
+        k8s_status = g.k8s_client.core_api.read_namespaced_service_status("service-" + task.targetUuid, namespace)
     except:
         save_task_step_progress(task.uuid, '模型部署', '失败', 100, '获取Kubernetes服务访问端口失败。')
         return False
@@ -258,18 +248,11 @@ def save_deployment(task, namespace, is_public):
         return False
     solution = Solution()
     solution.__dict__ = res['value']['results'][0]
-    deployment = Deployment()
-    deployment.uuid = task.uuid
-    deployment.deployer = task.userLogin
-    deployment.solutionUuid = task.targetUuid
-    deployment.solutionName = task.taskName
-    deployment.solutionAuthor = solution.authorLogin
-    deployment.pictureUrl = solution.pictureUrl
-    deployment.k8sPort = k8s_status.spec.ports[0].node_port
-    deployment.isPublic = is_public
-    deployment.status = '运行'
+    solution.deployer = task.userLogin
+    solution.k8sPort = k8s_status.spec.ports[0].node_port
+    solution.deployStatus = '运行'
 
-    res = umm_client.create_deployment(deployment, jwt=g.oauth_client.get_jwt())
+    res = umm_client.deploy_solution(solution, jwt=g.oauth_client.get_jwt())
     if res['status'] != 'ok':
         save_task_step_progress(task.uuid, '模型部署', '失败', 100, '保存模型部署对象失败。')
 

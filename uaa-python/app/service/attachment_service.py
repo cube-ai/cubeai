@@ -29,7 +29,7 @@ def get_attachments(**args):
 def delete_attachment(id, http_request):
     token = token_service.get_token(http_request)
     user_login = token.username
-    has_role = token.has_role('ROLE_ADMIN')
+    has_role = token.has_role('ROLE_CONTENT')
 
     attachment = attachment_db.get_attachment(id)
 

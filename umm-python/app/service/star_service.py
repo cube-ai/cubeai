@@ -14,6 +14,7 @@ def create_star(**args):
     star.__dict__ = args.get('star')
     star.userLogin = user_login
     star.starDate = mytime.now()
+    star.targetType = ''
 
     id = star_db.create_star(star)
     return id

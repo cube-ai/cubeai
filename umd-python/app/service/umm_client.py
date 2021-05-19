@@ -1,4 +1,3 @@
-import json
 from app.service.http_client import http_client
 
 
@@ -57,18 +56,6 @@ def get_solutions(uuid, jwt=None):
     return http_client(service_name, body=body, jwt=jwt)
 
 
-def create_solution(solution, jwt):
-    return http_client('post', service_name, '/api/solutions', body=json.dumps(solution.__dict__), jwt=jwt)
-
-
-def delete_solution(id, jwt):
-    return http_client('delete', service_name, '/api/solutions/{}'.format(id), jwt=jwt)
-
-
-def create_artifact(artifact, jwt):
-    return http_client('post', service_name, '/api/artifacts', body=json.dumps(artifact.__dict__), jwt=jwt)
-
-
 def get_artifacts(solution_uuid, type, jwt=None):
     body = {
         'action': 'get_artifacts',
@@ -80,38 +67,25 @@ def get_artifacts(solution_uuid, type, jwt=None):
     return http_client(service_name, body=body, jwt=jwt)
 
 
-def delete_artifact(id, jwt):
-    return http_client('delete', service_name, '/api/artifacts/{}'.format(id), jwt=jwt)
-
-
-def create_document(document, jwt):
-    return http_client('post', service_name, '/api/documents', body=json.dumps(document.__dict__), jwt=jwt)
-
-
-def get_document(id, jwt=None):
-    return http_client('get', service_name, '/api/documents/{}'.format(id), jwt=jwt)
-
-
-def delete_document(id, jwt):
-    return http_client('delete', service_name, '/api/documents/{}'.format(id), jwt=jwt)
-
-
-def create_deployment(deployment, jwt):
+def deploy_solution(solution, jwt):
     body = {
-        'action': 'create_deployment',
+        'action': 'deploy_solution',
         'args': {
-            'deployment': deployment.__dict__,
+            'solutionId': solution.id,
+            'deployer': solution.deployer,
+            'deployStatus': solution.deployStatus,
+            'k8sPort': solution.k8sPort,
         },
     }
     return http_client(service_name, body=body, jwt=jwt)
 
 
-def update_deployment_status(deploymentId, status, jwt):
+def update_solution_deploy_status(solutionId, status, jwt):
     body = {
-        'action': 'update_deployment_status',
+        'action': 'update_solution_deploy_status',
         'args': {
-            'deploymentId': deploymentId,
-            'status': status,
+            'solutionId': solutionId,
+            'deployStatus': status,
         },
     }
     return http_client(service_name, body=body, jwt=jwt)

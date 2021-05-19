@@ -19,9 +19,13 @@ class Solution:
         self.active = None
         self.modelType = None
         self.toolkitType = None
+        self.starCount = None
+        self.viewCount = None
         self.createdDate = None
         self.modifiedDate = None
-        self.viewCount = None
-        self.downloadCount = None
-        self.commentCount = None
-        self.starCount = None
+        self.hasWeb =None
+        self.deployStatus = None
+        self.deployer = None
+        self.deployDate = None
+        self.k8sPort = None
+        self.callCount = None

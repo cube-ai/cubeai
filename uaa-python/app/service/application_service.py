@@ -87,9 +87,9 @@ def get_applications(**args):
 
     where = ''
     if where1:
-        where += 'and {}'.format(where1)
+        where += 'and ({})'.format(where1)
     if where2:
-        where += 'and {}'.format(where2)
+        where += 'and ({})'.format(where2)
     if where:
         where = where[4:]
 

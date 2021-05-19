@@ -1,4 +1,8 @@
 import uuid
+import time
+import json
+import threading
+import websocket
 from PIL import ImageFont
 from app.global_data.config import Config
 from app.global_data.consul_client import ConsulClient
@@ -16,6 +20,7 @@ class GlobalData:
         self.consul_client = None
         self.oauth_client = None
         self.db = None
+        self.websocket = None
         self.verify_code_font = ImageFont.truetype('app/resources/fonts/FreeSansBoldOblique.ttf', size=25)
 
     def load_global_data(self):
@@ -41,6 +46,10 @@ class GlobalData:
             logging.error('初始化数据库失败！')
             return
 
+        thread = threading.Thread(target=websocket_client_thread)
+        thread.setDaemon(True)
+        thread.start()
+
         self.inited = True
         self.init_success = True
 
@@ -49,6 +58,28 @@ class GlobalData:
             self.central_config = self.consul_client.get_kv()
 
         return self.central_config
+
+
+def websocket_client_thread():
+
+    def on_open(ws):
+        ws.send(json.dumps({
+            'type': 'subscribe',
+            'content': g.config.app_name,
+        }))
+
+    while True:
+        time.sleep(1)
+        while True:
+            time.sleep(1)
+            gateway = g.consul_client.resolve_service('gateway')
+            if gateway is not None:
+                g.websocket = websocket.WebSocketApp('ws://{}/websocket'.format(gateway), on_open=on_open)
+                logging.critical('Connecting to WebSocket server: {} ...'.format(gateway))
+                break
+
+        g.websocket.run_forever()
+        logging.error('WebSocket connection broken, try connect again ...')
 
 
 g = GlobalData()

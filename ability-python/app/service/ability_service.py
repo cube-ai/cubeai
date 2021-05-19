@@ -9,7 +9,7 @@ def forward_request(prev_request):
     if path.startswith('/model/'):
         deployment_uuid = path[7:]
 
-        res = umm_client.find_and_call_ability(deployment_uuid)
+        res = umm_client.find_ability(deployment_uuid)
         if res['status'] != 'ok':
             raise Exception('未找到部署实例')
 
@@ -31,7 +31,7 @@ def forward_request(prev_request):
     if path.startswith('/file/'):
         deployment_uuid, method = path[6:].split('/')
 
-        res = umm_client.find_and_call_ability(deployment_uuid)
+        res = umm_client.find_ability(deployment_uuid)
         if res['status'] != 'ok':
             raise Exception('未找到部署实例')
 
@@ -53,7 +53,7 @@ def forward_request(prev_request):
     if path.startswith('/stream/'):
         deployment_uuid, method = path[8:].split('/')
 
-        res = umm_client.find_and_call_ability(deployment_uuid)
+        res = umm_client.find_ability(deployment_uuid)
         if res['status'] != 'ok':
             raise Exception('未找到部署实例')
 
@@ -78,7 +78,7 @@ def forward_request(prev_request):
         deployment_uuid = path[:i]
         filename = path[i+1:]
 
-        res = umm_client.find_and_call_ability(deployment_uuid)
+        res = umm_client.find_ability(deployment_uuid)
         if res['status'] != 'ok':
             raise Exception('未找到部署实例')
         deployment = res['value']

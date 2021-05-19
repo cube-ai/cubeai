@@ -74,13 +74,24 @@ def get_users(**args):
     if not has_role:
         raise Exception('403 Forbidden')
 
+    filter = args.get('filter')
     pageable = {
         'page': args.get('page'),
         'size': args.get('size'),
         'sort': args.get('sort'),
     }
 
-    total, results = user_db.get_users('', pageable)
+    where = ''
+    if filter is not None:
+        where += 'login like "%{}%"'.format(filter)
+        where += ' or full_name like "%{}%"'.format(filter)
+        where += ' or email like "%{}%"'.format(filter)
+        where += ' or phone like "%{}%"'.format(filter)
+
+    if where != '':
+        where = 'WHERE ' + where
+
+    total, results = user_db.get_users(where, pageable)
     return {
         'total': total,
         'results': results,

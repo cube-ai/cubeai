@@ -1,7 +1,7 @@
 from datetime import datetime
 from app.domain.user import User
 from app.database import user_db
-from app.service import mail_service, passwd_service, token_service, verify_code_service, user_service
+from app.service import mail_service, passwd_service, token_service, verify_code_service, user_service, random_avatar_service
 from app.utils import mytime
 
 
@@ -63,6 +63,9 @@ def register_user(**args):
     user = User()
     user.__dict__ = args.get('user')
 
+    if not user.login or len(user.login) < 3:
+        raise Exception('400 username太短')
+
     old = user_db.find_one_by_kv('login', user.login)
     if old is not None:
         raise Exception('400 username重名')
@@ -78,7 +81,7 @@ def register_user(**args):
     user.password = passwd_service.encode(user.password)
     user.activated = False
     user.activationKey = passwd_service.gen_random_key()
-    user.imageUrl = ''
+    user.imageUrl = random_avatar_service.get_random_avatar(200)
     user.langKey = 'en'
     user.createdBy = user.login
     user.createdDate = mytime.now()

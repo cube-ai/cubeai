@@ -47,11 +47,17 @@ class AppCore(object):
     def update_solution_view_count(self, **args):
         return solution_service.update_solution_view_count(**args)
 
-    def update_solution_download_count(self, **args):
-        return solution_service.update_solution_download_count(**args)
-
     def delete_solution(self, **args):
         return solution_service.delete_solution(**args)
+
+    def deploy_solution(self, **args):
+        return solution_service.deploy_solution(**args)
+
+    def update_solution_deploy_status(self, **args):
+        return solution_service.update_solution_deploy_status(**args)
+
+    def update_solution_call_count(self, **args):
+        return solution_service.update_solution_call_count(**args)
 
     def create_star(self, **args):
         return star_service.create_star(**args)

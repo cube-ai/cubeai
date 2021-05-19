@@ -18,14 +18,17 @@ def create_solution(**args):
         raise Exception('403 Forbidden')
 
     solution.active = True
+    solution.deployStatus = '停止'
     solution.company = ''
     solution.starCount = 0
     solution.viewCount = 0
-    solution.downloadCount = 0
     solution.commentCount = 0
     solution.displayOrder = 0
     solution.createdDate = mytime.now()
     solution.modifiedDate = mytime.now()
+    solution.deployStatus = '停止'
+    solution.deployDate = mytime.now()
+    solution.callCount = 0
 
     solution_id = solution_db.create_solution(solution)
 
@@ -34,7 +37,7 @@ def create_solution(**args):
     description = Description()
     description.solutionUuid = solution.uuid
     description.authorLogin = solution.authorLogin
-    description.content = r'<p>无内容</p>'
+    description.content = ''
     description_db.create_description(description)
 
     credit = Credit()
@@ -57,6 +60,9 @@ def get_solutions(**args):
     subject2 = args.get('subject2')
     subject3 = args.get('subject3')
     tag = args.get('tag')
+    hasWeb = args.get('hasWeb')
+    deployer = args.get('deployer')
+    deployStatus = args.get('deployStatus')
     filter = args.get('filter')
     pageable = {
         'page': args.get('page'),
@@ -92,6 +98,14 @@ def get_solutions(**args):
         where1 += 'and model_type = "{}" '.format(modelType)
     if toolkitType is not None:
         where1 += 'and toolkit_type = "{}" '.format(toolkitType)
+    if hasWeb is not None:
+        where1 += 'and has_web = {} '.format(hasWeb)
+    if deployStatus == '部署':
+        where1 += 'and (deploy_status = "运行" or deploy_status = "暂停") '
+    if deployStatus == '运行':
+        where1 += 'and deploy_status = "运行" '
+    if deployer is not None:
+        where1 += 'and deployer = "{}" '.format(deployer)
     if subject1 is not None:
         where1 += 'and subject_1 = "{}" '.format(subject1)
     if subject2 is not None:
@@ -116,14 +130,15 @@ def get_solutions(**args):
         where3 += ' or tag_2 like "%{}%"'.format(filter)
         where3 += ' or tag_3 like "%{}%"'.format(filter)
         where3 += ' or company like "%{}%"'.format(filter)
+        where3 += ' or deployer like "%{}%"'.format(filter)
 
     where = ''
     if where1:
-        where += 'and {}'.format(where1)
+        where += 'and ({})'.format(where1)
     if where2:
-        where += 'and {}'.format(where2)
+        where += 'and ({})'.format(where2)
     if where3:
-        where += 'and {}'.format(where3)
+        where += 'and ({})'.format(where3)
     if where:
         where = where[4:]
 
@@ -254,15 +269,6 @@ def update_solution_star_count(**args):
     return 0
 
 
-def update_solution_comment_count(**args):
-    solution = Solution()
-    solution.__dict__ = solution_db.get_solution_by_id(args.get('solutionId'))
-    solution.commentCount = comment_db.get_comment_count(solution.uuid)
-
-    solution_db.update_solution_comment_count(solution)
-    return 0
-
-
 def update_solution_view_count(**args):
     solution = Solution()
     solution.__dict__ = solution_db.get_solution_by_id(args.get('solutionId'))
@@ -273,13 +279,12 @@ def update_solution_view_count(**args):
     return 0
 
 
-def update_solution_download_count(**args):
+def update_solution_comment_count(**args):
     solution = Solution()
     solution.__dict__ = solution_db.get_solution_by_id(args.get('solutionId'))
+    solution.commentCount = comment_db.get_comment_count(solution.uuid)
 
-    solution.downloadCount += 1
-
-    solution_db.update_solution_download_count(solution)
+    solution_db.update_solution_comment_count(solution)
     return 0
 
 
@@ -293,6 +298,9 @@ def delete_solution(**args):
 
     if user_login != solution.authorLogin and user_login != 'internal' and not has_role:
         raise Exception('403 Forbidden')
+
+    if solution.deployStatus != '停止':
+        raise Exception('403 模型正在运行，不可删除！')
 
     where = 'WHERE solution_uuid = "{}"'.format(solution.uuid)
     document_list = document_db.get_documents(where)
@@ -319,3 +327,53 @@ def delete_solution(**args):
 
     solution_db.delete_solution(solution.id)
     return 0
+
+
+def deploy_solution(**args):
+    token = token_service.get_token(args.get('http_request'))
+    user_login = token.username
+    has_role = token.has_role('ROLE_OPERATOR')
+
+    solution = Solution()
+    solution.__dict__ = solution_db.get_solution_by_id(args.get('solutionId'))
+
+    if user_login != args.get('deployer') and user_login != 'internal' and not has_role:
+        raise Exception('403 Forbidden')
+
+    solution.deployer = args.get('deployer')
+    solution.deployStatus = args.get('deployStatus')
+    solution.k8sPort = args.get('k8sPort')
+    solution.deployDate = mytime.now()
+
+    solution_db.update_solution_deploy_info(solution)
+    return 0
+
+
+def update_solution_deploy_status(**args):
+    token = token_service.get_token(args.get('http_request'))
+    user_login = token.username
+    has_role = token.has_role('ROLE_OPERATOR')
+
+    solution = Solution()
+    solution.__dict__ = solution_db.get_solution_by_id(args.get('solutionId'))
+
+    if user_login != 'internal' and not has_role:
+        raise Exception('403 Forbidden')
+
+    solution.deployStatus = args.get('deployStatus')
+
+    solution_db.update_solution_deploy_status(solution)
+    return 0
+
+
+def update_solution_call_count(**args):
+    results = solution_db.get_solutions_by_uuid(args.get('uuid'))
+
+    if len(results) > 0:
+        solution = Solution()
+        solution.__dict__ = results[0]
+        solution.callCount += 1
+        solution_db.update_solution_call_count(solution)
+        return results[0]
+    else:
+        raise Exception('404 solution not found')

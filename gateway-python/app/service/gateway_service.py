@@ -105,15 +105,6 @@ def gen_next_request(prev_request):
     body = prev_request.body if method == 'POST' or method == 'PUT' else None
     headers = prev_request.headers
 
-    try:
-        headers.pop('If-Modified-Since')
-    except:
-        pass
-    try:
-        headers.pop('If-None-Match')
-    except:
-        pass
-
     next_request = {
         'url': url,
         'method': method,

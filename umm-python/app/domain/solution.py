@@ -19,12 +19,17 @@ class Solution:
         self.active = None
         self.modelType = None
         self.toolkitType = None
+        self.starCount = None
+        self.viewCount = None
+        self.commentCount = None
         self.createdDate = None
         self.modifiedDate = None
-        self.viewCount = None
-        self.downloadCount = None
-        self.commentCount = None
-        self.starCount = None
+        self.hasWeb =None
+        self.deployStatus = None
+        self.deployer = None
+        self.deployDate = None
+        self.k8sPort = None
+        self.callCount = None
 
     def from_record(self, record):
         self.id = record[0]
@@ -48,8 +53,12 @@ class Solution:
         self.toolkitType = record[18]
         self.starCount = record[19]
         self.viewCount = record[20]
-        self.downloadCount = record[21]
-        self.commentCount = record[22]
-        self.createdDate = record[23].strftime('%Y-%m-%dT%H:%M:%S')
-        self.modifiedDate = record[24].strftime('%Y-%m-%dT%H:%M:%S')
-
+        self.commentCount = record[21]
+        self.createdDate = record[22].strftime('%Y-%m-%dT%H:%M:%S')
+        self.modifiedDate = record[23].strftime('%Y-%m-%dT%H:%M:%S')
+        self.hasWeb = ord(record[24]) == 1
+        self.deployStatus = record[25]
+        self.deployer = record[26]
+        self.deployDate = record[27].strftime('%Y-%m-%dT%H:%M:%S')
+        self.k8sPort = record[28]
+        self.callCount = record[29]

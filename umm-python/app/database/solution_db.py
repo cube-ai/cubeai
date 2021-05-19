@@ -75,12 +75,16 @@ def create_solution(solution):
             created_date,
             modified_date,
             view_count,
-            download_count,
+            star_count,
             comment_count,
-            star_count
+            call_count,
+            deploy_status,
+            deploy_date,
+            has_web
         ) VALUES ( "{}", "{}", "{}", "{}", "{}", "{}", 
                     {}, 
-                    "{}", "{}", "{}", "{}", "{}", "{}", "{}")
+                    "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", 
+                    {})
     '''.format(
         solution.uuid,
         solution.authorLogin,
@@ -93,9 +97,12 @@ def create_solution(solution):
         solution.createdDate,
         solution.modifiedDate,
         solution.viewCount,
-        solution.downloadCount,
+        solution.starCount,
         solution.commentCount,
-        solution.starCount
+        solution.callCount,
+        solution.deployStatus,
+        solution.deployDate,
+        1 if solution.hasWeb else 0
     )
 
     conn = g.db.pool.connection()
@@ -242,23 +249,6 @@ def update_solution_star_count(solution):
     conn.close()
 
 
-def update_solution_comment_count(solution):
-    sql = '''
-        UPDATE solution SET 
-            comment_count = "{}"
-        WHERE id = {}
-    '''.format(
-        solution.commentCount,
-        solution.id
-    )
-
-    conn = g.db.pool.connection()
-    with conn.cursor() as cursor:
-        cursor.execute(sql)
-        conn.commit()
-    conn.close()
-
-
 def update_solution_view_count(solution):
     sql = '''
         UPDATE solution SET 
@@ -276,13 +266,70 @@ def update_solution_view_count(solution):
     conn.close()
 
 
-def update_solution_download_count(solution):
+def update_solution_comment_count(solution):
     sql = '''
         UPDATE solution SET 
-            download_count = "{}"
+            comment_count = "{}"
         WHERE id = {}
     '''.format(
-        solution.downloadCount,
+        solution.commentCount,
+        solution.id
+    )
+
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
+
+
+def update_solution_deploy_info(solution):
+    sql = '''
+        UPDATE solution SET 
+            deployer = "{}",
+            deploy_status = "{}",
+            k_8_s_port = "{}",
+            deploy_date = "{}"
+        WHERE id = {}
+    '''.format(
+        solution.deployer,
+        solution.deployStatus,
+        solution.k8sPort,
+        solution.deployDate,
+        solution.id
+    )
+
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
+
+
+def update_solution_deploy_status(solution):
+    sql = '''
+        UPDATE solution SET 
+            deploy_status = "{}"
+        WHERE id = {}
+    '''.format(
+        solution.deployStatus,
+        solution.id
+    )
+
+    conn = g.db.pool.connection()
+    with conn.cursor() as cursor:
+        cursor.execute(sql)
+        conn.commit()
+    conn.close()
+
+
+def update_solution_call_count(solution):
+    sql = '''
+        UPDATE solution SET 
+            call_count = "{}"
+        WHERE id = {}
+    '''.format(
+        solution.callCount,
         solution.id
     )
 

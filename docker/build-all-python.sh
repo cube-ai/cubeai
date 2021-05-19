@@ -1,4 +1,5 @@
-pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple serviceboot==0.1.2
+# 先安装serviceboot
+pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple serviceboot==0.3.6
 
 cd ~/cubeai/uaa-python
 sh build-docker.sh

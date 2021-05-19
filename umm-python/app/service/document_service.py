@@ -1,6 +1,6 @@
 from app.domain.document import Document
 from app.service import token_service
-from app.database import document_db, solution_db, composite_solution_db
+from app.database import document_db, solution_db
 from app.utils import mytime
 
 
@@ -12,8 +12,6 @@ def create_document(**args):
     document = Document()
     document.__dict__ = args.get('document')
     solutions = solution_db.get_solutions_by_uuid(document.solutionUuid)
-    if not solutions:
-        solutions = composite_solution_db.get_solutions_by_uuid(document.solutionUuid)
     solution = solutions[0]
 
     user_login = token.username

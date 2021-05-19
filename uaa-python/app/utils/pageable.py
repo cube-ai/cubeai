@@ -25,7 +25,7 @@ def camel_to_lowercase(text):
         if (char.isupper() or '0' <= char <= '9') and index != 0:
             lst.append("_")
         lst.append(char)
-        if '0' <= char <= '9' and index != len(text)-1:
+        if '0' <= char <= '9' and (index != len(text)-1 and text[index + 1] != ','):
             lst.append("_")
 
     return "".join(lst).lower()

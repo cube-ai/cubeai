@@ -58,3 +58,34 @@ def logout(**args):
         'access_token': '',
         'refresh_token': '',
     }
+
+
+def login_cmd(**args):
+    username = args.get('username')
+    password = args.get('password')
+
+    url = g.oauth_client.get_uaa_url()
+    headers2 = {
+        'Authorization': 'Basic {}'.format(str(base64.b64encode(b'web_app:changeit'), encoding='utf-8'))
+    }
+    body2 = {
+        'action': 'get_token',
+        'args': {
+            'grant_type': 'password',
+            'username': username,
+            'password': password,
+        }
+    }
+    res = requests.post(url, json=body2, headers=headers2)
+
+    if res.status_code != 200:
+        raise Exception('server_error')
+
+    res_body = json.loads(res.text, encoding='utf-8')
+    if res_body['status'] != 'ok':
+        raise Exception('password_error')
+
+    return {
+        'access_token': res_body['value'].get('access_token'),
+        'refresh_token': res_body['value'].get('refresh_token'),
+    }

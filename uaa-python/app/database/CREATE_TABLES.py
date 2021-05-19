@@ -5,6 +5,9 @@ def create_tables(pool):
     conn = pool.connection()
     with conn.cursor() as cursor:
         create_table_user(conn, cursor)
+        create_table_qq_user(conn, cursor)
+        create_table_gitee_user(conn, cursor)
+        create_table_github_user(conn, cursor)
         create_table_authority(conn, cursor)
         create_table_verify_code(conn, cursor)
         create_table_message(conn, cursor)
@@ -81,6 +84,60 @@ def create_table_user(conn, cursor):
         '''.format(datetime.now().strftime('%Y-%m-%dT%H:%M:%S'), datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
         cursor.execute(sql)
         conn.commit()
+
+
+def create_table_qq_user(conn, cursor):
+    sql = '''
+        CREATE TABLE IF NOT EXISTS qq_user (
+            id  bigint PRIMARY KEY  NOT NULL AUTO_INCREMENT,
+            qq_login               varchar(50) NOT NULL UNIQUE,
+            user_login                varchar(50)
+        );
+    '''
+    cursor.execute(sql)
+    conn.commit()
+    try:
+        sql = 'CREATE UNIQUE INDEX idx_qq_user_qq_login on qq_user(qq_login);'
+        cursor.execute(sql)
+        conn.commit()
+    except:
+        pass
+
+
+def create_table_gitee_user(conn, cursor):
+    sql = '''
+        CREATE TABLE IF NOT EXISTS gitee_user (
+            id  bigint PRIMARY KEY  NOT NULL AUTO_INCREMENT,
+            gitee_login               varchar(50) NOT NULL UNIQUE,
+            user_login                varchar(50)
+        );
+    '''
+    cursor.execute(sql)
+    conn.commit()
+    try:
+        sql = 'CREATE UNIQUE INDEX idx_gitee_user_gitee_login on gitee_user(gitee_login);'
+        cursor.execute(sql)
+        conn.commit()
+    except:
+        pass
+    
+
+def create_table_github_user(conn, cursor):
+    sql = '''
+        CREATE TABLE IF NOT EXISTS github_user (
+            id  bigint PRIMARY KEY  NOT NULL AUTO_INCREMENT,
+            github_login              varchar(50) NOT NULL UNIQUE,
+            user_login                varchar(50)
+        );
+    '''
+    cursor.execute(sql)
+    conn.commit()
+    try:
+        sql = 'CREATE UNIQUE INDEX idx_github_user_github_login on github_user(github_login);'
+        cursor.execute(sql)
+        conn.commit()
+    except:
+        pass
 
 
 def create_table_authority(conn, cursor):
