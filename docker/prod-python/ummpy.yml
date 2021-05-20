@@ -1,0 +1,6 @@
+version: '2'
+services:
+    ummpy-app:
+        image: ummpy
+        environment:
+            - START_SLEEP=0

@@ -1,0 +1,27 @@
+<app-pageheader></app-pageheader>
+
+<div class="p-d-flex p-flex-column p-m-3">
+    <p-toolbar class="p-mb-3">
+        <ng-template pTemplate="left">
+            <div class="p-d-flex p-ai-center">
+                <div class="p-mr-3">
+                    <span style="font-size: 1.5rem">模型打包指南</span>
+                </div>
+            </div>
+        </ng-template>
+    </p-toolbar>
+
+    <p-card>
+        <div *ngIf="!!content">
+            <div *ngIf="content.startsWith('<')">
+                <div [innerHTML]="content | html">
+                </div>
+            </div>
+            <div *ngIf="!content.startsWith('<')">
+                <div id="md_view" mdView>
+                    <textarea style="display: none;">{{content}}</textarea>
+                </div>
+            </div>
+        </div>
+    </p-card>
+</div>

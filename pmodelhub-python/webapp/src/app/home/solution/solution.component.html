@@ -1,0 +1,558 @@
+<p-confirmPopup></p-confirmPopup>
+<app-pageheader></app-pageheader>
+
+<div class="p-d-flex p-flex-column p-m-3" *ngIf="!!solution">
+    <p-toolbar class="p-mb-3">
+        <ng-template pTemplate="left">
+            <div class="p-d-flex p-ai-center">
+                <div class="p-mr-3">
+                    <span style="font-size: 1.5rem">{{solution.name}}</span>
+                </div>
+                <div *ngIf="canEdit()" class="p-ml-6 p-d-none p-d-md-inline">
+                    <p-button icon="pi pi-pencil" styleClass="p-button-outlined" (onClick)="enterEdit()"
+                              pTooltip="进入编辑状态" tooltipPosition="top"
+                              *ngIf="!isEditing">
+                    </p-button>
+                    <p-button icon="pi pi-save" styleClass="p-button-outlined" (onClick)="saveAndQuitEdit()"
+                              pTooltip="保存并退出编辑" tooltipPosition="top"
+                              *ngIf="isEditing" [disabled]="!solution.name">
+                    </p-button>
+                </div>
+                <div *ngIf="!isEditing && (isOperator || isOwner)" class="p-ml-6 p-d-none p-d-md-inline">
+                    <p-button icon="fa fa-rocket" styleClass="p-button-outlined" (onClick)="deploySolution()"
+                              pTooltip="部署模型" tooltipPosition="top">
+                    </p-button>
+                </div>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="right">
+            <div class="p-d-flex" style="font-size: 1.25rem">
+                <a (click)="starSolution()" pTooltip="关注" tooltipPosition="top" style="cursor: pointer">
+                    <span *ngIf="star" class="fa fa-star" style="color: gold"></span>
+                    <span *ngIf="!star" class="fa fa-star-o"></span>
+                </a>
+                <a (click)="gotoStargazers()" class="p-mx-3" pTooltip="粉丝数量" tooltipPosition="top" style="cursor: pointer">
+                    {{solution.starCount}}
+                </a>
+            </div>
+        </ng-template>
+    </p-toolbar>
+
+    <p-card>
+        <p-tabView>
+            <p-tabPanel header="基本信息">
+                <div class="p-d-flex p-flex-column">
+                    <div class="p-d-flex p-d-md-none p-jc-center" *ngIf="!isEditing">
+                        <a (click)="gotoAbility()" style="cursor: pointer" *ngIf="solution.deployStatus !== '停止'">
+                            <img src="{{solution.pictureUrl}}" pTooltip="点击查看模型部署实例" tooltipPosition="bottom">
+                        </a>
+                        <a (click)="deploySolution()" style="cursor: pointer" *ngIf="solution.deployStatus === '停止'">
+                            <img src="{{solution.pictureUrl}}" pTooltip="部署模型" tooltipPosition="bottom">
+                        </a>
+                    </div>
+                    <div class="p-grid">
+                        <div class="p-col">
+                            <div *ngIf="!isEditing">
+                                <p>名称： &nbsp;&nbsp;&nbsp;{{solution.name}}</p>
+                                <p>类别： &nbsp;&nbsp;&nbsp;{{solution.modelType}}</p>
+                                <p>工具： &nbsp;&nbsp;&nbsp;{{solution.toolkitType}}</p>
+                                <p>
+                                    作者： &nbsp;&nbsp;&nbsp;
+                                    <a (click)="gotoPersonal(solution.authorLogin)" style="cursor: pointer; font-weight: bold">
+                                        {{solution.authorName || solution.authorLogin}}
+                                    </a>
+                                </p>
+                                <p *ngIf="!!solution.company">单位： &nbsp;&nbsp;&nbsp;{{solution.company}}</p>
+                                <p>日期： &nbsp;&nbsp;&nbsp;{{solution.createdDate | date:'yyyy-MM-dd HH:mm:ss'}}</p>
+                                <p>
+                                    标签：
+                                    <p-chip *ngIf="solution.tag1" styleClass="p-ml-2"><span style="font-size: 0.8rem">{{solution.tag1}}</span>
+                                    </p-chip>
+                                    <p-chip *ngIf="solution.tag2" styleClass="p-ml-2"><span style="font-size: 0.8rem">{{solution.tag2}}</span>
+                                    </p-chip>
+                                    <p-chip *ngIf="solution.tag3" styleClass="p-ml-2"><span style="font-size: 0.8rem">{{solution.tag3}}</span>
+                                    </p-chip>
+                                </p>
+                                <p>摘要：&nbsp;&nbsp;&nbsp;{{solution.summary}}</p>
+                                <p *ngIf="solution.deployStatus === '停止'">
+                                    部署状态：&nbsp;&nbsp;&nbsp;
+                                    <a (click)="deploySolution()" style="color: red; cursor: pointer">{{solution.deployStatus}}</a>
+                                </p>
+                                <p *ngIf="solution.deployStatus === '暂停'">
+                                    部署状态：&nbsp;&nbsp;&nbsp;
+                                    <a (click)="gotoAbility()" style="color: yellow; cursor: pointer">{{solution.deployStatus}}</a>
+                                </p>
+                                <p *ngIf="solution.deployStatus === '运行'">
+                                    部署状态：&nbsp;&nbsp;&nbsp;
+                                    <a (click)="gotoAbility()" style="color: green; cursor: pointer">{{solution.deployStatus}}</a>
+                                </p>
+                            </div>
+                            <div class="p-d-flex p-flex-column" *ngIf="isEditing">
+                                <p-card class="p-d-flex p-flex-column p-mt-3" *ngIf="isManager">
+                                    <span style="font-weight: bold">控制字段（仅管理员可见）</span>
+                                    <div class="p-fluid p-grid p-mt-3">
+                                        <div class="p-col-3 p-field">
+                                            <label for="subject1">主题1</label>
+                                            <input id="subject1" type="text" pInputText [(ngModel)]="solution.subject1" maxlength=20>
+                                        </div>
+                                        <div class="p-col-3 p-field">
+                                            <label for="subject2">主题2</label>
+                                            <input id="subject2" type="text" pInputText [(ngModel)]="solution.subject2" maxlength=20>
+                                        </div>
+                                        <div class="p-col-3 p-field">
+                                            <label for="subject3">主题3</label>
+                                            <input id="subject3" type="text" pInputText [(ngModel)]="solution.subject3" maxlength=20>
+                                        </div>
+                                        <div class="p-col-3 p-field">
+                                            <label for="displayOrder">显示控制</label>
+                                            <input id="displayOrder" type="number" pInputText [(ngModel)]="solution.displayOrder">
+                                        </div>
+                                    </div>
+                                </p-card>
+
+                                <p-card class="p-mt-3">
+                                    <span style="font-weight: bold">模型基本信息</span>
+                                    <div class="p-fluid p-grid p-mt-3">
+                                        <div class="p-col-4 p-field">
+                                            <label for="solution_name">模型名称</label>
+                                            <input id="solution_name" type="text" pInputText [(ngModel)]="solution.name" maxlength=30 required>
+                                        </div>
+                                        <div class="p-col-4 p-field">
+                                            <label for="modelType">模型类别</label>
+                                            <p-dropdown id="modelType" [options]="modelTypes" [(ngModel)]="solution.modelType"
+                                                        placeholder="请选择...">
+                                            </p-dropdown>
+                                        </div>
+                                        <div class="p-col-4 p-field">
+                                            <label for="modelToolkit">模型工具</label>
+                                            <p-dropdown id="modelToolkit" [options]="modelToolkits" [(ngModel)]="solution.toolkitType"
+                                                        placeholder="请选择...">
+                                            </p-dropdown>
+                                        </div>
+                                    </div>
+                                    <div class="p-fluid p-grid p-mt-3">
+                                        <div class="p-col-3 p-field">
+                                            <label for="tag1">标签1</label>
+                                            <input id="tag1" type="text" pInputText [(ngModel)]="solution.tag1" maxlength=20>
+                                        </div>
+                                        <div class="p-col-3 p-field" *ngIf="!!solution.tag1">
+                                            <label for="tag2">标签2</label>
+                                            <input id="tag2" type="text" pInputText [(ngModel)]="solution.tag2" maxlength=20>
+                                        </div>
+                                        <div class="p-col-3 p-field" *ngIf="!!solution.tag2">
+                                            <label for="tag3">标签3</label>
+                                            <input id="tag3" type="text" pInputText [(ngModel)]="solution.tag3" maxlength=20>
+                                        </div>
+                                        <div class="p-col-3 p-field">
+                                            <label for="company">作者单位</label>
+                                            <input id="company" type="text" pInputText [(ngModel)]="solution.company" maxlength=20>
+                                        </div>
+                                    </div>
+                                    <div class="p-fluid p-mt-3">
+                                        <div class="p-field">
+                                            <label for="summary">摘要</label>
+                                            <textarea id="summary" pInputTextarea [(ngModel)]="solution.summary"
+                                                      [autoResize]="true" maxlength="256"></textarea>
+                                        </div>
+                                    </div>
+                                </p-card>
+
+                                <div class="p-fluid p-mt-5 p-mb-2">
+                                    <p-button label="保存并退出编辑" icon="pi pi-save" (onClick)="saveAndQuitEdit()"
+                                              [disabled]="!solution.name"></p-button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-col-fixed p-d-none p-d-md-flex p-jc-end" style="width:220px" *ngIf="!isEditing">
+                            <div class="p-mt-4">
+                                <a (click)="gotoAbility()" style="cursor: pointer" *ngIf="solution.deployStatus !== '停止'">
+                                    <img src="{{solution.pictureUrl}}" pTooltip="点击查看模型部署实例" tooltipPosition="bottom">
+                                </a>
+                                <a (click)="deploySolution()" style="cursor: pointer" *ngIf="solution.deployStatus === '停止'">
+                                    <img src="{{solution.pictureUrl}}" pTooltip="部署模型" tooltipPosition="bottom">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="p-col-fixed p-d-none p-d-md-flex p-jc-center" style="width:260px" *ngIf="isEditing">
+                            <div class="p-d-flex p-flex-column p-mt-3">
+                                <div *ngIf="!!inputPictureUrl">
+                                    <image-cropper [imageBase64]="inputPictureUrl"
+                                                   [maintainAspectRatio]="true" [aspectRatio]="1 / 1"
+                                                   [resizeToWidth]="200" [resizeToHeight]="200" format="jpeg"
+                                                   (imageCropped)="saveCroppedImage($event)"
+                                                   ng2FileDrop [uploader]="imgSelector">
+                                    </image-cropper>
+                                </div>
+                                <div *ngIf="!!solution.pictureUrl" class="p-mt-3 p-text-center">
+                                    <img src="{{solution.pictureUrl}}" style="max-width: 100%"
+                                         ng2FileDrop [uploader]="imgSelector" (click)="img_select.click()">
+                                </div>
+                                <div *ngIf="!!inputPictureUrl" style="color: #0000ff; font-size: 0.75rem; text-align: center">
+                                    200x200px
+                                </div>
+                                <div class="p-d-flex p-flex-column">
+                                    <div class="p-mt-3 p-d-flex p-ai-center">
+                                        <small style="font-weight: bold">点击更换图片</small>
+                                        <span class="p-ml-2 p-mr-3">或</span>
+                                        <p-button (onClick)="getRandomPicture()" styleClass="p-button-outlined p-button-sm">随机图片</p-button>
+                                    </div>
+                                    <div style="display: none">
+                                        <input #img_select type="file" ng2FileSelect [uploader]="imgSelector" accept=".jpg, .jpeg, .png, .gif" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-d-flex p-flex-column p-mt-4" *ngIf="isEditing || !!description.content">
+                        <div class="p-d-flex p-mb-3">
+                            <span style="font-size: 1.5rem; font-weight: bold">模型概述</span>
+                            <p-selectButton styleClass="p-ml-5" [options]="editModes" [(ngModel)]="selectedEditMode"
+                                    *ngIf="isEditing" [disabled]="!!description.content">
+                            </p-selectButton>
+                        </div>
+                        <div *ngIf="isEditing && selectedEditMode === 'html'">
+                            <ueditor [(ngModel)]="description.content"
+                                     [config]="{ wordCount: true }"
+                                     [loadingTip]="'加载中……'"
+                                     (onReady)="_ready($event)"
+                                     (onDestroy)="_destroy()"
+                                     (ngModelChange)="_change($event)">
+                            </ueditor>
+                        </div>
+                        <div *ngIf="isEditing && selectedEditMode === 'markdown'">
+                            <div id="md_editor" mdEditor (onEditorChange)="description.content = $event">
+                                <textarea style="display: none;" [(ngModel)]="description.content"></textarea>
+                            </div>
+                        </div>
+                        <div *ngIf="!isEditing && !!description.content">
+                            <div *ngIf="description.content.startsWith('<')">
+                                <div [innerHTML]="description.content | html">
+                                </div>
+                            </div>
+                            <div *ngIf="!description.content.startsWith('<')">
+                                <div id="md_view" mdView>
+                                    <textarea style="display: none;">{{description.content}}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p-card class="p-mt-3" *ngIf="isEditing && isOwner">
+                        <div class="p-d-flex p-ai-center" *ngIf="solution.active">
+                            <span>模型当前状态为“公开”，是否设为私有？</span>
+                            <p-button styleClass="p-button-warning p-ml-3" (onClick)="setSolutionPublic($event, false)">
+                                设为私有
+                            </p-button>
+                        </div>
+                        <div class="p-d-flex p-ai-center" *ngIf="!solution.active">
+                            <span>模型当前状态为“私有”，是否设为公开？</span>
+                            <p-button styleClass="p-button-warning p-ml-3" (onClick)="setSolutionPublic($event, true)">
+                                设为公有
+                            </p-button>
+                        </div>
+                    </p-card>
+
+                    <p-card class="p-mt-3" *ngIf="isEditing">
+                        <div class="p-d-flex p-flex-column">
+                            <p-button label="删除模型" styleClass="p-button-warning" (onClick)="readyToDelete = !readyToDelete">
+                            </p-button>
+                            <div class="p-d-flex p-flex-column p-mt-3" *ngIf="readyToDelete">
+                                <span>
+                                    模型删除后将不能恢复。如确认删除，请在下列输入模型名称，并点击“确认删除”按钮：
+                                </span>
+                                <input type="text" pInputText [(ngModel)]="deleteConfirmText" placeholder="模型名称" class="p-mt-3">
+                                <p-button label="确认删除" styleClass="p-button-danger p-mt-3" (onClick)="deleteSolution()">
+                                </p-button>
+                            </div>
+                        </div>
+                    </p-card>
+                </div>
+            </p-tabPanel>
+            <p-tabPanel header="配置数据">
+                <pre class="p-my-3">{{ymlText}}</pre>
+            </p-tabPanel>
+            <p-tabPanel header="构件">
+                <p-table [value]="artifacts" [autoLayout]="true"
+                         styleClass="p-datatable-sm p-datatable-gridlines p-datatable-striped p-mt-3">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>名称</th>
+                            <th>类型</th>
+                            <th>修改日期</th>
+                            <th>大小</th>
+                            <th>操作</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-artifact>
+                        <tr>
+                            <td>{{artifact.name}}</td>
+                            <td>{{artifact.type}}</td>
+                            <td>{{artifact.modifiedDate | date:'yyyy-MM-dd HH:mm'}}</td>
+                            <td>
+                                <span *ngIf="artifact.fileSize < 1024">{{artifact.fileSize}} B</span>
+                                <span *ngIf="artifact.fileSize >= 1024">{{(artifact.fileSize / 1024) | number: '1.1-1'}} KB</span>
+                            </td>
+                            <td>
+                                <p-button icon="pi pi-download" styleClass="p-button-text"
+                                          *ngIf="(artifact.type !== 'DOCKER镜像') && !!userLogin"
+                                          (onClick)="downloadFile(artifact.url)">
+                                </p-button>
+                                <p-button icon="pi pi-eye" styleClass="p-button-text"
+                                          *ngIf="(artifact.type !== 'DOCKER镜像') && isTextFile(artifact.url) && !!userLogin"
+                                          (onClick)="viewFile(artifact.url)">
+                                </p-button>
+                                <p-button icon="pi pi-copy" styleClass="p-button-text"
+                                          pTooltip="docker run {{artifact.url}}"
+                                          *ngIf="(artifact.type === 'DOCKER镜像') && !!userLogin"
+                                          (onClick)="copyDockerUrl(artifact.url)">
+                                </p-button>
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                        无数据
+                    </ng-template>
+                </p-table>
+            </p-tabPanel>
+            <p-tabPanel header="文档">
+                <div class="p-d-flex p-flex-column">
+                    <span style="font-weight: bold" class="p-d-none p-d-md-inline p-mt-4 p-mb-2" *ngIf="canEdit()">上传文档</span>
+                    <p-table [value]="uploader.queue" [autoLayout]="true" *ngIf="canEdit()"
+                             ng2FileDrop [uploader]="uploader"
+                             styleClass="p-d-none p-d-md-inline p-datatable-sm p-datatable-gridlines p-datatable-striped">
+                        <ng-template pTemplate="caption">
+                            <input type="file" ng2FileSelect [uploader]="uploader"
+                                   accept=".pdf, .doc, .docx, .ppt, .pptx, .xls, .xlsx, .jpg, .jpeg, .png, .zip, .rar, .txt" />
+                            <span>或拖拽文件于此</span><i class="fa fa-arrow-down"></i>
+                        </ng-template>
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>文件名</th>
+                                <th>大小</th>
+                                <th>状态</th>
+                                <th class="p-text-right">操作</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-item>
+                            <tr>
+                                <td>{{ item?.file?.name }}</td>
+                                <td>{{ item?.file?.size/1024 | number:'1.1-1' }} KB</td>
+                                <td>
+                                    <span *ngIf="item.isSuccess" style="color: forestgreen">上传成功</span>
+                                    <span *ngIf="item.isCancel" style="color: #ffc107">上传被取消</span>
+                                    <span *ngIf="item.isError" style="color: red">上传失败</span>
+                                </td>
+                                <td class="p-text-right">
+                                    <p-button icon="pi pi-upload" styleClass="p-button-text" pTooltip="上传"
+                                              *ngIf="!item.isReady && !item.isUploading && !item.isSuccess"
+                                              (onClick)="upload(item)"></p-button>
+                                    <p-button icon="pi pi-ban" styleClass="p-button-text p-button-danger" pTooltip="取消"
+                                              *ngIf="item.isUploading"
+                                              (onClick)="item.cancel()"></p-button>
+                                    <p-button icon="pi pi-times" styleClass="p-button-text p-button-danger" pTooltip="移除"
+                                              *ngIf="!item.isUploading"
+                                              (onClick)="item.remove()"></p-button>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="summary">
+                            <p-progressBar [value]="uploader.progress"></p-progressBar>
+                        </ng-template>
+                        <ng-template pTemplate="emptymessage">
+                            无数据
+                        </ng-template>
+                    </p-table>
+
+                    <span style="font-weight: bold" class="p-d-none p-d-md-inline p-mt-4 p-mb-2">模型文档</span>
+                    <p-table [value]="documents" [autoLayout]="true"
+                             styleClass="p-datatable-sm p-datatable-gridlines p-datatable-striped">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>文件名</th>
+                                <th>日期</th>
+                                <th>大小</th>
+                                <th class="p-text-right">操作</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-document>
+                            <tr>
+                                <td>{{document.name}}</td>
+                                <td>{{document.modifiedDate | date:'yyyy-MM-dd HH:mm'}}</td>
+                                <td>
+                                    <span *ngIf="document.fileSize < 1024">{{document.fileSize}} B</span>
+                                    <span *ngIf="document.fileSize >= 1024">{{(document.fileSize / 1024) | number: '1.1-1'}} KB</span>
+                                </td>
+                                <td class="p-text-right">
+                                    <p-button icon="pi pi-download" styleClass="p-button-text" *ngIf="userLogin"
+                                              (onClick)="downloadFile(document.url)"></p-button>
+                                    <p-button icon="pi pi-trash" styleClass="p-button-text p-button-danger" *ngIf="canEdit()"
+                                              (onClick)="deleteDocument(document)"></p-button>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="emptymessage">
+                            无数据
+                        </ng-template>
+                    </p-table>
+                </div>
+            </p-tabPanel>
+        </p-tabView>
+    </p-card>
+
+    <p-card class="p-mt-3 p-d-none p-d-md-flex p-flex-column">
+        <p-dataView [value]="comments"
+                    [lazy]="true" (onLazyLoad)="reloadPage($event)"
+                    [paginator]="true" [rows]="itemsPerPage" [first]="page * itemsPerPage" [totalRecords]="totalItems"
+                    [showPageLinks]="false"
+                    [showJumpToPageDropdown]="true"
+                    currentPageReportTemplate="{currentPage}"
+                    [showCurrentPageReport]="false"
+                    [rowsPerPageOptions]="pageSizeOptions"
+                    emptyMessage="无数据"
+                    layout="list">
+            <ng-template pTemplate="header">
+                <div class="p-d-flex p-flex-row p-jc-between">
+                    <span style="font-size: 1.5rem">评论</span>
+                    <span>{{solution.commentCount}}条</span>
+                </div>
+            </ng-template>
+            <ng-template let-comment pTemplate="listItem">
+                <div class="p-col-12">
+                    <div class="p-my-3"
+                         [ngClass]="{'p-shadow-1': !comment.mouseOver, 'p-shadow-12': !!comment.mouseOver}"
+                         (mouseover)="comment.mouseOver = true" (mouseout)="comment.mouseOver = false">
+                        <p-card>
+                            <div class="p-grid">
+                                <div class="p-col-1">
+                                    <div class="p-d-flex p-flex-column">
+                                        <div class="p-text-right">
+                                            {{comment.userLogin}}
+                                        </div>
+                                        <div  class="p-text-right" style="font-size: 10px">
+                                            {{comment.createdDate | date:'yy-MM-dd HH:mm' }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-col-10">
+                                    <div class="p-d-flex p-flex-column">
+                                        <div style="font-size: 14px">
+                                            {{comment.commentText}}
+                                        </div>
+                                        <div class="p-mt-3" *ngIf="comment.isReplying && userLogin">
+                                            <div class="p-grid">
+                                                <div class="p-col-11 p-fluid">
+                                                    <input type="text" pInputText [(ngModel)]="comment.replyText" maxlength=250
+                                                           placeholder="回复：">
+                                                </div>
+                                                <div class="p-col-1">
+                                                    <button (click)="submitReplyComment(comment)" [disabled]="!comment.replyText">
+                                                        <span style="font-size: 12px">提交</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="p-d-flex p-flex-column" style="font-size: 12px" *ngIf="comment.viewReply">
+                                            <div class="p-shadow-1 p-p-3 p-mt-3" *ngFor="let reply1 of comment.replyComments">
+                                                <div class="p-d-flex p-flex-column">
+                                                    <div class="p-d-flex p-jc-between p-ai-center">
+                                                        <span>{{reply1.createdDate | date:'yy-MM-dd HH:mm'}}&nbsp;|&nbsp;{{reply1.userLogin}}</span>
+                                                        <div>
+                                                            <a (click)="toggleViewComment(reply1)" style="cursor: pointer"
+                                                               *ngIf="reply1.replyComments && reply1.replyComments.length > 0 && !reply1.viewReply">
+                                                                <span class="fa fa-plus-square" style="color: #0f91ff"></span>
+                                                            </a>
+                                                            <a (click)="toggleViewComment(reply1)" style="cursor: pointer"
+                                                               *ngIf="reply1.replyComments && reply1.replyComments.length > 0 && reply1.viewReply">
+                                                                <span class="fa fa-minus-square" style="color: #0f91ff"></span>
+                                                            </a>
+                                                            &nbsp;&nbsp;
+                                                            <a (click)="toggleReplyComment(reply1)" style="cursor: pointer"
+                                                               *ngIf="userLogin">
+                                                                <span class="fa fa-reply" style="color: #0f91ff"></span>
+                                                            </a>
+                                                            &nbsp;&nbsp;
+                                                            <a (click)="deleteReply(reply1, comment)" style="cursor: pointer"
+                                                               *ngIf="canDeleteComment(reply1)">
+                                                                <span class="fa fa-trash" style="color: red"></span>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        {{reply1.commentText}}
+                                                    </div>
+                                                    <div class="p-mt-3" *ngIf="reply1.isReplying && userLogin">
+                                                        <div class="p-grid">
+                                                            <div class="p-col-11 p-fluid">
+                                                                <input type="text" pInputText [(ngModel)]="reply1.replyText" maxlength=250
+                                                                       placeholder="回复：">
+                                                            </div>
+                                                            <div class="p-col-1">
+                                                                <button (click)="submitReplyComment(reply1)" [disabled]="!reply1.replyText">
+                                                                    <span style="font-size: 12px">提交</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div *ngIf="reply1.viewReply">
+                                                        <div class="p-shadow-1 p-p-3 p-mt-3" *ngFor="let reply2 of reply1.replyComments">
+                                                            <div class="p-d-flex p-flex-column">
+                                                                <div class="p-d-flex p-jc-between p-ai-center">
+                                                                    <span>{{reply2.createdDate | date:'yy-MM-dd HH:mm'}}&nbsp;|&nbsp;{{reply2.userLogin}}</span>
+                                                                    <div>
+                                                                        <a (click)="deleteReply(reply2, reply1)" style="cursor: pointer"
+                                                                           *ngIf="canDeleteComment(reply2)">
+                                                                            <span class="fa fa-trash" style="color: red"></span>
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    {{reply2.commentText}}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="p-col-1 p-d-flex">
+                                    <div class="p-d-flex p-ml-auto">
+                                        <a (click)="toggleViewComment(comment)" style="cursor: pointer"
+                                           *ngIf="comment.replyComments && comment.replyComments.length > 0 && !comment.viewReply">
+                                            <span class="fa fa-plus-square" style="color: #0f91ff"></span>
+                                        </a>
+                                        <a (click)="toggleViewComment(comment)" style="cursor: pointer"
+                                           *ngIf="comment.replyComments && comment.replyComments.length > 0 && comment.viewReply">
+                                            <span class="fa fa-minus-square" style="color: #0f91ff"></span>
+                                        </a>
+                                        <a class="p-ml-3" (click)="toggleReplyComment(comment)" style="cursor: pointer"
+                                           *ngIf="userLogin">
+                                            <span class="fa fa-reply" style="color: #0f91ff"></span>
+                                        </a>
+                                        <a class="p-ml-3" (click)="deleteComment(comment)" style="cursor: pointer"
+                                           *ngIf="canDeleteComment(comment)">
+                                            <span class="fa fa-trash" style="color: red"></span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </p-card>
+                    </div>
+                </div>
+            </ng-template>
+        </p-dataView>
+
+        <div class="p-d-flex p-flex-column p-mt-5" *ngIf="userLogin">
+            <div class="p-field p-fluid">
+                <label for="comment">发表评论</label>
+                <textarea id="comment" pInputTextarea [(ngModel)]="commentText" [autoResize]="true" maxlength="512"></textarea>
+            </div>
+            <div class="p-text-right">
+                <p-button label="提交" (onClick)="submitComment('0', 0)" [disabled]="!commentText"></p-button>
+            </div>
+         </div>
+    </p-card>
+
+</div>

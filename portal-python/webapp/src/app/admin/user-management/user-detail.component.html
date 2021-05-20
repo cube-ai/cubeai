@@ -1,0 +1,153 @@
+<div class="p-d-flex p-flex-column p-m-3" *ngIf="user">
+    <p-toolbar class="p-mb-3">
+        <ng-template pTemplate="left">
+            <i class="pi pi-bars p-d-none p-d-lg-inline" style="font-size: 1.75rem; cursor: pointer"
+               (click)="globalService.toggleSideNav()">
+            </i>
+            <i class="pi pi-bars p-d-lg-none" style="font-size: 1.75rem; cursor: pointer"
+               (click)="globalService.openSideBar()">
+            </i>
+            <span style="font-size: 1.75rem" class="p-ml-3">{{headline}}</span>
+        </ng-template>
+
+        <ng-template pTemplate="right">
+            <p-button icon="pi pi-save" styleClass="p-button-outlined" (onClick)="createUser()"
+                      [disabled]="shouldDisableCreate()"
+                      pTooltip="提交"
+                      *ngIf="mode === 'create'">
+            </p-button>
+            <p-button icon="pi pi-save" styleClass="p-button-outlined" (onClick)="updateUser()"
+                      [disabled]="shouldDisableUpdate()"
+                      pTooltip="提交"
+                      *ngIf="mode === 'edit'">
+            </p-button>
+        </ng-template>
+    </p-toolbar>
+
+    <p-panel>
+        <p-header style="width: 100%">
+            <div class="p-d-flex">
+                <div>
+                    <span *ngIf="mode !== 'create'" style="font-size: 1.5rem; font-weight: bold">
+                        <i class="pi pi-user"></i>
+                        {{user.login}}
+                    </span>
+                    <div *ngIf="mode === 'create'">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon"><i class="pi pi-user"></i></span>
+                            <span class="p-input-icon-right" style="width: 100%">
+                                <i class="pi pi-times" *ngIf="user.login" (click)="user.login = ''; checkLogin()"></i>
+                                <input type="text" pInputText style="width: 100%" [(ngModel)]="user.login"
+                                       placeholder="用户名" minlength="1" maxlength="20" required
+                                       (blur)="checkLogin()">
+                            </span>
+                        </div>
+                        <small class="p-invalid" *ngIf="errorLogin">
+                            {{errorLogin}}
+                        </small>
+                    </div>
+                </div>
+                <p-checkbox [binary]="true" label="激活" [(ngModel)]="user.activated" class="p-ml-auto"
+                            [disabled]="mode !== 'edit'">
+                </p-checkbox>
+            </div>
+        </p-header>
+
+        <div class="p-fluid" *ngIf="mode !== 'password'">
+            <div class="p-grid">
+                <div class="p-field p-col-12 p-md-6">
+                    <label for="fullName">真实姓名</label>
+                        <span class="p-input-icon-right">
+                        <i class="pi pi-times" *ngIf="user.fullName" (click)="user.fullName = ''"></i>
+                        <input id="fullName" type="text" pInputText [(ngModel)]="user.fullName" maxlength="20" [disabled]="mode === 'view'">
+                    </span>
+                </div>
+                <div class="p-field p-col-12 p-md-6">
+                    <label for="email">电子邮箱</label>
+                    <span class="p-input-icon-right">
+                        <i class="pi pi-times" *ngIf="user.email" (click)="user.email = ''; checkEmail()"></i>
+                        <input id="email" type="text" pInputText [(ngModel)]="user.email" [disabled]="mode === 'view'"
+                               minlength="5" maxlength="50" required (blur)="checkEmail()">
+                    </span>
+                    <small class="p-invalid" *ngIf="errorEmail">
+                        {{errorEmail}}
+                    </small>
+                </div>
+            </div>
+            <div class="p-grid">
+                <div class="p-field p-col-12 p-md-6">
+                    <label for="phone">手机号码</label>
+                    <span class="p-input-icon-right">
+                        <i class="pi pi-times" *ngIf="user.phone" (click)="user.phone = ''; checkPhone()"></i>
+                        <input id="phone" type="text" pInputText [(ngModel)]="user.phone" [disabled]="mode === 'view'"
+                               minlength="5" maxlength="20" required (blur)="checkPhone()">
+                    </span>
+                    <small class="p-invalid" *ngIf="errorPhone">
+                        {{errorPhone}}
+                    </small>
+                </div>
+                <div class="p-field p-col-12 p-md-6" *ngIf="mode === 'create'">
+                    <label for="password">密码</label>
+                    <span class="p-input-icon-right">
+                        <i class="pi pi-times" *ngIf="user.password" (click)="user.password = ''; checkPassword()"></i>
+                        <input id="password" type="password" pInputText [(ngModel)]="user.password"
+                               required (blur)="checkPassword()">
+                    </span>
+                    <small class="p-invalid" *ngIf="errorPassword">
+                        {{errorPassword}}
+                    </small>
+                </div>
+            </div>
+            <div class="p-field" *ngIf="showAuthorities">
+                <label for="authority_list">角色</label>
+                <p-listbox id="authority_list" [options]="authorities" [(ngModel)]="user.authorities" [metaKeySelection]="false" [checkbox]="true"
+                           [multiple]="true" optionLabel="no" [filter]="false" (onChange)="checkAuthorities()" [disabled]="mode === 'view'">
+                    <ng-template let-authority pTemplate="item">
+                        {{authority}}
+                    </ng-template>
+                </p-listbox>
+            </div>
+            <div class="p-mt-5">
+                <p-button label="提交" icon="pi pi-save" (onClick)="createUser()"
+                          [disabled]="shouldDisableCreate()" *ngIf="mode === 'create'">
+                </p-button>
+                <p-button label="提交" icon="pi pi-save" (onClick)="updateUser()"
+                          [disabled]="shouldDisableUpdate()" *ngIf="mode === 'edit'">
+                </p-button>
+            </div>
+        </div>
+
+        <div class="p-fluid" *ngIf="mode === 'password'">
+            <h4>为用户&nbsp;{{user.login}}&nbsp;设置新密码：</h4>
+            <div class="p-field p-mt-3">
+                <span class="p-input-icon-right">
+                    <i class="pi pi-times" *ngIf="user.password" (click)="user.password = ''; checkPassword()"></i>
+                    <input pInputText [(ngModel)]="user.password" placeholder="新密码" (blur)="checkPassword()">
+                </span>
+                <small class="p-invalid" *ngIf="errorPassword">
+                    {{errorPassword}}
+                </small>
+            </div>
+            <div class="p-mt-5">
+                <p-button label="提交" icon="pi pi-save" (onClick)="resetPassword()"
+                          [disabled]="!!errorPassword || !user.password">
+                </p-button>
+            </div>
+        </div>
+
+        <p-footer *ngIf="mode === 'edit' || mode === 'view'">
+            <p>
+                创建人： {{user.createdBy}}
+            </p>
+            <p>
+                创建于： {{user.createdDate | date: 'yyyy-MM-dd HH:mm'}}
+            </p>
+            <p>
+                修改人： {{user.lastModifiedBy}}
+            </p>
+            <p>
+                修改于： {{user.lastModifiedDate | date: 'yyyy-MM-dd HH:mm'}}
+            </p>
+        </p-footer>
+    </p-panel>
+</div>

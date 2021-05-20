@@ -1,0 +1,6 @@
+version: '2'
+services:
+    ppersonalpy-app:
+        image: ppersonalpy
+        environment:
+            - START_SLEEP=0

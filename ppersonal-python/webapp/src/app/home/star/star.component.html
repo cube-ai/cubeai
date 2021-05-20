@@ -1,0 +1,100 @@
+<app-pageheader></app-pageheader>
+
+<div class="p-col-12">
+    <div class="p-mx-3">
+        <p-dataView [value]="stars"
+                    [lazy]="true" (onLazyLoad)="reloadPage($event)"
+                    [paginator]="true" [rows]="itemsPerPage" [first]="page * itemsPerPage" [totalRecords]="totalItems"
+                    [showPageLinks]="false"
+                    [showJumpToPageDropdown]="true"
+                    currentPageReportTemplate="{currentPage}"
+                    [showCurrentPageReport]="false"
+                    [rowsPerPageOptions]="pageSizeOptions"
+                    emptyMessage="无数据"
+                    [layout]="layout" (onChangeLayout)="changeLayout($event)"
+                    [loading]="loading">
+            <ng-template pTemplate="paginatorleft">
+                <span class="p-d-none p-d-md-inline" style="font-size: 0.9rem">共 {{totalItems}} 条</span>
+            </ng-template>
+            <ng-template let-item pTemplate="paginatordropdownitem">
+                {{item.value}} / 页
+            </ng-template>
+            <ng-template pTemplate="header">
+                <div class="p-d-flex p-flex-row p-jc-between">
+                    <span style="font-size: 1.5rem" *ngIf="isMyself">我的关注</span>
+                    <span style="font-size: 1.5rem" *ngIf="!isMyself">{{starerLogin}}&nbsp;的关注</span>
+                    <p-dataViewLayoutOptions class="p-d-none p-d-md-inline"></p-dataViewLayoutOptions>
+                </div>
+            </ng-template>
+            <ng-template let-star pTemplate="listItem">
+                <div class="p-col-12" *ngIf="!!star.targetObject">
+                    <div class="p-my-1"
+                         [ngClass]="{'p-shadow-1': !star.mouseOver, 'p-shadow-12': !!star.mouseOver}"
+                         (mouseover)="star.mouseOver = true" (mouseout)="star.mouseOver = false">
+                        <div class="p-d-flex p-flex-column p-p-3">
+                            <div class="p-d-flex p-ai-center">
+                                <img src="{{star.targetObject.pictureUrl}}" (click)="viewStar(star)"
+                                     style="cursor: pointer; width: 2.5rem; height: 2.5rem; border-radius: 60%">
+                                <div class="p-ml-2 p-mr-3" (click)="viewStar(star)" style="cursor: pointer; font-size: 1.1rem; font-weight: bold">
+                                    {{star.targetObject.name}}
+                                </div>
+                                <div class="p-ml-auto" style="font-size: 1rem">
+                                    <i class="fa fa-star" style="color: gold"></i>
+                                    {{star.targetObject.starCount}}
+                                </div>
+                            </div>
+                            <div class="p-mt-2" (click)="viewStar(star)" style="cursor: pointer; font-size: 0.9rem">
+                                {{star.targetObject.summary}}
+                            </div>
+                            <div class="p-mt-2 p-d-flex">
+                                <p-chip *ngIf="star.targetObject.modelType"><span style="font-size: 0.8rem">{{star.targetObject.modelType}}</span></p-chip>
+                                <p-chip *ngIf="star.targetObject.toolkitType" styleClass="p-ml-3"><span style="font-size: 0.8rem">{{star.targetObject.toolkitType}}</span></p-chip>
+                                <div class="p-d-none p-d-md-flex">
+                                    <p-chip *ngIf="star.targetObject.tag1" styleClass="p-ml-3"><span style="font-size: 0.8rem">{{star.targetObject.tag1}}</span></p-chip>
+                                    <p-chip *ngIf="star.targetObject.tag2" styleClass="p-ml-3"><span style="font-size: 0.8rem">{{star.targetObject.tag2}}</span></p-chip>
+                                    <p-chip *ngIf="star.targetObject.tag3" styleClass="p-ml-3"><span style="font-size: 0.8rem">{{star.targetObject.tag3}}</span></p-chip>
+                                </div>
+                            </div>
+                            <div class="p-d-flex p-mt-3" style="font-size: 0.9rem; font-weight: lighter">
+                                <div>
+                                    {{star.targetObject.authorLogin}}
+                                </div>
+                                <div class="p-ml-3">
+                                    {{star.targetObject.createdDate | date:'yyyy-MM-dd HH:mm:ss'}}
+                                </div>
+                                <div class="p-ml-auto">
+                                    浏览：{{star.targetObject.viewCount}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+            <ng-template let-star pTemplate="gridItem">
+                <div *ngIf="!!star.targetObject">
+                    <div class="p-mt-3 p-mr-3"
+                         [ngClass]="{'p-shadow-1': !star.mouseOver, 'p-shadow-12': !!star.mouseOver}"
+                         (mouseover)="star.mouseOver = true" (mouseout)="star.mouseOver = false">
+                        <p-panel>
+                            <p-header style="width: 100%">
+                                <div class="p-d-flex p-ai-center">
+                                    <div class="p-mr-3" (click)="viewStar(star)" style="cursor: pointer; font-weight: bold">
+                                        {{star.targetObject.name}}
+                                    </div>
+                                    <div class="p-ml-auto">
+                                        <i class="pi pi-star" style="color: gold"></i>
+                                        {{star.targetObject.starCount}}
+                                    </div>
+                                </div>
+                            </p-header>
+                            <div class="p-text-center">
+                                <img src="{{star.targetObject.pictureUrl}}" (click)="viewStar(star)" style="cursor: pointer; width: 10rem; max-width: 100%">
+                            </div>
+                        </p-panel>
+                    </div>
+                </div>
+            </ng-template>
+        </p-dataView>
+    </div>
+</div>
+

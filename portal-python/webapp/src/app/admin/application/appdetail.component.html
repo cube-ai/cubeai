@@ -1,0 +1,148 @@
+<div class="p-d-flex p-flex-column p-m-3" *ngIf="application">
+    <p-toolbar class="p-mb-3">
+        <ng-template pTemplate="left">
+            <i class="pi pi-bars p-d-none p-d-lg-inline" style="font-size: 1.75rem; cursor: pointer"
+               (click)="globalService.toggleSideNav()">
+            </i>
+            <i class="pi pi-bars p-d-lg-none" style="font-size: 1.75rem; cursor: pointer"
+               (click)="globalService.openSideBar()">
+            </i>
+            <span style="font-size: 1.75rem" class="p-ml-3">{{headline}}</span>
+        </ng-template>
+
+        <ng-template pTemplate="right">
+            <p-button icon="pi pi-save" styleClass="p-button-outlined" (onClick)="saveApplication()"
+                      [disabled]="!application.name || !application.url || !application.subject1"
+                      pTooltip="提交"
+                      *ngIf="mode !== 'view'">
+            </p-button>
+        </ng-template>
+    </p-toolbar>
+
+    <p-panel>
+        <p-header>
+            <span *ngIf="mode === 'view'" style="font-size: 1.5rem; font-weight: bold">
+                {{application.name}}
+            </span>
+            <div *ngIf="mode !== 'view'">
+                <label class="p-mr-2">应用名：</label>
+                <input type="text" pInputText [(ngModel)]="application.name" required>
+            </div>
+        </p-header>
+
+        <div class="p-fluid">
+            <div class="p-field">
+                <label for="url">URL</label>
+                <input id="url" type="text" pInputText [(ngModel)]="application.url" maxlength="512" [disabled]="mode === 'view'" required>
+            </div>
+            <div class="p-grid">
+                <div class="p-col-6 p-md-3 p-field">
+                    <label for="subject1">主题1</label>
+                    <input id="subject1" type="text" pInputText [(ngModel)]="application.subject1" [disabled]="mode === 'view'" required>
+                </div>
+                <div class="p-col-6 p-md-3 p-field">
+                    <label for="subject2">主题2</label>
+                    <input id="subject2" type="text" pInputText [(ngModel)]="application.subject2" [disabled]="mode === 'view'">
+                </div>
+                <div class="p-col-6 p-md-2 p-field">
+                    <label for="subject3">主题3</label>
+                    <input id="subject3" type="text" pInputText [(ngModel)]="application.subject3" [disabled]="mode === 'view'">
+                </div>
+                <div class="p-col-3 p-md-2 p-field">
+                    <label for="owner">作者</label>
+                    <input id="owner" type="text" pInputText [(ngModel)]="application.owner" [disabled]="mode === 'view'">
+                </div>
+                <div class="p-col-3 p-md-2 p-field">
+                    <label for="displayOrder">显示控制</label>
+                    <input id="displayOrder" type="number" pInputText [(ngModel)]="application.displayOrder" [disabled]="mode === 'view'">
+                </div>
+            </div>
+            <div class="p-field">
+                <label for="needRoles">角色要求（多个角色以逗号分开，不要带空格）</label>
+                <input id="needRoles" type="text" pInputText [(ngModel)]="application.needRoles" [disabled]="mode === 'view'">
+            </div>
+            <div class="p-field">
+                <label for="summary">应用简介</label>
+                <textarea id="summary" pInputTextarea [(ngModel)]="application.summary" [disabled]="mode === 'view'"
+                          [autoResize]="true" maxlength="256"></textarea>
+            </div>
+            <div class="p-d-flex p-flex-column p-my-3">
+                <label class="p-mt-2 p-mb-3">头像</label>
+
+                <div *ngIf="mode !== 'view'" class="p-d-flex p-flex-column">
+                    <div *ngIf="!application.pictureUrl">
+                        <div class="p-card p-d-flex p-jc-center p-ai-center" style="width: 300px; height: 300px"
+                             ng2FileDrop [uploader]="fileSelector" (click)="img_select.click()">
+                            <i class="fa fa-spinner fa-spin fa-5x"></i>
+                        </div>
+                    </div>
+                    <div *ngIf="!inputPictureUrl && !!application.pictureUrl">
+                        <img src="{{application.pictureUrl}}" style="max-width: 100%"
+                             ng2FileDrop [uploader]="fileSelector" (click)="img_select.click()">
+                    </div>
+                    <div *ngIf="!!inputPictureUrl">
+                        <div class="p-grid">
+                            <div class="p-col-8">
+                                <image-cropper [imageBase64]="inputPictureUrl"
+                                               [maintainAspectRatio]="true" [aspectRatio]="1 / 1"
+                                               [resizeToWidth]="300" [resizeToHeight]="300" format="jpeg"
+                                               (imageCropped)="saveCroppedImage($event)"
+                                               ng2FileDrop [uploader]="fileSelector">
+                                </image-cropper>
+                            </div>
+                            <div class="p-col-4">
+                                <div *ngIf="!!application.pictureUrl" class="p-text-center">
+                                    <img src="{{application.pictureUrl}}" style="max-width: 100%"
+                                         ng2FileDrop [uploader]="fileSelector" (click)="img_select.click()">
+                                    <br>
+                                    <small style="color: #0000ff">300x300px</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-mt-3 p-d-flex p-ai-center">
+                        <small style="font-weight: bold">点击/拖放更换图片</small>
+                        <span class="p-mx-3">或</span>
+                        <p-button (onClick)="getRandomPicture()" styleClass="p-button-outlined p-button-sm">生成随机图片</p-button>
+                    </div>
+                    <div style="display: none">
+                        <input #img_select type="file" ng2FileSelect [uploader]="fileSelector" accept=".jpg, .jpeg, .png, .gif" />
+                    </div>
+                </div>
+
+                <div *ngIf="mode === 'view'">
+                    <div *ngIf="!application.pictureUrl" class="p-card p-d-flex p-jc-center p-ai-center" style="width: 300px; height: 300px">
+                        未指定
+                    </div>
+                    <div *ngIf="!!application.pictureUrl">
+                        <img src="{{application.pictureUrl}}">
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="mode !== 'view'" class="p-mt-5">
+                <p-button label="提交" icon="pi pi-save" (onClick)="saveApplication()"
+                        [disabled]="!application.name || !application.url || !application.subject1"
+                        *ngIf="mode !== 'view'">
+                </p-button>
+            </div>
+        </div>
+
+
+        <p-footer *ngIf="mode !== 'create'">
+            <p>
+                创建人： {{application.createdBy}}
+            </p>
+            <p>
+                创建于： {{application.createdDate | date: 'yyyy-MM-dd HH:mm'}}
+            </p>
+            <p>
+                修改人： {{application.modifiedBy}}
+            </p>
+            <p>
+                修改于： {{application.modifiedDate | date: 'yyyy-MM-dd HH:mm'}}
+            </p>
+        </p-footer>
+    </p-panel>
+</div>

@@ -1,0 +1,104 @@
+<p-confirmPopup></p-confirmPopup>
+<app-pageheader></app-pageheader>
+<div class="p-col-12">
+    <div class="p-mx-3">
+        <p-dataView [value]="tasks"
+                    [lazy]="true" (onLazyLoad)="reloadPage($event)"
+                    [paginator]="true" [rows]="itemsPerPage" [first]="page * itemsPerPage" [totalRecords]="totalItems"
+                    [showPageLinks]="false"
+                    [showJumpToPageDropdown]="true"
+                    currentPageReportTemplate="{currentPage}"
+                    [showCurrentPageReport]="false"
+                    [rowsPerPageOptions]="pageSizeOptions"
+                    emptyMessage="无数据"
+                    [layout]="layout" (onChangeLayout)="changeLayout($event)"
+                    [loading]="loading">
+            <ng-template pTemplate="paginatorleft">
+                <span class="p-d-none p-d-md-inline" style="font-size: 0.9rem">共 {{totalItems}} 条</span>
+            </ng-template>
+            <ng-template let-item pTemplate="paginatordropdownitem">
+                {{item.value}} / 页
+            </ng-template>
+            <ng-template pTemplate="header">
+                <div class="p-d-flex p-flex-row p-flex-wrap p-jc-between p-ai-center">
+                    <span style="font-size: 1.5rem">任务管理</span>
+                    <span class="p-input-icon-right p-d-none p-d-md-inline">
+                        <input pInputText type="text" [(ngModel)]="searchUserLogin" (blur)="loadData()" placeholder="用户名">
+                        <i class="pi pi-times" *ngIf="searchUserLogin" (click)="searchUserLogin = ''; loadData()"></i>
+                    </span>
+                    <p-dropdown [options]="taskStatuses" [(ngModel)]="selectedTaskStatus" (onChange)="loadData()">
+                    </p-dropdown>
+                </div>
+            </ng-template>
+            <ng-template let-task pTemplate="listItem">
+                <div class="p-col-12">
+                    <div class="p-my-1"
+                         [ngClass]="{'p-shadow-1': !task.mouseOver, 'p-shadow-12': !!task.mouseOver}"
+                         (mouseover)="task.mouseOver = true" (mouseout)="task.mouseOver = false">
+                        <div class="p-grid p-p-3 p-d-flex p-ai-center" style="font-size: 0.9rem">
+                            <div class="p-col-5 p-md-3 p-as-center">
+                                <a (click)="searchUserLogin = task.userLogin; loadData()" style="cursor: pointer">
+                                    <div class="p-d-flex p-ai-center">
+                                        <p-avatar icon="pi pi-user" styleClass="p-mr-2" shape="circle"
+                                                  [style]="{'background-color':'#2196F3', 'color': '#ffffff'}">
+                                        </p-avatar>
+                                        <div style="font-size: 1rem; font-weight: bold">
+                                            {{task.userLogin}}
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="p-col-7 p-md-3 p-text-right">
+                                <div class="p-d-flex p-flex-column">
+                                    <div style="font-size: 1rem; font-weight: bold">
+                                        <a (click)="viewTaskDetails(task)" style="cursor: pointer">
+                                            {{task.taskName}}
+                                        </a>
+                                    </div>
+                                    <div class="p-mt-1">
+                                        {{task.taskType}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-col-2 p-md-1">
+                                <div class="p-d-flex p-flex-column">
+                                    <div>
+                                        <span *ngIf="task.taskStatus === '等待调度'"
+                                              style="color: grey">{{task.taskStatus}}</span>
+                                        <span *ngIf="task.taskStatus === '正在执行'"
+                                              style="color: blue">{{task.taskStatus}}</span>
+                                        <span *ngIf="task.taskStatus === '成功'"
+                                              style="color: green">{{task.taskStatus}}</span>
+                                        <span *ngIf="task.taskStatus === '失败'"
+                                              style="color: red">{{task.taskStatus}}</span>
+                                    </div>
+                                    <div class="p-mt-1">
+                                        {{task.taskProgress}}%
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-col-9 p-md-4">
+                                <div class="p-d-flex p-flex-column">
+                                    <div>
+                                        {{task.description}}
+                                    </div>
+                                    <div class="p-mt-1">
+                                        开始：{{task.startDate | date:'yyyy-MM-dd HH:mm:ss'}}
+                                    </div>
+                                    <div class="p-mt-1" *ngIf="task.taskStatus === '成功' || task.taskStatus === '失败'">
+                                        结束：{{task.endDate | date:'yyyy-MM-dd HH:mm:ss'}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-col-1 p-text-right">
+                                <a (click)="deleteTask(task.id)" style="cursor: pointer">
+                                    <i class="fa fa-remove" style="color: red"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+        </p-dataView>
+    </div>
+</div>

@@ -1,0 +1,112 @@
+.CodeMirrror-merge {
+  position: relative;
+  border: 1px solid #ddd;
+  white-space: pre;
+}
+
+.CodeMirrror-merge, .CodeMirrror-merge .CodeMirrror {
+  height: 350px;
+}
+
+.CodeMirrror-merge-2pane .CodeMirrror-merge-pane { width: 47%; }
+.CodeMirrror-merge-2pane .CodeMirrror-merge-gap { width: 6%; }
+.CodeMirrror-merge-3pane .CodeMirrror-merge-pane { width: 31%; }
+.CodeMirrror-merge-3pane .CodeMirrror-merge-gap { width: 3.5%; }
+
+.CodeMirrror-merge-pane {
+  display: inline-block;
+  white-space: normal;
+  vertical-align: top;
+}
+.CodeMirrror-merge-pane-rightmost {
+  position: absolute;
+  right: 0px;
+  z-index: 1;
+}
+
+.CodeMirrror-merge-gap {
+  z-index: 2;
+  display: inline-block;
+  height: 100%;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  position: relative;
+  background: #f8f8f8;
+}
+
+.CodeMirrror-merge-scrolllock-wrap {
+  position: absolute;
+  bottom: 0; left: 50%;
+}
+.CodeMirrror-merge-scrolllock {
+  position: relative;
+  left: -50%;
+  cursor: pointer;
+  color: #555;
+  line-height: 1;
+}
+
+.CodeMirrror-merge-copybuttons-left, .CodeMirrror-merge-copybuttons-right {
+  position: absolute;
+  left: 0; top: 0;
+  right: 0; bottom: 0;
+  line-height: 1;
+}
+
+.CodeMirrror-merge-copy {
+  position: absolute;
+  cursor: pointer;
+  color: #44c;
+}
+
+.CodeMirrror-merge-copy-reverse {
+  position: absolute;
+  cursor: pointer;
+  color: #44c;
+}
+
+.CodeMirrror-merge-copybuttons-left .CodeMirrror-merge-copy { left: 2px; }
+.CodeMirrror-merge-copybuttons-right .CodeMirrror-merge-copy { right: 2px; }
+
+.CodeMirrror-merge-r-inserted, .CodeMirrror-merge-l-inserted {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAACCAYAAACddGYaAAAAGUlEQVQI12MwuCXy3+CWyH8GBgYGJgYkAABZbAQ9ELXurwAAAABJRU5ErkJggg==);
+  background-position: bottom left;
+  background-repeat: repeat-x;
+}
+
+.CodeMirrror-merge-r-deleted, .CodeMirrror-merge-l-deleted {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAACCAYAAACddGYaAAAAGUlEQVQI12M4Kyb2/6yY2H8GBgYGJgYkAABURgPz6Ks7wQAAAABJRU5ErkJggg==);
+  background-position: bottom left;
+  background-repeat: repeat-x;
+}
+
+.CodeMirrror-merge-r-chunk { background: #ffffe0; }
+.CodeMirrror-merge-r-chunk-start { border-top: 1px solid #ee8; }
+.CodeMirrror-merge-r-chunk-end { border-bottom: 1px solid #ee8; }
+.CodeMirrror-merge-r-connect { fill: #ffffe0; stroke: #ee8; stroke-width: 1px; }
+
+.CodeMirrror-merge-l-chunk { background: #eef; }
+.CodeMirrror-merge-l-chunk-start { border-top: 1px solid #88e; }
+.CodeMirrror-merge-l-chunk-end { border-bottom: 1px solid #88e; }
+.CodeMirrror-merge-l-connect { fill: #eef; stroke: #88e; stroke-width: 1px; }
+
+.CodeMirrror-merge-l-chunk.CodeMirrror-merge-r-chunk { background: #dfd; }
+.CodeMirrror-merge-l-chunk-start.CodeMirrror-merge-r-chunk-start { border-top: 1px solid #4e4; }
+.CodeMirrror-merge-l-chunk-end.CodeMirrror-merge-r-chunk-end { border-bottom: 1px solid #4e4; }
+
+.CodeMirrror-merge-collapsed-widget:before {
+  content: "(...)";
+}
+.CodeMirrror-merge-collapsed-widget {
+  cursor: pointer;
+  color: #88b;
+  background: #eef;
+  border: 1px solid #ddf;
+  font-size: 90%;
+  padding: 0 3px;
+  border-radius: 4px;
+}
+.CodeMirrror-merge-collapsed-line .CodeMirrror-gutter-elt { display: none; }

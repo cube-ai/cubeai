@@ -1,0 +1,11 @@
+version: '2'
+services:
+    umupy-app:
+        image: umupy
+        privileged: true  # remove while deploy in k8s
+        volumes:  # remove volumes mapping  while deploy in k8s
+            - /usr/bin/docker:/bin/docker
+            - /var/run/docker.sock:/var/run/docker.sock
+        environment:
+            - DOCKER_LOCATION=local  # change to 'remote' while deploy in k8s
+            - START_SLEEP=0

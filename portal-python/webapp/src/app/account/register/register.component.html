@@ -1,0 +1,116 @@
+<div class="p-d-flex p-flex-column">
+    <div class="p-d-none p-d-md-flex p-jc-center p-my-6">
+        <a  href="/">
+            <img src="assets/images/cubeai128.png" style="height: 5rem">
+        </a>
+    </div>
+    <div class="p-d-flex p-jc-center">
+        <p-panel>
+            <p-header style="font-size: 1.5rem; font-weight: bold">
+                注册新用户
+            </p-header>
+            <div class="p-fluid p-my-5 p-mx-5">
+                <div class="p-grid">
+                    <div class="p-col-12 p-md-6 p-field">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon"><i class="pi pi-user"></i></span>
+                            <span class="p-input-icon-right" style="width: 100%">
+                                <i class="pi pi-times" *ngIf="user.login" (click)="user.login = ''; checkLogin()"></i>
+                                <input type="text" pInputText style="width: 100%" [(ngModel)]="user.login"
+                                       placeholder="用户名" minlength="3" maxlength="20" required
+                                       (blur)="checkLogin()">
+                            </span>
+                        </div>
+                        <small class="p-invalid" *ngIf="errorLogin">
+                            {{errorLogin}}
+                        </small>
+                    </div>
+                    <div class="p-col-12 p-md-6 p-field">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon"><i class="pi pi-id-card"></i></span>
+                            <span class="p-input-icon-right" style="width: 100%">
+                                <i class="pi pi-times" *ngIf="user.fullName" (click)="user.fullName = ''"></i>
+                                <input type="text" pInputText style="width: 100%" [(ngModel)]="user.fullName"
+                                       placeholder="真实姓名" maxlength="20">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-grid">
+                    <div class="p-col-12 p-md-6 p-field">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon"><i class="pi pi-envelope"></i></span>
+                            <span class="p-input-icon-right" style="width: 100%">
+                                <i class="pi pi-times" *ngIf="user.email" (click)="user.email = ''; checkEmail()"></i>
+                                <input type="text" pInputText  style="width: 100%" [(ngModel)]="user.email"
+                                       placeholder="电子邮箱" minlength="5" maxlength="50" required
+                                       (blur)="checkEmail()">
+                            </span>
+                        </div>
+                        <small class="p-invalid" *ngIf="errorEmail">
+                            {{errorEmail}}
+                        </small>
+                    </div>
+
+                    <div class="p-col-12 p-md-6 p-field">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon"><i class="pi pi-phone"></i></span>
+                            <span class="p-input-icon-right" style="width: 100%">
+                            <i class="pi pi-times" *ngIf="user.phone" (click)="user.phone = ''; checkPhone()"></i>
+                            <input type="text" pInputText style="width: 100%" [(ngModel)]="user.phone"
+                                   placeholder="手机号码" minlength="5" maxlength="20" required
+                                   (blur)="checkPhone()">
+                        </span>
+                        </div>
+                        <small class="p-invalid" *ngIf="errorPhone">
+                            {{errorPhone}}
+                        </small>
+                    </div>
+                </div>
+
+                <div class="p-grid">
+                    <div class="p-col-12 p-md-6 p-field">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon"><i class="pi pi-key"></i></span>
+                            <span class="p-input-icon-right" style="width: 100%">
+                            <i class="pi pi-times" *ngIf="user.password" (click)="user.password = ''; checkPassword()"></i>
+                                <input type="password" pInputText style="width: 100%" [(ngModel)]="user.password"
+                                       placeholder="密码" required
+                                       (change)="confirmPassword = ''" (blur)="checkPassword()">
+                            </span>
+                        </div>
+                        <small class="p-invalid" *ngIf="errorPassword">
+                            {{errorPassword}}
+                        </small>
+                    </div>
+
+                    <div class="p-col-12 p-md-6 p-field">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon"><i class="pi pi-key"></i></span>
+                            <span class="p-input-icon-right" style="width: 100%">
+                                <i class="pi pi-times" *ngIf="confirmPassword" (click)="confirmPassword = ''; checkPasswordConfirm()"></i>
+                                <input type="password" pInputText  style="width: 100%" [(ngModel)]="confirmPassword"
+                                       placeholder="重复密码" required
+                                       (blur)="checkPasswordConfirm()">
+                            </span>
+                        </div>
+                        <small class="p-invalid" *ngIf="errorPasswordConfirm">
+                            {{errorPasswordConfirm}}
+                        </small>
+                    </div>
+                </div>
+
+                <div>
+                    <p-messages [(value)]="msgs"></p-messages>
+                </div>
+
+                <div class="p-mt-5">
+                    <p-button label="注册" icon="pi pi-check-square" (onClick)="register()"
+                              [disabled]="shoudDisableRegister()">
+                    </p-button>
+                </div>
+            </div>
+        </p-panel>
+    </div>
+</div>

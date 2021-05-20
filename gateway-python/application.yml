@@ -1,0 +1,18 @@
+serviceboot:
+  version: v2
+
+service:
+  cname: API网关
+  ename: gateway
+  version: 2.3.0
+  port:
+    dev: 8080
+    prod: 80
+
+gateway:
+  is_gateway: yes
+
+build:
+  image_name: gatewaypy
+  build_web: no
+  compile_python_to_so: no

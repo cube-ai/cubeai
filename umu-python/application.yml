@@ -1,0 +1,18 @@
+serviceboot:
+  version: v2
+
+service:
+  cname: UMU
+  ename: umu
+  version: 2.3.0
+  port:
+    dev: 8101
+    prod: 80
+
+gateway:
+  is_gateway: no
+
+build:
+  image_name: umupy
+  build_web: no
+  compile_python_to_so: no

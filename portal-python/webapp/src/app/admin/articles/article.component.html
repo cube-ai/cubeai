@@ -1,0 +1,123 @@
+<div class="p-d-flex p-flex-column p-m-3" *ngIf="article">
+    <p-toolbar class="p-mb-3">
+        <ng-template pTemplate="left">
+            <i class="pi pi-bars p-d-none p-d-lg-inline" style="font-size: 1.75rem; cursor: pointer"
+               (click)="globalService.toggleSideNav()">
+            </i>
+            <i class="pi pi-bars p-d-lg-none" style="font-size: 1.75rem; cursor: pointer"
+               (click)="globalService.openSideBar()">
+            </i>
+            <span style="font-size: 1.75rem" class="p-ml-3">{{headline}}</span>
+        </ng-template>
+
+        <ng-template pTemplate="right">
+            <p-button icon="pi pi-save" styleClass="p-button-outlined" (onClick)="saveArticle()"
+                      [disabled]="!article.title"
+                      pTooltip="提交"
+                      *ngIf="mode !== 'view'">
+            </p-button>
+        </ng-template>
+    </p-toolbar>
+
+    <p-panel>
+        <p-header>
+            <span *ngIf="mode === 'view'" style="font-size: 1.5rem; font-weight: bold">
+                {{article.title}}
+            </span>
+            <div *ngIf="mode !== 'view'">
+                <label class="p-mr-2">标题：</label>
+                <input type="text" pInputText [(ngModel)]="article.title" required>
+            </div>
+        </p-header>
+
+        <div class="p-fluid">
+            <div class="p-grid">
+                <div class="p-col-4 p-md-2 p-field">
+                    <label for="subject1">主题1</label>
+                    <input id="subject1" type="text" pInputText [(ngModel)]="article.subject1" [disabled]="mode === 'view'">
+                </div>
+                <div class="p-col-4 p-md-2 p-field">
+                    <label for="subject2">主题2</label>
+                    <input id="subject2" type="text" pInputText [(ngModel)]="article.subject2" [disabled]="mode === 'view'">
+                </div>
+                <div class="p-col-4 p-md-2 p-field">
+                    <label for="subject3">主题3</label>
+                    <input id="subject3" type="text" pInputText [(ngModel)]="article.subject3" [disabled]="mode === 'view'">
+                </div>
+                <div class="p-col-4 p-md-2 p-field">
+                    <label for="tag1">标签1</label>
+                    <input id="tag1" type="text" pInputText [(ngModel)]="article.tag1" [disabled]="mode === 'view'">
+                </div>
+                <div class="p-col-4 p-md-2 p-field">
+                    <label for="tag2">标签2</label>
+                    <input id="tag2" type="text" pInputText [(ngModel)]="article.tag2" [disabled]="mode === 'view'">
+                </div>
+                <div class="p-col-4 p-md-2 p-field">
+                    <label for="tag3">标签3</label>
+                    <input id="tag3" type="text" pInputText [(ngModel)]="article.tag3" [disabled]="mode === 'view'">
+                </div>
+            </div>
+            <div class="p-field">
+                <label for="summary">摘要</label>
+                <textarea id="summary" pInputTextarea [(ngModel)]="article.summary" [disabled]="mode === 'view'"
+                          [autoResize]="true" maxlength="256"></textarea>
+            </div>
+
+            <div *ngIf="mode !== 'view'" class="p-my-5">
+                <p-button label="提交" icon="pi pi-save" (onClick)="saveArticle()"
+                          [disabled]="!article.title"
+                          *ngIf="mode !== 'view'">
+                </p-button>
+            </div>
+
+            <div>
+                <div class="p-d-flex p-flex-row p-ai-center p-mb-3" style="font-size: 1.5rem">
+                    <span class="p-mr-5">正文</span>
+                    <p-selectButton styleClass="p-mr-5" [options]="editModes" [(ngModel)]="editMode"
+                                    *ngIf="mode !== 'view'" [disabled]="!!article.content">
+                    </p-selectButton>
+                    <p-button icon="pi pi-pencil" styleClass="p-button-outlined p-button-help p-button"
+                              (click)="enterEdit()" label="编辑"
+                              *ngIf="mode !== 'view' && !isEditing"></p-button>
+                    <p-button icon="pi pi-search" styleClass="p-button-outlined p-button-success p-button"
+                              (click)="preview()" label="预览"
+                              *ngIf="mode !== 'view' && isEditing"></p-button>
+                </div>
+                <div *ngIf="!!article && isEditing && editMode === 'html'">
+                    <ueditor [(ngModel)]="article.content"
+                             [config]="{ wordCount: true }"
+                             [loadingTip]="'加载中……'"
+                             (onReady)="_ready($event)"
+                             (onDestroy)="_destroy()"
+                             (ngModelChange)="_change($event)">
+                    </ueditor>
+                </div>
+                <div *ngIf="!!article && isEditing && editMode === 'markdown'">
+                    <div id="md_editor" mdEditor (onEditorChange)="article.content = $event">
+                        <textarea style="display: none;" [(ngModel)]="article.content"></textarea>
+                    </div>
+                </div>
+
+                <div *ngIf="!!article && !isEditing && article.content.startsWith('<')">
+                    <div [innerHTML]="article.content | html">
+                    </div>
+                </div>
+                <div *ngIf="!!article && !isEditing && !article.content.startsWith('<')">
+                    <div id="md_view" mdView>
+                        <textarea style="display: none;">{{article.content}}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p-footer *ngIf="mode !== 'create'">
+            <p>
+                起草人： {{article.authorName || article.authorLogin}}
+            </p>
+            <p>
+                发布时间： {{article.createdDate | date: 'yyyy-MM-dd HH:mm'}}
+            </p>
+        </p-footer>
+    </p-panel>
+</div>
+
