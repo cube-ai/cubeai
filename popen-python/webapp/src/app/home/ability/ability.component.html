@@ -1,0 +1,165 @@
+<p-confirmPopup></p-confirmPopup>
+<app-pageheader></app-pageheader>
+
+<div class="p-d-flex p-flex-column p-m-3" *ngIf="!!solution">
+    <p-toolbar class="p-mb-3">
+        <ng-template pTemplate="left">
+            <div class="p-d-flex p-ai-center">
+                <span style="font-size: 1.5rem">{{solution.name}}</span>
+           </div>
+        </ng-template>
+
+        <ng-template pTemplate="right">
+            <div class="p-d-flex p-mt-3" style="font-size: 1.25rem">
+                <a (click)="toggleStar()" pTooltip="关注" tooltipPosition="top" style="cursor: pointer">
+                    <span *ngIf="star" class="fa fa-star" style="color: gold"></span>
+                    <span *ngIf="!star" class="fa fa-star-o"></span>
+                </a>
+                <a (click)="gotoStargazers()" class="p-mx-3" pTooltip="粉丝数量" tooltipPosition="top" style="cursor: pointer">
+                    {{solution.starCount}}
+                </a>
+            </div>
+        </ng-template>
+    </p-toolbar>
+
+    <p-card>
+        <div class="p-d-flex p-flex-wrap-reverse">
+            <div class="p-d-flex p-flex-column">
+                <div style="font-weight: bold; font-size: 1.3rem">
+                    基本信息
+                </div>
+                <div class="p-mt-3">模型名称： {{solution.name}}</div>
+                <div class="p-mt-3">
+                    模型作者：
+                    <a (click)="gotoPersonalModels(solution.authorLogin)" style="cursor: pointer">
+                        {{solution.authorLogin}}
+                    </a>
+                </div>
+                <div class="p-mt-3">
+                    能力部署：
+                    <a (click)="gotoPersonalAbilitys(solution.deployer)" style="cursor: pointer">
+                        {{solution.deployer}}
+                    </a>
+                </div>
+                <div class="p-mt-3">部署日期： {{solution.deployDate | date:'yyyy-MM-dd HH:mm:ss'}}</div>
+                <div class="p-mt-3">调用次数： {{solution.callCount}}</div>
+                <div class="p-mt-3">
+                    运行状态：
+                    <span *ngIf="solution.deployStatus === '运行'" style="color: green">{{solution.deployStatus}}</span>
+                    <span *ngIf="solution.deployStatus !== '运行'" style="color: red">{{solution.deployStatus}}</span>
+                </div>
+            </div>
+            <div class="p-ml-auto p-mr-auto p-mr-md-0 p-mb-3">
+                <img src="{{solution.pictureUrl}}" (click)="gotoSolution()"
+                     style="cursor: pointer"
+                     pTooltip="点击查看模型详情" tooltipPosition="bottom">
+            </div>
+        </div>
+    </p-card>
+
+    <p-card class="p-mt-3" *ngIf="(isOperator || isOwner) && solution.deployStatus !== '停止'">
+        <div class="p-d-flex p-flex-column">
+            <div style="font-weight: bold; font-size: 1.3rem">
+                生命周期管理
+            </div>
+            <div *ngIf="solution.deployStatus === '运行' && !!deploymentStatus">
+                <div class="p-mt-3">
+                    <span *ngIf="!changing">容器副本（就绪/总数）： {{deploymentStatus.replicasReady}} / {{deploymentStatus.replicas}}</span>
+                    <span *ngIf="changing">
+                        容器副本（总数）：
+                        <input pInputText [(ngModel)]="resource.replicas" type="number" placeholder="容器副本" min="1" max="5">
+                    </span>
+                </div>
+                <div class="p-mt-3">
+                    <span>内存资源（需求/限制）： </span>
+                    <span *ngIf="!changing">{{deploymentStatus.requestsMem}} / {{deploymentStatus.limitsMem}}</span>
+                    <span *ngIf="changing">
+                        <input pInputText [(ngModel)]="resource.requestsMem" type="text" placeholder="内存需求值" maxlength=7>
+                        &nbsp;/&nbsp;
+                        <input pInputText [(ngModel)]="resource.limitsMem" type="text" placeholder="内存限制值" maxlength=7>
+                    </span>
+                </div>
+                <div class="p-mt-3">
+                    <span>CPU资源（需求/限制）： </span>
+                    <span *ngIf="!changing">{{deploymentStatus.requestsCpu}} / {{deploymentStatus.limitsCpu}}</span>
+                    <span *ngIf="changing">
+                    <input pInputText *ngIf="changing" [(ngModel)]="resource.requestsCpu" type="text" placeholder="CPU需求值" maxlength=7>
+                    &nbsp;/&nbsp;
+                    <input pInputText *ngIf="changing" [(ngModel)]="resource.limitsCpu" type="text" placeholder="CPU限制值" maxlength=7>
+                </span>
+                </div>
+            </div>
+            <div class="p-d-flex p-flex-wrap">
+                <div class="p-mr-4 p-mt-3" *ngIf="solution.deployStatus === '暂停'">
+                    <p-button (onClick)="restartAbility()">重启实例</p-button>
+                </div>
+                <div class="p-mr-4 p-mt-3" *ngIf="solution.deployStatus === '运行' && !changing && deploymentStatus">
+                    <p-button (onClick)="toggleScaleAbility()">实例扩缩容</p-button>
+                </div>
+                <div class="p-mr-4 p-mt-3" *ngIf="solution.deployStatus === '运行' && changing">
+                    <p-button styleClass="p-button-warning" (onClick)="scaleAbility()">执行扩缩容</p-button>
+                </div>
+                <div class="p-mr-4 p-mt-3" *ngIf="solution.deployStatus === '运行' && changing">
+                    <p-button styleClass="p-button-outlined" (onClick)="toggleScaleAbility()">取消扩缩容</p-button>
+                </div>
+                <div class="p-mr-4 p-mt-3" *ngIf="solution.deployStatus === '运行'">
+                    <p-button styleClass="p-button-warning" (onClick)="pauseAbility()">暂停实例</p-button>
+                </div>
+                <div class="p-mr-4 p-mt-3" *ngIf="solution.deployStatus === '运行' || solution.deployStatus === '暂停'">
+                    <p-button  styleClass="p-button-danger" (click)="stopAbility()">停止实例</p-button>
+                </div>
+                <div class="p-mr-4 p-mt-3" *ngIf="solution.deployStatus === '运行' && !showPodLogs">
+                    <p-button styleClass="p-button-success" (onClick)="togglePodLogs()">查看日志</p-button>
+                </div>
+                <div class="p-mr-4 p-mt-3" *ngIf="solution.deployStatus === '运行' && showPodLogs">
+                    <p-button styleClass="p-button-outlined" (onClick)="togglePodLogs()">隐藏日志</p-button>
+                </div>
+            </div>
+            <div class="p-fluid p-mt-4" *ngIf="solution.deployStatus === '运行' && !!deploymentStatus && showPodLogs">
+                <div class="p-field">
+                    <textarea pInputTextarea [(ngModel)]="podLogs" [rows]="10" placeholder="日志" readonly></textarea>
+                </div>
+            </div>
+        </div>
+    </p-card>
+
+    <p-card class="p-mt-3" *ngIf="solution.deployStatus === '运行'">
+        <div class="p-d-flex p-flex-wrap p-flex-column">
+            <div class="p-d-flex p-jc-between p-ai-center" style="font-weight: bold; font-size: 1.3rem">
+                API接口测试
+                <p-button styleClass="p-button-outlined" (onClick)="openWeb()" *ngIf="solution.hasWeb">模型应用示范</p-button>
+            </div>
+            <div class="p-mt-3 p-d-none p-d-md-inline">HTTP方法： POST</div>
+            <div class="p-d-none p-d-md-flex p-ai-center p-mt-3">
+                <span class="p-mr-3 ">HTTP请求体格式请参考模型文档：</span>
+                <p-button styleClass="p-button-outlined" label="查看模型" (onClick)="gotoSolution()"></p-button>
+            </div>
+            <div class="p-d-none p-d-md-flex p-ai-center p-mt-3">
+                <span class="p-mr-3">URL： {{url_model}}</span>
+                <p-button label="发送请求" (onClick)="sendTestRequest()" [disabled]="!requestBody || sending"></p-button>
+            </div>
+            <div class="p-grid p-mt-3">
+                <div class="p-col-12 p-md-6">
+                    <div class="p-d-flex p-flex-column">
+                        <div class="p-d-flex p-jc-between">
+                            <p-button label="生成测试数据" (onClick)="genTestRequest()" *ngIf="!requestBody"></p-button>
+                            <p-button label="清空测试数据" styleClass="p-button-warning" (onClick)="cleanTestRequest()" *ngIf="requestBody"></p-button>
+                            <p-button label="发送请求" (onClick)="sendTestRequest()" [disabled]="!requestBody || sending" styleClass="p-d-inline p-d-md-none"></p-button>
+                        </div>
+                        <div class="p-fluid p-field p-mt-3">
+                            <textarea pInputTextarea [(ngModel)]="requestBody" [rows]="10" placeholder="HTTP请求体"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-col-12 p-md-6">
+                    <div class="p-d-flex p-flex-column">
+                        <p-button label="清空响应体" styleClass="p-button-warning" (onClick)="cleanResponseBody()" [disabled]="!responseBody"></p-button>
+                        <div class="p-fluid p-field p-mt-3">
+                            <textarea pInputTextarea [(ngModel)]="responseBody" [rows]="10" placeholder="HTTP请求体" readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </p-card>
+</div>

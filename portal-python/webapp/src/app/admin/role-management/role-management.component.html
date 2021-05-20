@@ -1,0 +1,47 @@
+<p-confirmPopup></p-confirmPopup>
+
+<div class="p-d-flex p-flex-column p-m-3">
+    <p-toolbar class="p-mb-3">
+        <ng-template pTemplate="left">
+            <i class="pi pi-bars p-d-none p-d-lg-inline" style="font-size: 1.75rem; cursor: pointer"
+               (click)="globalService.toggleSideNav()">
+            </i>
+            <i class="pi pi-bars p-d-lg-none" style="font-size: 1.75rem; cursor: pointer"
+               (click)="globalService.openSideBar()">
+            </i>
+            <span style="font-size: 1.75rem" class="p-ml-3">角色管理</span>
+        </ng-template>
+
+        <ng-template pTemplate="right">
+            <button pButton icon="pi pi-refresh" class="p-button-outlined" (onClick)="refresh()"></button>
+        </ng-template>
+    </p-toolbar>
+
+    <p-card>
+        <div class="p-d-flex p-flex-column p-ml-3">
+            <div class="p-d-flex p-flex-wrap p-ai-center">
+                <span class="p-float-label p-mt-3 p-mr-3">
+                    <input id="role" type="text" pInputText [(ngModel)]="role" minlength="8" maxlength="20">
+                    <label for="role">新角色</label>
+                </span>
+                <p-button class="p-mt-3"
+                    label="添加角色" icon="pi pi-plus" (onClick)="createRole()" [disabled]="!role">
+                </p-button>
+            </div>
+            <div class="p-d-flex p-flex-column p-my-4 p-ml-1">
+                <div *ngFor="let role of roles" class="p-mt-4">
+                    <p-avatar label="R" [style]="{'background-color': '#9c27b0', 'color': '#ffffff'}" shape="circle"></p-avatar>
+                    <span class="p-ml-3">{{role}}</span>
+                    <a (click)="deleteRole(role, $event)" pTooltip="删除角色" *ngIf="!isSysRole(role)"
+                       style="color: red; cursor: pointer"
+                       class="p-ml-4" >
+                        <i class="fa fa-trash"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </p-card>
+
+</div>
+

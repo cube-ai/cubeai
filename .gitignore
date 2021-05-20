@@ -123,3 +123,10 @@ stats.html
 
 # node files
 node_modules/
+
+
+# CubeAI打包结果
+out/
+
+# 临时文件
+temp/

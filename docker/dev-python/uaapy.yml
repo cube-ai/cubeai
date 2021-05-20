@@ -1,0 +1,6 @@
+version: '2'
+services:
+    uaapy-app:
+        image: uaapy
+        environment:
+            - START_SLEEP=0

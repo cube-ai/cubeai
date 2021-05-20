@@ -1,0 +1,88 @@
+<div class="header-container p-py-6 p-d-none p-d-md-block">
+    <div class="p-d-flex p-flex-wrap p-jc-center p-ai-center">
+        <div class="p-mx-1 p-mt-2">
+            <img src="assets/images/cubeai128-w.png" style="height: 5rem">
+        </div>
+        <div class="p-mx-1" style="color: aliceblue; font-size: 2.5rem">
+            AI算能服务平台
+        </div>
+    </div>
+</div>
+<div class="header-container p-py-5 p-d-block p-d-md-none">
+    <div class="p-text-center" style="color: aliceblue; font-size: 2rem">
+        AI算能服务平台
+    </div>
+</div>
+
+<div class="p-grid">
+    <div class="p-col-12">
+        <p-card styleClass="p-mt-3">
+            <div *ngIf="!!homepageIntro">
+                <div *ngIf="homepageIntro.startsWith('<')">
+                    <div [innerHTML]="homepageIntro | html">
+                    </div>
+                </div>
+                <div *ngIf="!homepageIntro.startsWith('<')">
+                    <div id="md_view1" mdView>
+                        <textarea style="display: none;">{{homepageIntro}}</textarea>
+                    </div>
+                </div>
+            </div>
+        </p-card>
+    </div>
+
+    <div class="p-col-12">
+        <p-card styleClass="p-d-none p-d-md-block">
+            <p-carousel [value]="applications" [numVisible]="6" [numScroll]="6" [circular]="true" [autoplayInterval]="5000" [responsiveOptions]="responsiveOptions">
+                <ng-template let-application pTemplate="item">
+                    <div *ngIf="application.pictureUrl && hasAnyRole(application.needRoles)">
+                        <div class="p-mx-3" [ngClass]="{'p-shadow-1': !application.mouseOver, 'p-shadow-12': !!application.mouseOver}"
+                             (mouseover)="application.mouseOver = true" (mouseout)="application.mouseOver = false">
+                            <p-panel>
+                                <p-header style="width: 100%; text-align: center; font-size: 1.5rem; font-weight: bold">
+                                    {{application.name}}
+                                </p-header>
+                                <div class="p-text-center">
+                                    <img src="{{application.pictureUrl}}" (click)="gotoUrl(application.url)" style="cursor: pointer; width: 15rem">
+                                </div>
+                            </p-panel>
+                        </div>
+                    </div>
+                </ng-template>
+            </p-carousel>
+        </p-card>
+        <p-card styleClass="p-d-block p-d-md-none">
+            <div class="p-d-flex p-flex-wrap p-jc-center">
+                <div *ngFor="let application of applications" class="p-m-3">
+                    <div *ngIf="application.pictureUrl && hasAnyRole(application.needRoles)">
+                        <p-panel>
+                            <p-header style="width: 100%; text-align: center; font-size: 1.5rem; font-weight: bold">
+                                {{application.name}}
+                            </p-header>
+                            <div  class="p-text-center">
+                                <img src="{{application.pictureUrl}}" (click)="gotoUrl(application.url)" style="cursor: pointer; width: 15rem; max-width: 100%">
+                            </div>
+                        </p-panel>
+                    </div>
+                </div>
+            </div>
+        </p-card>
+    </div>
+
+    <div class="p-col-12 p-d-none p-d-md-block">
+        <p-card>
+            <div *ngIf="!!homepagePartners">
+                <div *ngIf="homepagePartners.startsWith('<')">
+                    <div [innerHTML]="homepagePartners | html">
+                    </div>
+                </div>
+                <div *ngIf="!homepagePartners.startsWith('<')">
+                    <div id="md_view2" mdView>
+                        <textarea style="display: none;">{{homepagePartners}}</textarea>
+                    </div>
+                </div>
+            </div>
+        </p-card>
+    </div>
+</div>
+

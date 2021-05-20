@@ -1,0 +1,44 @@
+<app-pageheader></app-pageheader>
+
+<div class="p-col-12">
+    <div class="p-mx-3">
+        <p-dataView [value]="creditHistoryList"
+                    [lazy]="true" (onLazyLoad)="reloadPage($event)"
+                    [paginator]="true" [rows]="itemsPerPage" [first]="page * itemsPerPage" [totalRecords]="totalItems"
+                    [showPageLinks]="false"
+                    [showJumpToPageDropdown]="true"
+                    currentPageReportTemplate="{currentPage}"
+                    [showCurrentPageReport]="false"
+                    [rowsPerPageOptions]="pageSizeOptions"
+                    emptyMessage="无数据"
+                    [layout]="layout" (onChangeLayout)="changeLayout($event)"
+                    [loading]="loading">
+            <ng-template pTemplate="paginatorleft">
+                <span class="p-d-none p-d-md-inline" style="font-size: 0.9rem">共 {{totalItems}} 条</span>
+            </ng-template>
+            <ng-template let-item pTemplate="paginatordropdownitem">
+                {{item.value}} / 页
+            </ng-template>
+            <ng-template pTemplate="header">
+                <div class="p-d-flex p-flex-row p-jc-between p-ai-center">
+                    <span style="font-weight: bold; font-size: 1.5rem">我的积分</span>
+                    <span style="font-weight: bold; font-size: 1rem" *ngIf="!!credit">现有积分： {{credit.credit}}</span>
+                </div>
+            </ng-template>
+            <ng-template let-creditHistory pTemplate="listItem">
+                <div class="p-col-12">
+                    <div class="p-d-flex p-ai-center p-my-3">
+                        <span class="p-ml-3"><i class="fa fa-fw fa-credit-card"></i></span>
+                        <div class="p-d-flex p-flex-wrap p-ai-center">
+                            <span class="p-mx-3">{{creditHistory.modifyDate | date:'yyyy-MM-dd HH:mm:ss'}}</span>
+                            <span class="p-mx-3">{{creditHistory.comment}}</span>
+                            <span class="p-mx-3"><span *ngIf="creditHistory.creditPlus > 0">+</span>{{creditHistory.creditPlus}}积分</span>
+                            <span class="p-mx-3">当前积分：{{creditHistory.currentCredit}}</span>
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+        </p-dataView>
+    </div>
+</div>
+

@@ -1,0 +1,147 @@
+<div class="p-d-flex p-flex-column p-m-3">
+    <p-toolbar class="p-mb-3">
+        <ng-template pTemplate="left">
+            <i class="pi pi-bars p-d-none p-d-lg-inline" style="font-size: 1.75rem; cursor: pointer"
+               (click)="globalService.toggleSideNav()">
+            </i>
+            <i class="pi pi-bars p-d-lg-none" style="font-size: 1.75rem; cursor: pointer"
+               (click)="globalService.openSideBar()">
+            </i>
+            <span style="font-size: 1.75rem" class="p-mx-3">收信箱</span>
+            <span style="font-size: 0.75rem" *ngIf="unreadCount > 0">未读消息：{{unreadCount}}条</span>
+        </ng-template>
+
+        <ng-template pTemplate="right">
+            <p-button icon="pi pi-send" styleClass="p-button-outlined p-mr-3" (onClick)="writeMessage()"></p-button>
+            <p-button icon="pi pi-refresh" styleClass="p-button-outlined" (onClick)="loadData()"></p-button>
+        </ng-template>
+    </p-toolbar>
+
+    <p-table [value]="messages" [autoLayout]="true"
+             selectionMode="single"
+             stateStorage="local" stateKey="inbox-state"
+             styleClass="p-datatable-sm p-datatable-gridlines p-datatable-striped"
+             [lazy]="true" (onLazyLoad)="reloadPage($event)"
+             [paginator]="true" [rows]="itemsPerPage" [totalRecords]="totalItems"
+             [showCurrentPageReport]="true"
+             currentPageReportTemplate="{currentPage} / {totalPages} 页， {first}~{last} / {totalRecords} 条"
+             [rowsPerPageOptions]="pageSizeOptions"
+             [loading]="loading">
+        <ng-template pTemplate="caption">
+            <div class="p-d-flex">
+                <span class="p-input-icon-right p-ml-auto">
+                    <input pInputText type="text" [(ngModel)]="filter" (blur)="loadData()" placeholder="搜索">
+                    <i class="pi pi-times" *ngIf="filter" (click)="filter = ''; loadData()"></i>
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th><span style="color: red">!</span></th>
+                <th pSortableColumn="sender">发信人<p-sortIcon field="sender"></p-sortIcon></th>
+                <th pSortableColumn="subject">主题<p-sortIcon field="subject"></p-sortIcon></th>
+                <th>正文</th>
+                <th pSortableColumn="createdDate">日期<p-sortIcon field="createdDate"></p-sortIcon></th>
+                <th>操作</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-message>
+            <tr>
+                <td [ngClass]="{'unreaded': !message.viewed}"><span *ngIf="message.urgent" style="color: red">!</span></td>
+                <td [ngClass]="{'unreaded': !message.viewed}" (click)="markAsViewed(message)">{{message.sender}}</td>
+                <td [ngClass]="{'unreaded': !message.viewed}"><a (click)="viewMessage(message)" style="font-weight: bold; cursor: pointer">{{abbreviateText(message.subject, 20)}}</a></td>
+                <td [ngClass]="{'unreaded': !message.viewed}" (click)="markAsViewed(message)">{{abbreviateText(message.content, 50)}}</td>
+                <td [ngClass]="{'unreaded': !message.viewed}" (click)="markAsViewed(message)">{{message.createdDate | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                <td>
+                    <p-button icon="pi pi-eye" styleClass="p-button-text"
+                              (onClick)="viewMessage(message)"></p-button>
+                    <p-button icon="fa fa-envelope-open-o" styleClass="p-button-text p-button-help" *ngIf="!message.viewed"
+                              pTooltip="标为已读"
+                              (onClick)="markAsViewed(message)"></p-button>
+                    <p-button icon="fa fa-envelope-o" styleClass="p-button-text p-button-warning" *ngIf="message.viewed"
+                              pTooltip="标为未读"
+                              (onClick)="markAsUnviewed(message)"></p-button>
+                    <p-button icon="pi pi-trash" styleClass="p-button-text p-button-danger"
+                              (onClick)="markAsDeleted(message)"></p-button>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            无数据
+        </ng-template>
+    </p-table>
+</div>
+
+<p-dialog [(visible)]="showWriteDlg" header="写信" [modal]="true" [style]="{'width': '800px'}">
+    <ng-template pTemplate="content">
+        <p-card [style]="{'background-color': '#fafafa'}">
+            <div class="p-fluid p-d-flex p-flex-column">
+                <div class="p-field p-grid">
+                    <label for="receivers" class="p-col-fixed" style="width: 80px">收信人：</label>
+                    <div class="p-col">
+                        <p-chips id="receivers" [(ngModel)]="writeReceivers" separator=","
+                                 [allowDuplicate]="false" [addOnTab]="true" [addOnBlur]="true"
+                                 (onAdd)="checkReceiver($event)" *ngIf="showWriteReceivers" required>
+                        </p-chips>
+                    </div>
+                </div>
+                <div class="p-field p-grid">
+                    <label for="subject" class="p-col-fixed p-d-flex p-ai-center" style="width: 80px">主&nbsp;&nbsp;&nbsp;题：</label>
+                    <div class="p-col">
+                        <input id="subject" type="text" pInputText [(ngModel)]="writeSubject" maxlength="1024" required>
+                    </div>
+                </div>
+                <div class="p-field p-mt-3">
+                    <textarea pInputTextarea [(ngModel)]="writeContent" [rows]="8" placeholder="正文"
+                              [autoResize]="true" maxlength="1024"></textarea>
+                </div>
+                <p-toggleButton [(ngModel)]="writeUrgent" class="p-ml-auto"
+                                onLabel="紧急" offLabel="普通"
+                                onIcon="pi pi-exclamation-triangle" offIcon="pi pi-circle-off">
+                </p-toggleButton>
+            </div>
+        </p-card>
+    </ng-template>
+    <ng-template pTemplate="footer">
+        <p-button label="取消" icon="pi pi-times" class="p-button-raised p-mr-5"
+                (onClick)="showWriteDlg=false">
+        </p-button>
+        <p-button label="发送" icon="pi pi-send" class="p-button-raised" (onClick)="sendMessage()"
+                [disabled]="!writeReceivers || writeReceivers.length < 1 || !writeSubject">
+        </p-button>
+    </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="showViewDlg" header="看信" [modal]="true" [style]="{'width': '800px'}" position="bottom">
+    <ng-template pTemplate="content">
+        <p-card [style]="{'background-color': '#fafafa'}">
+            <div class="p-fluid p-d-flex p-flex-column">
+                <span style="font-size: 20px; font-weight: bold">{{viewSubject}}</span>
+                <div class="p-d-flex p-ai-center p-mt-4 p-ml-1">
+                    <span>发信人：</span>
+                    <span class="p-ml-3">{{viewSender}}</span>
+                </div>
+                <div class="p-d-flex p-ai-center p-mt-3 p-ml-1">
+                    <span>时&nbsp;&nbsp;&nbsp;间：</span>
+                    <span class="p-ml-3">{{viewDate | date:'yyyy-MM-dd HH:mm:ss'}}</span>
+                </div>
+                <div class="p-field p-mt-4">
+                    <textarea pInputTextarea [ngModel]="viewContent" [rows]="8" placeholder="正文" disabled></textarea>
+                </div>
+                <p-toggleButton [(ngModel)]="viewUrgent" disabled class="p-mr-auto p-ml-1"
+                                onLabel="紧急" offLabel="普通"
+                                onIcon="pi pi-exclamation-triangle" offIcon="pi pi-circle-off">
+                </p-toggleButton>
+                <div class="p-d-flex p-jc-center" *ngIf="viewUrl">
+                    <p-button label="转至目标页面" styleClass="p-button-outlined" (onClick)="gotoUrl()">
+                    </p-button>
+                </div>
+            </div>
+        </p-card>
+    </ng-template>
+    <ng-template pTemplate="footer">
+        <p-button label="确定" icon="pi pi-check" class="p-button-raised"
+                  (onClick)="showViewDlg=false">
+        </p-button>
+    </ng-template>
+</p-dialog>

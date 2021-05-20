@@ -1,0 +1,84 @@
+<p-confirmPopup></p-confirmPopup>
+
+<div class="p-d-flex p-flex-column p-m-3">
+    <p-toolbar class="p-mb-3">
+        <ng-template pTemplate="left">
+            <i class="pi pi-bars p-d-none p-d-lg-inline" style="font-size: 1.75rem; cursor: pointer"
+               (click)="globalService.toggleSideNav()">
+            </i>
+            <i class="pi pi-bars p-d-lg-none" style="font-size: 1.75rem; cursor: pointer"
+               (click)="globalService.openSideBar()">
+            </i>
+            <span style="font-size: 1.75rem" class="p-ml-3">应用管理</span>
+        </ng-template>
+
+        <ng-template pTemplate="right">
+            <p-button icon="pi pi-plus" styleClass="p-button-outlined p-mr-3" (onClick)="createApplication()" *ngIf="canCreate()"></p-button>
+            <p-button icon="pi pi-refresh" styleClass="p-button-outlined" (onClick)="loadData()"></p-button>
+        </ng-template>
+    </p-toolbar>
+
+    <p-table [value]="applications" [autoLayout]="true"
+             selectionMode="single"
+             stateStorage="local" stateKey="applications-state"
+             styleClass="p-datatable-sm p-datatable-gridlines p-datatable-striped"
+             [lazy]="true" (onLazyLoad)="reloadPage($event)"
+             [paginator]="true" [rows]="itemsPerPage" [totalRecords]="totalItems"
+             [showPageLinks]="false"
+             [showJumpToPageDropdown]="true"
+             currentPageReportTemplate="{currentPage}"
+             [showCurrentPageReport]="false"
+             [rowsPerPageOptions]="pageSizeOptions"
+             [loading]="loading">
+        <ng-template pTemplate="paginatorleft">
+            <span class="p-d-none p-d-md-inline" style="font-size: 0.9rem">共 {{totalItems}} 条</span>
+        </ng-template>
+        <ng-template let-item pTemplate="paginatordropdownitem">
+            {{item.value}} / 页
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            无数据
+        </ng-template>
+        <ng-template pTemplate="caption">
+            <div class="p-fluid">
+                <span class="p-input-icon-right">
+                    <input pInputText type="text" [(ngModel)]="filter" (blur)="loadData()" placeholder="搜索">
+                    <i class="pi pi-times" *ngIf="filter" (click)="filter = ''; loadData()"></i>
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th pSortableColumn="id">id<p-sortIcon field="id"></p-sortIcon></th>
+                <th pSortableColumn="name">应用名称<p-sortIcon field="name"></p-sortIcon></th>
+                <th>URL</th>
+                <th pSortableColumn="subject1">主题1<p-sortIcon field="subject1"></p-sortIcon></th>
+                <th pSortableColumn="subject2">主题2<p-sortIcon field="subject2"></p-sortIcon></th>
+                <th pSortableColumn="subject3">主题3<p-sortIcon field="subject3"></p-sortIcon></th>
+                <th>所需角色</th>
+                <th pSortableColumn="displayOrder">显示控制<p-sortIcon field="displayOrder"></p-sortIcon></th>
+                <th>操作</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-application>
+            <tr>
+                <td>{{application.id}}</td>
+                <td><a (click)="viewApplication(application)" style="cursor: pointer; font-weight: bold">{{application.name}}</a></td>
+                <td>{{application.url}}</td>
+                <td>{{application.subject1}}</td>
+                <td>{{application.subject2}}</td>
+                <td>{{application.subject3}}</td>
+                <td>{{application.needRoles}}</td>
+                <td>{{application.displayOrder}}</td>
+                <td>
+                    <p-button icon="pi pi-eye" styleClass="p-button-text"
+                              (onClick)="viewApplication(application)"></p-button>
+                    <p-button icon="pi pi-pencil" styleClass="p-button-text p-button-success" *ngIf="canEdit(application)"
+                              (onClick)="editApplication(application)"></p-button>
+                    <p-button icon="pi pi-trash" styleClass="p-button-text p-button-danger" *ngIf="canDelete(application)"
+                              (onClick)="deleteApplication(application)"></p-button>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
