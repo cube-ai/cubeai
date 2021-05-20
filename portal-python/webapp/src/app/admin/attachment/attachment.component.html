@@ -1,0 +1,114 @@
+<p-confirmPopup></p-confirmPopup>
+
+<div class="p-d-flex p-flex-column p-m-3">
+    <p-toolbar class="p-mb-3">
+        <ng-template pTemplate="left">
+            <i class="pi pi-bars p-d-none p-d-lg-inline" style="font-size: 1.75rem; cursor: pointer"
+               (click)="globalService.toggleSideNav()">
+            </i>
+            <i class="pi pi-bars p-d-lg-none" style="font-size: 1.75rem; cursor: pointer"
+               (click)="globalService.openSideBar()">
+            </i>
+            <span style="font-size: 1.75rem" class="p-ml-3">附件管理</span>
+        </ng-template>
+
+        <ng-template pTemplate="right">
+            <p-button icon="pi pi-refresh" styleClass="p-button-outlined" (onClick)="loadData()"></p-button>
+        </ng-template>
+    </p-toolbar>
+
+    <span style="font-size: 1.25rem; font-weight: bold" class="p-mt-3 p-mb-2">上传附件</span>
+    <p-table [value]="uploader.queue" [autoLayout]="true"
+             ng2FileDrop [uploader]="uploader"
+             styleClass="p-datatable-sm p-datatable-gridlines p-datatable-striped">
+        <ng-template pTemplate="caption">
+            <input type="file" ng2FileSelect [uploader]="uploader" accept="*.*" />
+            <span>或拖拽文件于此</span><i class="fa fa-arrow-down"></i>
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th>文件名</th>
+                <th>大小</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item>
+            <tr>
+                <td>{{ item?.file?.name }}</td>
+                <td>{{ item?.file?.size/1024 | number:'1.1-1' }} KB</td>
+                <td>
+                    <span *ngIf="item.isSuccess" style="color: forestgreen">上传成功</span>
+                    <span *ngIf="item.isCancel" style="color: #ffc107">上传被取消</span>
+                    <span *ngIf="item.isError" style="color: red">上传失败</span>
+                </td>
+                <td>
+                    <p-button icon="pi pi-upload" styleClass="p-button-text" pTooltip="上传"
+                              *ngIf="!item.isReady && !item.isUploading && !item.isSuccess"
+                              (onClick)="upload(item)"></p-button>
+                    <p-button icon="pi pi-ban" styleClass="p-button-text p-button-danger" pTooltip="取消"
+                              *ngIf="item.isUploading"
+                              (onClick)="item.cancel()"></p-button>
+                    <p-button icon="pi pi-times" styleClass="p-button-text p-button-danger" pTooltip="移除"
+                              *ngIf="!item.isUploading"
+                              (onClick)="item.remove()"></p-button>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="summary">
+            <p-progressBar [value]="uploader.progress"></p-progressBar>
+        </ng-template>
+    </p-table>
+
+    <span style="font-size: 1.25rem; font-weight: bold" class="p-mt-5 p-mb-2">附件清单</span>
+    <p-table [value]="attachments" [autoLayout]="true"
+             selectionMode="single"
+             stateStorage="local" stateKey="attachments-state"
+             styleClass="p-datatable-sm p-datatable-gridlines p-datatable-striped"
+             [lazy]="true" (onLazyLoad)="reloadPage($event)"
+             [paginator]="true" [rows]="itemsPerPage" [totalRecords]="totalItems"
+             [showPageLinks]="false"
+             [showJumpToPageDropdown]="true"
+             currentPageReportTemplate="{currentPage}"
+             [showCurrentPageReport]="false"
+             [rowsPerPageOptions]="pageSizeOptions"
+             [loading]="loading">
+        <ng-template pTemplate="paginatorleft">
+            <span class="p-d-none p-d-md-inline" style="font-size: 0.9rem">共 {{totalItems}} 条</span>
+        </ng-template>
+        <ng-template let-item pTemplate="paginatordropdownitem">
+            {{item.value}} / 页
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            无数据
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th pSortableColumn="id">id<p-sortIcon field="id"></p-sortIcon></th>
+                <th pSortableColumn="authorLogin">上载人<p-sortIcon field="authorLogin"></p-sortIcon></th>
+                <th pSortableColumn="name">文件名<p-sortIcon field="name"></p-sortIcon></th>
+                <th pSortableColumn="fileSize">大小<p-sortIcon field="fileSize"></p-sortIcon></th>
+                <th pSortableColumn="createdDate">日期<p-sortIcon field="createdDate"></p-sortIcon></th>
+                <th>操作</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-attachment>
+            <tr>
+                <td>{{attachment.id}}</td>
+                <td>{{attachment.authorLogin}}</td>
+                <td pTooltip="{{attachment.url}}">{{attachment.name}}</td>
+                <td>
+                    <span *ngIf="attachment.fileSize < 1024">{{attachment.fileSize}} B</span>
+                    <span *ngIf="attachment.fileSize >= 1024">{{(attachment.fileSize / 1024) | number: '1.1-1'}} KB</span>
+                </td>
+                <td>{{attachment.createdDate | date:'yyyy-MM-dd'}}</td>
+                <td>
+                    <p-button icon="pi pi-download" styleClass="p-button-text"
+                              (onClick)="downloadFile(attachment.url)"></p-button>
+                    <p-button icon="pi pi-trash" styleClass="p-button-text p-button-danger"
+                              (onClick)="deleteAttachment(attachment)"></p-button>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

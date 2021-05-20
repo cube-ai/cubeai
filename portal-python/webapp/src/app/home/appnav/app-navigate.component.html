@@ -1,0 +1,31 @@
+<div class="p-d-flex p-flex-wrap p-jc-center p-ai-center p-m-3">
+    <div class="p-mr-2 p-mt-1 p-d-none p-d-md-inline">
+        <a href="/#/">
+            <img src="assets/images/cubeai128.png" style="height: 5rem">
+        </a>
+    </div>
+    <div style="font-size: 2rem; font-weight: bold">
+        {{navTitle}}
+    </div>
+</div>
+
+<div class="p-d-flex p-flex-wrap p-jc-center">
+    <div *ngFor="let application of applications" class="p-m-3">
+        <div *ngIf="application.pictureUrl && hasAnyRole(application.needRoles)">
+            <div [ngClass]="{'p-shadow-1': !application.mouseOver, 'p-shadow-12': !!application.mouseOver}"
+                 (mouseover)="application.mouseOver = true" (mouseout)="application.mouseOver = false">
+                <p-panel>
+                    <p-header style="width: 100%; text-align: center; font-size: 1.5rem; font-weight: bold">
+                        {{application.name}}
+                    </p-header>
+                    <div class="p-text-center">
+                        <img src="{{application.pictureUrl}}" (click)="gotoUrl(application.url)" style="cursor: pointer; width: 15rem; max-width: 100%">
+                    </div>
+                </p-panel>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

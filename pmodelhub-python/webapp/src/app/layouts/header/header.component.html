@@ -1,0 +1,68 @@
+<div class="p-d-flex p-ai-center p-text-secondary" style="height: 2.5rem; background-color: #000000">
+    <div class="p-ml-2 p-mt-1">
+        <img src="assets/images/cube-32.png" style="height: 2rem; cursor: pointer" (click)="gotoHomepage()">
+    </div>
+    <div class="p-ml-1">
+        <span style="cursor: pointer" (click)="gotoHomepage()">CubeAI★智立方</span>
+    </div>
+
+    <i class="pi pi-sitemap p-ml-auto p-text-secondary p-d-none p-d-md-inline" style="font-size: 1.5rem; cursor: pointer"
+       (click)="gotoAppNav()"
+       pTooltip="平台导航" tooltipPosition="bottom">
+    </i>
+
+    <i class="fa fa-gears p-ml-6 p-text-secondary p-d-none p-d-md-inline" style="font-size: 1.5rem; cursor: pointer"
+       (click)="gotoAdmin()"
+       *ngIf="isAdmin()"
+       pTooltip="系统管理"  tooltipPosition="bottom">
+    </i>
+
+    <i class="fa fa-question-circle-o p-ml-6 p-text-secondary p-d-none p-d-md-inline" style="font-size: 1.5rem; cursor: pointer"
+       (click)="gotoHelp()"
+       pTooltip="帮助"  tooltipPosition="bottom">
+    </i>
+
+    <i class="pi pi-bell p-ml-6 p-text-secondary p-d-none p-d-md-inline" style="font-size: 1.5rem; cursor: pointer"
+       pBadge  value="{{newMsgCount}}"
+       (click)="gotoMessage()"
+       *ngIf="isAuthenticated()"
+       pTooltip="站内消息"  tooltipPosition="bottom">
+     </i>
+
+    <div *ngIf="isAuthenticated()"
+         class="p-ml-auto p-ml-md-6 p-d-flex p-ai-center"
+         style="height: 2.5rem; background-color: #5c7881; color: white; z-index: 102">
+        <img src="{{principal.getCurrentAccount().imageUrl}}" (click)="gotoAccount()"
+             class="p-ml-3"
+             style="cursor: pointer; width: 2rem; height: 2rem; border-radius: 60%">
+    </div>
+    <div *ngIf="isAuthenticated()">
+        <p-splitButton class="p-d-none p-d-md-inline" [style]="{'height': '2.5rem'}"
+                       label="{{getAccountName()}}"
+                       styleClass="p-button-secondary"
+                       (onClick)="gotoAccount()"
+                       [model]="getAccountMenu()">
+        </p-splitButton>
+        <p-splitButton class="p-d-md-none" [style]="{'height': '2.5rem', 'margin-left': '-2rem', 'z-index': '101'}"
+                       label=" "
+                       styleClass="p-button-secondary"
+                       (onClick)="gotoAccount()"
+                       [model]="getAccountMenu()">
+        </p-splitButton>
+    </div>
+
+    <p-splitButton *ngIf="!isAuthenticated()" class="p-ml-auto p-ml-md-6 p-d-none p-d-md-inline"
+                   label="{{getAccountName()}}" icon="pi pi-user"
+                   styleClass="p-button-secondary"
+                   (onClick)="gotoAccount()"
+                   [model]="getAccountMenu()">
+    </p-splitButton>
+    <p-splitButton *ngIf="!isAuthenticated()" class="p-ml-auto p-ml-md-6 p-d-md-none"
+                   icon="pi pi-user"
+                   styleClass="p-button-secondary"
+                   (onClick)="gotoAccount()"
+                   [model]="getAccountMenu()">
+    </p-splitButton>
+</div>
+
+<p-menu #menu_account1 [popup]="true" [model]="getAccountMenu()"></p-menu>

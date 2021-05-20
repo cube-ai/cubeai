@@ -1,0 +1,73 @@
+<div class="p-d-flex p-flex-column">
+    <div class="p-d-none p-d-md-flex p-jc-center p-my-6">
+        <a  href="/">
+            <img src="assets/images/cubeai128.png" style="height: 5rem">
+        </a>
+    </div>
+    <div class="p-d-flex p-jc-center">
+        <p-panel>
+            <p-header style="font-size: 1.5rem; font-weight: bold">
+                用户登录
+            </p-header>
+            <div class="p-d-flex p-flex-column p-mt-5 p-mx-6">
+                <div class="p-inputgroup">
+                    <span class="p-inputgroup-addon"><i class="pi pi-user"></i></span>
+                    <span class="p-input-icon-right p-float-label" style="width: 100%">
+                        <i class="pi pi-times" *ngIf="username" (click)="username=''"></i>
+                        <input id="username" type="text" pInputText style="width: 100%" [(ngModel)]="username">
+                        <label for="username">用户名 | 邮箱 | 手机号</label>
+                    </span>
+                </div>
+                <div class="p-inputgroup p-mt-5">
+                    <span class="p-inputgroup-addon"><i class="pi pi-key"></i></span>
+                    <span class="p-input-icon-right p-float-label" style="width: 100%">
+                        <i class="pi pi-times" *ngIf="password" (click)="password=''"></i>
+                        <input id="password" type="password" pInputText style="width: 100%" [(ngModel)]="password">
+                        <label for="password">密码</label>
+                    </span>
+                </div>
+                <div class="p-inputgroup p-mt-5" style="height: 44px">
+                    <span class="p-inputgroup-addon"><i class="pi pi-eye"></i></span>
+                    <span class="p-input-icon-right p-float-label" style="width: 100%">
+                        <i class="pi pi-times" *ngIf="myCode" (click)="myCode=''"></i>
+                        <input id="verifyCode" type="text" pInputText style="width: 100%; height: 44px" [(ngModel)]="myCode">
+                        <label for="verifyCode">校验码</label>
+                    </span>
+                    <span class="p-inputgroup-addon" style="width: 160px">
+                        <a (click)="getVerifyCode()">
+                            <img src="{{verifyPicture}}" alt="获取验证码">
+                        </a>
+                    </span>
+                </div>
+                <div class="p-mt-6">
+                    <p-button label="登录" icon="pi pi-sign-in" (onClick)="login()" [style]="{'width': '100%'}">
+                    </p-button>
+                </div>
+
+                <div class="p-d-flex p-mt-5 p-mb-5 p-ai-center">
+                    <span>第三方登录：</span>
+                    <a class="p-ml-3 p-mt-1"  href="https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=101939187&redirect_uri=http://127.0.0.1:8080/oauth/qq">
+                        <img src="assets/images/qq.png" style="height: 1.5rem">
+                    </a>
+                    <a class="p-ml-3 p-mt-1"  href="https://gitee.com/oauth/authorize?client_id=a0cb7df5a3489e7384bc2d9eab3f9338cf3215f0944567cd6f5b849530b6fd7d&redirect_uri=http://127.0.0.1:8080/oauth/gitee&response_type=code">
+                        <img src="assets/images/gitee.png" style="height: 1.5rem">
+                    </a>
+                    <a class="p-ml-3 p-mt-1"  href="https://github.com/login/oauth/authorize?client_id=00aabc78b8fe07c50e9f&redirect_uri=http://127.0.0.1:8080/oauth/github">
+                        <img src="assets/images/github.jpg" style="height: 1.5rem">
+                    </a>
+                </div>
+
+                <div>
+                    <p-messages [(value)]="msgs"></p-messages>
+                </div>
+            </div>
+            <p-footer>
+                <div class="p-d-flex p-jc-between p-my-2 p-mx-5">
+                    <div><a href="/#/register" style="font-size: smaller; color: black">立即注册</a></div>
+                    <div><a href="/#/passwordreset" style="font-size: smaller; color: black">忘记密码</a></div>
+                </div>
+            </p-footer>
+        </p-panel>
+    </div>
+</div>
+
